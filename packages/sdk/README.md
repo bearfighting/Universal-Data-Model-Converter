@@ -113,6 +113,35 @@ Most important exports:
 - `convertSuccessResultSchema`
 - `convertFailureResultSchema`
 - `conversionReportSchema`
+- `optionCatalogSchema`
+- `conversionOptionCatalogsSchema`
+
+### Option Metadata
+
+Use the option metadata helpers when a consumer needs to explain advanced
+configuration without parsing package README files:
+
+```ts
+import { describeConversionOptions } from "@aio/sdk";
+
+const options = describeConversionOptions("json", "typescript");
+for (const option of options.parser.options) {
+  console.log(option.key, option.description, option.defaultValue);
+}
+```
+
+The public helpers are:
+
+- `describeParserOptions(format)`
+- `describeGeneratorOptions(format)`
+- `describeConversionOptions(sourceFormat, targetFormat)`
+- `listOptionCatalogs()`
+
+Each option includes its semantic and diagnostic effect, affected pipeline
+stages, supported or experimental status, value explanations, and structured
+examples. The metadata is a semantic explanation contract, not a UI form
+schema; control types, ordering, and presentation remain the responsibility
+of the consuming application.
 
 Example:
 

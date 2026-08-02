@@ -18,7 +18,20 @@ export {
   publicConvertResultSchema,
   schemaDiagnosticSchema,
   semanticLossSchema,
+  conversionOptionCatalogsSchema,
+  optionCatalogSchema,
+  optionMetadataCategorySchema,
+  optionMetadataExampleSchema,
+  optionMetadataSchema,
+  optionMetadataStageSchema,
+  optionValueMetadataSchema,
 } from "./public-contract.js";
+export {
+  describeConversionOptions,
+  describeGeneratorOptions,
+  describeParserOptions,
+  listOptionCatalogs,
+} from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
 export { collectUserFacingDiagnostics } from "./ui-diagnostics.js";
 export { describeFormatSupport, listFormatSupports } from "./support-matrix.js";
@@ -46,3 +59,4 @@ export type {
   GeneratorSupportSummary,
   ParserSupportSummary,
 } from "./support-matrix.js";
+export type { ConversionOptionCatalogs } from "./options-metadata.js";

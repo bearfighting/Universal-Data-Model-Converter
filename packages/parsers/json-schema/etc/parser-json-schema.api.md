@@ -115,6 +115,7 @@ export {
   isJsonSchemaInferenceError,
 } from "./errors.js";
 export { jsonSchemaParserCapabilities } from "./capabilities.js";
+export { jsonSchemaParserOptionCatalog } from "./option-metadata.js";
 export {
   inferJsonSchemaDocument,
   inferJsonSchemaDocumentWithOptions,
@@ -139,6 +140,13 @@ export {
   type JsonSchemaParseStrictness,
   type ResolvedJsonSchemaParseOptions,
 } from "./options.js";
+```
+
+## packages/parsers/json-schema/src/option-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+export declare const jsonSchemaParserOptionCatalog: OptionCatalog;
 ```
 
 ## packages/parsers/json-schema/src/options.d.ts

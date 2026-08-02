@@ -82,6 +82,7 @@ export {
   tryGenerateJsonSchema,
 } from "./api.js";
 export { jsonSchemaGeneratorCapabilities } from "./capabilities.js";
+export { jsonSchemaGeneratorOptionCatalog } from "./option-metadata.js";
 export {
   prepareJsonSchemaGeneratorOptions,
   resolveJsonSchemaGeneratorOptions,
@@ -102,6 +103,13 @@ export type {
   JsonSchemaGenerateResult,
   JsonSchemaGeneratorFailureCode,
 } from "./failure.js";
+```
+
+## packages/generators/json-schema/src/option-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+export declare const jsonSchemaGeneratorOptionCatalog: OptionCatalog;
 ```
 
 ## packages/generators/json-schema/src/options.d.ts

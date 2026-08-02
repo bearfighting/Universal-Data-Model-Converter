@@ -11,6 +11,69 @@ export const conversionTargetFormatSchema = z.enum([
   "typescript",
 ]);
 
+export const optionMetadataStageSchema = z.enum([
+  "parse",
+  "transform",
+  "generate",
+]);
+
+export const optionMetadataCategorySchema = z.enum([
+  "inference",
+  "diagnostics",
+  "selection",
+  "formatting",
+  "output",
+  "semantics",
+  "extension",
+]);
+
+export const optionMetadataExampleSchema = z.object({
+  title: z.string(),
+  input: z.string().optional(),
+  options: z.record(z.string(), z.unknown()),
+  output: z.string().optional(),
+  semanticChange: z.string().optional(),
+  diagnostics: z.array(z.string()).optional(),
+  explanation: z.string(),
+});
+
+export const optionValueMetadataSchema = z.object({
+  value: z.unknown(),
+  label: z.string(),
+  description: z.string(),
+  semanticEffect: z.string().optional(),
+  diagnosticEffect: z.string().optional(),
+  example: optionMetadataExampleSchema.optional(),
+});
+
+export const optionMetadataSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  description: z.string(),
+  category: optionMetadataCategorySchema,
+  defaultValue: z.unknown(),
+  valueDescriptions: z.array(optionValueMetadataSchema).optional(),
+  affectedStages: z.array(optionMetadataStageSchema),
+  semanticEffect: z.string(),
+  diagnosticEffect: z.string(),
+  examples: z.array(optionMetadataExampleSchema),
+  supported: z.boolean(),
+  experimental: z.boolean().optional(),
+});
+
+export const optionCatalogSchema = z.object({
+  format: z.string(),
+  role: z.enum(["parser", "generator"]),
+  options: z.array(optionMetadataSchema),
+});
+
+export const conversionOptionCatalogsSchema = z.object({
+  sourceFormat: conversionSourceFormatSchema,
+  targetFormat: conversionTargetFormatSchema,
+  parser: optionCatalogSchema,
+  generator: optionCatalogSchema,
+});
+
 export const schemaDiagnosticSchema = z.object({
   severity: z.enum(["error", "warning", "info"]),
   code: z.string(),

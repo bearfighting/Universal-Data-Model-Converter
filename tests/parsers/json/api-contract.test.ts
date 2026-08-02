@@ -20,6 +20,7 @@ describe("parser-json api contract", () => {
       "isJsonInferenceError",
       "jsonParser",
       "jsonParserCapabilities",
+      "jsonParserOptionCatalog",
       "parseJsonValue",
       "parseJsonValueDocument",
       "parseJsonValueDocumentWithOptions",
