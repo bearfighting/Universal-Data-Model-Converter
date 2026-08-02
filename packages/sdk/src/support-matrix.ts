@@ -73,6 +73,11 @@ const FORMAT_LIMITATIONS: Record<ConsumerSurfaceFormat, string[]> = {
     "Function types, conditional types, mapped types, and intersection types are outside the current supported subset.",
     "TypeScript generation widens integer semantics to number and does not preserve constraint families directly.",
   ],
+  zod: [
+    "Zod output targets Zod 4 and assumes the consuming project installs zod.",
+    "JavaScript output provides runtime schemas only; TypeScript output additionally emits z.infer types.",
+    "Object openness without explicit IR evidence uses a strict-object target policy and reports a policy note.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<ConsumerSurfaceFormat, string[]> = {
@@ -82,6 +87,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<ConsumerSurfaceFormat, string[]> = {
     "implicit-entry-selection",
     "enum-lowering-within-schema-subset",
   ],
+  zod: ["javascript-output", "constraint-refinement-rendering"],
 };
 
 export function describeFormatSupport(
@@ -110,6 +116,7 @@ export function listFormatSupports(): FormatSupportSummary[] {
     "json",
     "json-schema",
     "typescript",
+    "zod",
   ];
 
   return formats.map(describeFormatSupport);
@@ -144,5 +151,7 @@ function isSourceFormat(
 function isTargetFormat(
   format: ConsumerSurfaceFormat,
 ): format is ConversionTargetFormat {
-  return format === "json-schema" || format === "typescript";
+  return (
+    format === "json-schema" || format === "typescript" || format === "zod"
+  );
 }

@@ -23,6 +23,11 @@ Success does not necessarily mean:
 
 If truth is preserved only through normalization, widening, or target-local lowering, that caveat should be visible.
 
+The Zod 4 generator follows the same rule. It may lower compatible constraints
+to Zod checks and portable annotations to metadata, but it reports unsupported
+or partially preserved target behavior instead of emitting placeholder
+validators.
+
 ## Terms
 
 ### Capability

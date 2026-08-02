@@ -104,6 +104,53 @@ describe("sdk product scenario matrix", () => {
     expect(collectUserFacingDiagnostics(result)).toEqual([]);
   });
 
+  it("covers a JSON to Zod TypeScript runtime-schema flow", () => {
+    const result = convert({
+      sourceFormat: "json",
+      targetFormat: "zod",
+      input: '{"id":1,"name":"Ada"}',
+      name: "User",
+    });
+
+    expect(() => publicConvertResultSchema.parse(result)).not.toThrow();
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.output).toContain('import { z } from "zod";');
+    expect(result.output).toContain("export const UserSchema");
+    expect(result.output).toContain("z.infer<typeof UserSchema>");
+    expect(result.semanticNotes?.map((note) => note.code)).toContain(
+      "zod-object-policy",
+    );
+  });
+
+  it.each([
+    ["json", '{"id":1}', "JsonUser"],
+    [
+      "json-schema",
+      JSON.stringify({
+        type: "object",
+        properties: { id: { type: "integer" } },
+      }),
+      "SchemaUser",
+    ],
+    ["typescript", "export type User = { id: number };", "User"],
+  ] as const)("supports %s to zod", (sourceFormat, input, name) => {
+    const result = convert({
+      sourceFormat,
+      targetFormat: "zod",
+      input,
+      name,
+      advanced: { generator: { zod: { outputLanguage: "javascript" } } },
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.output).toContain("export const");
+    expect(result.output).not.toContain("z.infer");
+  });
+
   it("covers a json-schema round-trip that preserves constraint semantics", () => {
     const result = convert({
       sourceFormat: "json-schema",

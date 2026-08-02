@@ -9,9 +9,12 @@ import type { TypeScriptParseOptions } from "@aio/parser-typescript";
 
 export type SemanticFixtureFormatId = "json" | "json-schema" | "typescript";
 export type SemanticFixtureCoverageSubject =
-  SemanticFixtureFormatId | "generator:json-schema" | "generator:typescript";
+  | SemanticFixtureFormatId
+  | "generator:json-schema"
+  | "generator:typescript"
+  | "generator:zod";
 export type SemanticFixtureGeneratorId =
-  "generator:json-schema" | "generator:typescript";
+  "generator:json-schema" | "generator:typescript" | "generator:zod";
 export type SemanticFixtureRouteId =
   `${SemanticFixtureFormatId}->${SemanticFixtureFormatId}`;
 
@@ -44,6 +47,11 @@ export interface SemanticFixtureGeneratorExpectation {
   semanticNoteCodes?: string[];
 }
 
+export interface SemanticFixtureValidationExamples {
+  valid: unknown[];
+  invalid: unknown[];
+}
+
 export interface SemanticFixtureConversionExpectation {
   semanticCaveatCodes?: string[];
   semanticLosses?: Array<{
@@ -55,6 +63,7 @@ export interface SemanticFixtureConversionExpectation {
 export interface SemanticFixture {
   id: string;
   description: string;
+  validationExamples?: SemanticFixtureValidationExamples;
   canonicalShape: SchemaDocument;
   canonicalConstraints?: ConstraintDocument;
   sources: Partial<{

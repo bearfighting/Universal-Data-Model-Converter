@@ -11,6 +11,7 @@
       "@aio/generator-typescript": [
         "./packages/generators/typescript/src/index.ts"
       ],
+      "@aio/generator-zod": ["./packages/generators/zod/src/index.ts"],
       "@aio/parser-json": ["./packages/parsers/json/src/index.ts"],
       "@aio/parser-json-schema": [
         "./packages/parsers/json-schema/src/index.ts"

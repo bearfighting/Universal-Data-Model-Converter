@@ -9,6 +9,7 @@ export const conversionSourceFormatSchema = z.enum([
 export const conversionTargetFormatSchema = z.enum([
   "json-schema",
   "typescript",
+  "zod",
 ]);
 
 export const optionMetadataStageSchema = z.enum([

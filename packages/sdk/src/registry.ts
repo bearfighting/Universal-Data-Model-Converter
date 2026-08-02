@@ -8,6 +8,7 @@ import type {
 } from "@aio/core";
 import { jsonSchemaGeneratorCapabilities } from "@aio/generator-json-schema";
 import { typeScriptGeneratorCapabilities } from "@aio/generator-typescript";
+import { zodGeneratorCapabilities } from "@aio/generator-zod";
 import { jsonParserCapabilities } from "@aio/parser-json";
 import { jsonSchemaParserCapabilities } from "@aio/parser-json-schema";
 import { typeScriptParserCapabilities } from "@aio/parser-typescript";
@@ -28,6 +29,7 @@ const GENERATOR_REGISTRY: Record<
 > = {
   "json-schema": jsonSchemaGeneratorCapabilities,
   typescript: typeScriptGeneratorCapabilities,
+  zod: zodGeneratorCapabilities,
 };
 
 export function listConversionRoutes(): ConversionRoute[] {
@@ -36,7 +38,11 @@ export function listConversionRoutes(): ConversionRoute[] {
     "json-schema",
     "typescript",
   ];
-  const targets: ConversionTargetFormat[] = ["json-schema", "typescript"];
+  const targets: ConversionTargetFormat[] = [
+    "json-schema",
+    "typescript",
+    "zod",
+  ];
 
   return sources.flatMap((sourceFormat) =>
     targets.map((targetFormat) => planConversion(sourceFormat, targetFormat)),

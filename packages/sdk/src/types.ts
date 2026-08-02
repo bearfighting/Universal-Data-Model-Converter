@@ -14,12 +14,13 @@ import type {
   JsonSchemaOutput,
 } from "@aio/generator-json-schema";
 import type { TypeScriptGeneratorOptions } from "@aio/generator-typescript";
+import type { ZodGeneratorOptions } from "@aio/generator-zod";
 import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
 
 export type ConversionSourceFormat = "json" | "json-schema" | "typescript";
-export type ConversionTargetFormat = "json-schema" | "typescript";
+export type ConversionTargetFormat = "json-schema" | "typescript" | "zod";
 
 export interface ConvertAdvancedOptions {
   parser?: {
@@ -30,6 +31,7 @@ export interface ConvertAdvancedOptions {
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
     typeScript?: TypeScriptGeneratorOptions;
+    zod?: ZodGeneratorOptions;
   };
 }
 

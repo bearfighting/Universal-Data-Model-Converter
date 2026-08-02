@@ -18,7 +18,10 @@ import {
   schemaTupleNode,
   schemaUnknownNode,
 } from "@aio/core";
-import type { SemanticFixture } from "./types.js";
+import type {
+  SemanticFixture,
+  SemanticFixtureValidationExamples,
+} from "./types.js";
 
 export const primitiveStringFixture: SemanticFixture = {
   id: "primitive.string",
@@ -2353,7 +2356,91 @@ export const arrayMinItemsConstraintFixture: SemanticFixture = {
   },
 };
 
-export const sharedSemanticFixtures: SemanticFixture[] = [
+const validationExamplesByFixture: Partial<
+  Record<string, SemanticFixtureValidationExamples>
+> = {
+  "primitive.string": { valid: ["hello"], invalid: [42, null] },
+  "object.required-property": {
+    valid: [{ id: 1, name: "Ada" }],
+    invalid: [{ id: 1 }, { id: "1", name: "Ada" }],
+  },
+  "object.integer-property": {
+    valid: [{ id: 1 }],
+    invalid: [{ id: 1.5 }, { id: "1" }],
+  },
+  "collection.array": {
+    valid: [["alpha", "beta"]],
+    invalid: [[1], "alpha"],
+  },
+  "object.optional-property": {
+    valid: [{ id: 1 }, { id: 1, name: "Ada" }],
+    invalid: [{ name: "Ada" }, { id: "1" }],
+  },
+  "collection.record": {
+    valid: [{ enabled: true, archived: false }],
+    invalid: [{ enabled: "true" }, []],
+  },
+  "object.nullable-property": {
+    valid: [
+      { id: 1, name: null },
+      { id: 1, name: "Ada" },
+    ],
+    invalid: [{ id: 1 }, { id: "1", name: null }],
+  },
+  "collection.optional-tuple-member": {
+    valid: [[1], [1, "ready"]],
+    invalid: [["1"], [1, 2]],
+  },
+  "primitive.unknown": {
+    valid: [null, "anything", 42, { nested: true }],
+    invalid: [],
+  },
+  "union.primitive-union": {
+    valid: ["ready", 42],
+    invalid: [true, null],
+  },
+  "union.literal-union": {
+    valid: ["open", "closed"],
+    invalid: ["other", 1],
+  },
+  "reference.recursive-reference": {
+    valid: [
+      { value: 1, children: [] },
+      { value: 1, children: [{ value: 2, children: [] }] },
+    ],
+    invalid: [{ value: "1", children: [] }, { value: 1 }],
+  },
+  "constraint.annotation-string-bundle": {
+    valid: [{ code: "ABCD" }, {}],
+    invalid: [{ code: "abcd" }],
+  },
+  "constraint.collection-bundle": {
+    valid: [{ tags: ["one"] }, { tags: ["one", "two"] }, {}],
+    invalid: [
+      { tags: [] },
+      { tags: ["one", "one"] },
+      { tags: ["one", "two", "three", "four"] },
+    ],
+  },
+  "constraint.string-min-length": {
+    valid: [{ code: "ab" }, {}],
+    invalid: [{ code: "a" }],
+  },
+  "constraint.closed-object": {
+    valid: [{ id: "user-1" }],
+    invalid: [{ id: "user-1", extra: true }, { id: 1 }],
+  },
+  "constraint.numeric-minimum": {
+    valid: [{ score: 0 }, { score: 1 }, {}],
+    invalid: [{ score: -1 }],
+  },
+  "constraint.array-min-items": {
+    valid: [{ tags: ["one"] }, {}],
+    invalid: [{ tags: [] }],
+  },
+};
+
+const semanticFixtureDefinitions: SemanticFixture[] = [
   primitiveStringFixture,
   requiredPropertyFixture,
   integerPropertyFixture,
@@ -2387,3 +2474,16 @@ export const sharedSemanticFixtures: SemanticFixture[] = [
   numericMinimumConstraintFixture,
   arrayMinItemsConstraintFixture,
 ];
+
+export const sharedSemanticFixtures: SemanticFixture[] =
+  semanticFixtureDefinitions.map((fixture) => ({
+    ...fixture,
+    ...(validationExamplesByFixture[fixture.id]
+      ? { validationExamples: validationExamplesByFixture[fixture.id] }
+      : {}),
+    capabilityCoverage: {
+      ...fixture.capabilityCoverage,
+      "generator:zod": fixture.capabilityCoverage?.["generator:json-schema"] ??
+        fixture.capabilityCoverage?.["generator:typescript"] ?? ["shape-ir"],
+    },
+  }));

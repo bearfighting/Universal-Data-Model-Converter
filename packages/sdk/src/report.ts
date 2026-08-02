@@ -264,7 +264,7 @@ export function collectPreservedCapabilitiesFromRoute(
 
   if (
     constraintsArtifact &&
-    targetFormat === "json-schema" &&
+    (targetFormat === "json-schema" || targetFormat === "zod") &&
     routeCapabilities.supportsConstraintIr
   ) {
     preserved.add("constraint-ir");
