@@ -8,6 +8,7 @@ export {
   tryGenerateJsonSchema,
 } from "./api.js";
 export { jsonSchemaGeneratorCapabilities } from "./capabilities.js";
+export { jsonSchemaGeneratorOptionCatalog } from "./option-metadata.js";
 export {
   prepareJsonSchemaGeneratorOptions,
   resolveJsonSchemaGeneratorOptions,

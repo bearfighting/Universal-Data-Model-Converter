@@ -59,7 +59,20 @@ export {
   publicConvertResultSchema,
   schemaDiagnosticSchema,
   semanticLossSchema,
+  conversionOptionCatalogsSchema,
+  optionCatalogSchema,
+  optionMetadataCategorySchema,
+  optionMetadataExampleSchema,
+  optionMetadataSchema,
+  optionMetadataStageSchema,
+  optionValueMetadataSchema,
 } from "./public-contract.js";
+export {
+  describeConversionOptions,
+  describeGeneratorOptions,
+  describeParserOptions,
+  listOptionCatalogs,
+} from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
 export { collectUserFacingDiagnostics } from "./ui-diagnostics.js";
 export { describeFormatSupport, listFormatSupports } from "./support-matrix.js";
@@ -87,6 +100,7 @@ export type {
   GeneratorSupportSummary,
   ParserSupportSummary,
 } from "./support-matrix.js";
+export type { ConversionOptionCatalogs } from "./options-metadata.js";
 ```
 
 ## packages/sdk/src/inspect.d.ts
@@ -105,6 +119,33 @@ export declare function inspectTypeScriptImplicitEntry(
 ): TypeScriptImplicitEntryAnalysis;
 ```
 
+## packages/sdk/src/options-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+import type {
+  ConversionSourceFormat,
+  ConversionTargetFormat,
+} from "./types.js";
+export interface ConversionOptionCatalogs {
+  sourceFormat: ConversionSourceFormat;
+  targetFormat: ConversionTargetFormat;
+  parser: OptionCatalog;
+  generator: OptionCatalog;
+}
+export declare function describeParserOptions(
+  format: ConversionSourceFormat,
+): OptionCatalog;
+export declare function describeGeneratorOptions(
+  format: ConversionTargetFormat,
+): OptionCatalog;
+export declare function describeConversionOptions(
+  sourceFormat: ConversionSourceFormat,
+  targetFormat: ConversionTargetFormat,
+): ConversionOptionCatalogs;
+export declare function listOptionCatalogs(): OptionCatalog[];
+```
+
 ## packages/sdk/src/public-contract.d.ts
 
 ```ts
@@ -118,6 +159,390 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   typescript: "typescript";
   "json-schema": "json-schema";
 }>;
+export declare const optionMetadataStageSchema: z.ZodEnum<{
+  parse: "parse";
+  transform: "transform";
+  generate: "generate";
+}>;
+export declare const optionMetadataCategorySchema: z.ZodEnum<{
+  diagnostics: "diagnostics";
+  inference: "inference";
+  selection: "selection";
+  formatting: "formatting";
+  output: "output";
+  semantics: "semantics";
+  extension: "extension";
+}>;
+export declare const optionMetadataExampleSchema: z.ZodObject<
+  {
+    title: z.ZodString;
+    input: z.ZodOptional<z.ZodString>;
+    options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+    output: z.ZodOptional<z.ZodString>;
+    semanticChange: z.ZodOptional<z.ZodString>;
+    diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    explanation: z.ZodString;
+  },
+  z.core.$strip
+>;
+export declare const optionValueMetadataSchema: z.ZodObject<
+  {
+    value: z.ZodUnknown;
+    label: z.ZodString;
+    description: z.ZodString;
+    semanticEffect: z.ZodOptional<z.ZodString>;
+    diagnosticEffect: z.ZodOptional<z.ZodString>;
+    example: z.ZodOptional<
+      z.ZodObject<
+        {
+          title: z.ZodString;
+          input: z.ZodOptional<z.ZodString>;
+          options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+          output: z.ZodOptional<z.ZodString>;
+          semanticChange: z.ZodOptional<z.ZodString>;
+          diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+          explanation: z.ZodString;
+        },
+        z.core.$strip
+      >
+    >;
+  },
+  z.core.$strip
+>;
+export declare const optionMetadataSchema: z.ZodObject<
+  {
+    key: z.ZodString;
+    label: z.ZodString;
+    description: z.ZodString;
+    category: z.ZodEnum<{
+      diagnostics: "diagnostics";
+      inference: "inference";
+      selection: "selection";
+      formatting: "formatting";
+      output: "output";
+      semantics: "semantics";
+      extension: "extension";
+    }>;
+    defaultValue: z.ZodUnknown;
+    valueDescriptions: z.ZodOptional<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            value: z.ZodUnknown;
+            label: z.ZodString;
+            description: z.ZodString;
+            semanticEffect: z.ZodOptional<z.ZodString>;
+            diagnosticEffect: z.ZodOptional<z.ZodString>;
+            example: z.ZodOptional<
+              z.ZodObject<
+                {
+                  title: z.ZodString;
+                  input: z.ZodOptional<z.ZodString>;
+                  options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                  output: z.ZodOptional<z.ZodString>;
+                  semanticChange: z.ZodOptional<z.ZodString>;
+                  diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                  explanation: z.ZodString;
+                },
+                z.core.$strip
+              >
+            >;
+          },
+          z.core.$strip
+        >
+      >
+    >;
+    affectedStages: z.ZodArray<
+      z.ZodEnum<{
+        parse: "parse";
+        transform: "transform";
+        generate: "generate";
+      }>
+    >;
+    semanticEffect: z.ZodString;
+    diagnosticEffect: z.ZodString;
+    examples: z.ZodArray<
+      z.ZodObject<
+        {
+          title: z.ZodString;
+          input: z.ZodOptional<z.ZodString>;
+          options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+          output: z.ZodOptional<z.ZodString>;
+          semanticChange: z.ZodOptional<z.ZodString>;
+          diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+          explanation: z.ZodString;
+        },
+        z.core.$strip
+      >
+    >;
+    supported: z.ZodBoolean;
+    experimental: z.ZodOptional<z.ZodBoolean>;
+  },
+  z.core.$strip
+>;
+export declare const optionCatalogSchema: z.ZodObject<
+  {
+    format: z.ZodString;
+    role: z.ZodEnum<{
+      parser: "parser";
+      generator: "generator";
+    }>;
+    options: z.ZodArray<
+      z.ZodObject<
+        {
+          key: z.ZodString;
+          label: z.ZodString;
+          description: z.ZodString;
+          category: z.ZodEnum<{
+            diagnostics: "diagnostics";
+            inference: "inference";
+            selection: "selection";
+            formatting: "formatting";
+            output: "output";
+            semantics: "semantics";
+            extension: "extension";
+          }>;
+          defaultValue: z.ZodUnknown;
+          valueDescriptions: z.ZodOptional<
+            z.ZodArray<
+              z.ZodObject<
+                {
+                  value: z.ZodUnknown;
+                  label: z.ZodString;
+                  description: z.ZodString;
+                  semanticEffect: z.ZodOptional<z.ZodString>;
+                  diagnosticEffect: z.ZodOptional<z.ZodString>;
+                  example: z.ZodOptional<
+                    z.ZodObject<
+                      {
+                        title: z.ZodString;
+                        input: z.ZodOptional<z.ZodString>;
+                        options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                        output: z.ZodOptional<z.ZodString>;
+                        semanticChange: z.ZodOptional<z.ZodString>;
+                        diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                        explanation: z.ZodString;
+                      },
+                      z.core.$strip
+                    >
+                  >;
+                },
+                z.core.$strip
+              >
+            >
+          >;
+          affectedStages: z.ZodArray<
+            z.ZodEnum<{
+              parse: "parse";
+              transform: "transform";
+              generate: "generate";
+            }>
+          >;
+          semanticEffect: z.ZodString;
+          diagnosticEffect: z.ZodString;
+          examples: z.ZodArray<
+            z.ZodObject<
+              {
+                title: z.ZodString;
+                input: z.ZodOptional<z.ZodString>;
+                options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                output: z.ZodOptional<z.ZodString>;
+                semanticChange: z.ZodOptional<z.ZodString>;
+                diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                explanation: z.ZodString;
+              },
+              z.core.$strip
+            >
+          >;
+          supported: z.ZodBoolean;
+          experimental: z.ZodOptional<z.ZodBoolean>;
+        },
+        z.core.$strip
+      >
+    >;
+  },
+  z.core.$strip
+>;
+export declare const conversionOptionCatalogsSchema: z.ZodObject<
+  {
+    sourceFormat: z.ZodEnum<{
+      typescript: "typescript";
+      "json-schema": "json-schema";
+      json: "json";
+    }>;
+    targetFormat: z.ZodEnum<{
+      typescript: "typescript";
+      "json-schema": "json-schema";
+    }>;
+    parser: z.ZodObject<
+      {
+        format: z.ZodString;
+        role: z.ZodEnum<{
+          parser: "parser";
+          generator: "generator";
+        }>;
+        options: z.ZodArray<
+          z.ZodObject<
+            {
+              key: z.ZodString;
+              label: z.ZodString;
+              description: z.ZodString;
+              category: z.ZodEnum<{
+                diagnostics: "diagnostics";
+                inference: "inference";
+                selection: "selection";
+                formatting: "formatting";
+                output: "output";
+                semantics: "semantics";
+                extension: "extension";
+              }>;
+              defaultValue: z.ZodUnknown;
+              valueDescriptions: z.ZodOptional<
+                z.ZodArray<
+                  z.ZodObject<
+                    {
+                      value: z.ZodUnknown;
+                      label: z.ZodString;
+                      description: z.ZodString;
+                      semanticEffect: z.ZodOptional<z.ZodString>;
+                      diagnosticEffect: z.ZodOptional<z.ZodString>;
+                      example: z.ZodOptional<
+                        z.ZodObject<
+                          {
+                            title: z.ZodString;
+                            input: z.ZodOptional<z.ZodString>;
+                            options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                            output: z.ZodOptional<z.ZodString>;
+                            semanticChange: z.ZodOptional<z.ZodString>;
+                            diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                            explanation: z.ZodString;
+                          },
+                          z.core.$strip
+                        >
+                      >;
+                    },
+                    z.core.$strip
+                  >
+                >
+              >;
+              affectedStages: z.ZodArray<
+                z.ZodEnum<{
+                  parse: "parse";
+                  transform: "transform";
+                  generate: "generate";
+                }>
+              >;
+              semanticEffect: z.ZodString;
+              diagnosticEffect: z.ZodString;
+              examples: z.ZodArray<
+                z.ZodObject<
+                  {
+                    title: z.ZodString;
+                    input: z.ZodOptional<z.ZodString>;
+                    options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                    output: z.ZodOptional<z.ZodString>;
+                    semanticChange: z.ZodOptional<z.ZodString>;
+                    diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                    explanation: z.ZodString;
+                  },
+                  z.core.$strip
+                >
+              >;
+              supported: z.ZodBoolean;
+              experimental: z.ZodOptional<z.ZodBoolean>;
+            },
+            z.core.$strip
+          >
+        >;
+      },
+      z.core.$strip
+    >;
+    generator: z.ZodObject<
+      {
+        format: z.ZodString;
+        role: z.ZodEnum<{
+          parser: "parser";
+          generator: "generator";
+        }>;
+        options: z.ZodArray<
+          z.ZodObject<
+            {
+              key: z.ZodString;
+              label: z.ZodString;
+              description: z.ZodString;
+              category: z.ZodEnum<{
+                diagnostics: "diagnostics";
+                inference: "inference";
+                selection: "selection";
+                formatting: "formatting";
+                output: "output";
+                semantics: "semantics";
+                extension: "extension";
+              }>;
+              defaultValue: z.ZodUnknown;
+              valueDescriptions: z.ZodOptional<
+                z.ZodArray<
+                  z.ZodObject<
+                    {
+                      value: z.ZodUnknown;
+                      label: z.ZodString;
+                      description: z.ZodString;
+                      semanticEffect: z.ZodOptional<z.ZodString>;
+                      diagnosticEffect: z.ZodOptional<z.ZodString>;
+                      example: z.ZodOptional<
+                        z.ZodObject<
+                          {
+                            title: z.ZodString;
+                            input: z.ZodOptional<z.ZodString>;
+                            options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                            output: z.ZodOptional<z.ZodString>;
+                            semanticChange: z.ZodOptional<z.ZodString>;
+                            diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                            explanation: z.ZodString;
+                          },
+                          z.core.$strip
+                        >
+                      >;
+                    },
+                    z.core.$strip
+                  >
+                >
+              >;
+              affectedStages: z.ZodArray<
+                z.ZodEnum<{
+                  parse: "parse";
+                  transform: "transform";
+                  generate: "generate";
+                }>
+              >;
+              semanticEffect: z.ZodString;
+              diagnosticEffect: z.ZodString;
+              examples: z.ZodArray<
+                z.ZodObject<
+                  {
+                    title: z.ZodString;
+                    input: z.ZodOptional<z.ZodString>;
+                    options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                    output: z.ZodOptional<z.ZodString>;
+                    semanticChange: z.ZodOptional<z.ZodString>;
+                    diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                    explanation: z.ZodString;
+                  },
+                  z.core.$strip
+                >
+              >;
+              supported: z.ZodBoolean;
+              experimental: z.ZodOptional<z.ZodBoolean>;
+            },
+            z.core.$strip
+          >
+        >;
+      },
+      z.core.$strip
+    >;
+  },
+  z.core.$strip
+>;
 export declare const schemaDiagnosticSchema: z.ZodObject<
   {
     severity: z.ZodEnum<{

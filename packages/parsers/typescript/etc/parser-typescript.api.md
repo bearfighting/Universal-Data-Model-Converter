@@ -230,6 +230,7 @@ export {
   isTypeScriptInferenceError,
 } from "./errors.js";
 export { typeScriptParserCapabilities } from "./capabilities.js";
+export { typeScriptParserOptionCatalog } from "./option-metadata.js";
 export {
   analyzeImplicitEntry,
   analyzeImplicitEntryFromSource,
@@ -268,6 +269,13 @@ export {
   type TypeScriptParseOptions,
   type TypeScriptParseStrictness,
 } from "./options.js";
+```
+
+## packages/parsers/typescript/src/option-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+export declare const typeScriptParserOptionCatalog: OptionCatalog;
 ```
 
 ## packages/parsers/typescript/src/options.d.ts

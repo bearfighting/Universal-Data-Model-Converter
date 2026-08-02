@@ -3,6 +3,7 @@ export {
   isTypeScriptInferenceError,
 } from "./errors.js";
 export { typeScriptParserCapabilities } from "./capabilities.js";
+export { typeScriptParserOptionCatalog } from "./option-metadata.js";
 export {
   analyzeImplicitEntry,
   analyzeImplicitEntryFromSource,

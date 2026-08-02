@@ -128,6 +128,7 @@ export {
   collectTypeScriptTargetLossHotspots,
 } from "./analysis.js";
 export { typeScriptGeneratorCapabilities } from "./capabilities.js";
+export { typeScriptGeneratorOptionCatalog } from "./option-metadata.js";
 export type {
   TypeScriptCapabilityRequirement,
   TypeScriptLossHotspot,
@@ -151,6 +152,13 @@ export type {
   TypeScriptGenerateResult,
   TypeScriptGeneratorFailureCode,
 } from "./failure.js";
+```
+
+## packages/generators/typescript/src/option-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+export declare const typeScriptGeneratorOptionCatalog: OptionCatalog;
 ```
 
 ## packages/generators/typescript/src/options.d.ts

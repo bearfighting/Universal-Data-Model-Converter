@@ -70,6 +70,7 @@ export declare function isJsonInferenceError(
 ```ts
 export { JsonInferenceError, isJsonInferenceError } from "./errors.js";
 export { jsonParserCapabilities } from "./capabilities.js";
+export { jsonParserOptionCatalog } from "./option-metadata.js";
 export { decodeJsonText } from "./decode.js";
 export { inferJsonType } from "./infer.js";
 export {
@@ -144,6 +145,13 @@ export declare function inferSchemaNodeFromJsonValue(
   diagnostics?: SchemaDiagnostic[],
   path?: string[],
 ): SchemaNode;
+```
+
+## packages/parsers/json/src/option-metadata.d.ts
+
+```ts
+import type { OptionCatalog } from "@aio/core";
+export declare const jsonParserOptionCatalog: OptionCatalog;
 ```
 
 ## packages/parsers/json/src/options.d.ts
