@@ -1,6 +1,7 @@
 import type { OptionCatalog } from "@aio/core";
 import { jsonSchemaGeneratorOptionCatalog } from "@aio/generator-json-schema";
 import { typeScriptGeneratorOptionCatalog } from "@aio/generator-typescript";
+import { zodGeneratorOptionCatalog } from "@aio/generator-zod";
 import { jsonParserOptionCatalog } from "@aio/parser-json";
 import { jsonSchemaParserOptionCatalog } from "@aio/parser-json-schema";
 import { typeScriptParserOptionCatalog } from "@aio/parser-typescript";
@@ -18,6 +19,7 @@ const parserCatalogs: Record<ConversionSourceFormat, OptionCatalog> = {
 const generatorCatalogs: Record<ConversionTargetFormat, OptionCatalog> = {
   "json-schema": jsonSchemaGeneratorOptionCatalog,
   typescript: typeScriptGeneratorOptionCatalog,
+  zod: zodGeneratorOptionCatalog,
 };
 
 export interface ConversionOptionCatalogs {

@@ -19,6 +19,11 @@ As of July 23, 2026:
 The goal is to clear the minimum library-level blockers and then let downstream consumer surfaces move.
 The goal is not to wait for the core to become "fully complete."
 
+The first additional target family is now available through `@aio/generator-zod`
+and the SDK `zod` target. It supports TypeScript and plain JavaScript output,
+assumes Zod 4 in the consuming project, and remains generator-only; this does
+not imply that a Zod parser or additional parser families are part of Stage 1.
+
 ## Web Readiness Triage
 
 If a downstream Web surface started now, the library is already usable.

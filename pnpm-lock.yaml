@@ -59,6 +59,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/generators/zod:
+    dependencies:
+      "@aio/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/parsers/json:
     dependencies:
       "@aio/core":
@@ -91,6 +97,9 @@ importers:
       "@aio/generator-typescript":
         specifier: workspace:*
         version: link:../generators/typescript
+      "@aio/generator-zod":
+        specifier: workspace:*
+        version: link:../generators/zod
       "@aio/parser-json":
         specifier: workspace:*
         version: link:../parsers/json

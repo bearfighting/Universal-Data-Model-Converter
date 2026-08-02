@@ -60,6 +60,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@aio/generator-zod",
+    root: path.join(repoRoot, "packages/generators/zod"),
+    entry: path.join(repoRoot, "packages/generators/zod/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/zod/etc/generator-zod.api.md",
+    ),
+  },
+  {
     name: "@aio/sdk",
     root: path.join(repoRoot, "packages/sdk"),
     entry: path.join(repoRoot, "packages/sdk/src/index.ts"),

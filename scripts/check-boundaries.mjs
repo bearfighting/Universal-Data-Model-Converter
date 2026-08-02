@@ -40,6 +40,11 @@ const packageConfigs = [
     category: "generator",
     root: path.join(repoRoot, "packages/generators/typescript"),
   },
+  {
+    name: "@aio/generator-zod",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/zod"),
+  },
 ];
 
 const packageByName = new Map(packageConfigs.map((pkg) => [pkg.name, pkg]));
@@ -245,6 +250,7 @@ function getAllowedDependencies(pkg) {
     "@aio/parser-typescript",
     "@aio/generator-json-schema",
     "@aio/generator-typescript",
+    "@aio/generator-zod",
   ]);
 }
 

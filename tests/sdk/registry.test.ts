@@ -12,10 +12,13 @@ describe("sdk registry", () => {
     expect(listConversionRoutes()).toEqual([
       planConversion("json", "json-schema"),
       planConversion("json", "typescript"),
+      planConversion("json", "zod"),
       planConversion("json-schema", "json-schema"),
       planConversion("json-schema", "typescript"),
+      planConversion("json-schema", "zod"),
       planConversion("typescript", "json-schema"),
       planConversion("typescript", "typescript"),
+      planConversion("typescript", "zod"),
     ]);
   });
 

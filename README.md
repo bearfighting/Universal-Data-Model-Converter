@@ -22,6 +22,7 @@ That separation is intended to make parsers and generators independently replace
 - `@aio/parser-typescript`: TypeScript schema-subset parser for the shared IR
 - `@aio/generator-json-schema`: IR to JSON Schema generation
 - `@aio/generator-typescript`: IR to TypeScript generation
+- `@aio/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
 - `@aio/sdk`: optional aggregate re-export package
 
 ## Current Status
@@ -33,6 +34,7 @@ The current implementation is intentionally conservative.
 - `@aio/parser-typescript` supports a narrow, explicit TypeScript schema subset with structured failures for unsupported syntax
 - `@aio/generator-json-schema` supports the currently implemented IR subset
 - `@aio/generator-typescript` supports the currently implemented IR subset
+- `@aio/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
 - unsupported cases are reported through structured failures instead of silent guessing
 
 ## Current End-To-End Flows
@@ -45,6 +47,9 @@ The currently validated flows are:
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
 - `typescript -> shape -> json-schema`
+- `json -> zod`
+- `json-schema -> zod`
+- `typescript -> zod`
 
 That does not mean every JSON sample or every TypeScript type is supported.
 It means the current explicit subset is wired end to end and covered by tests.
@@ -217,6 +222,7 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [packages/parsers/typescript/README.md](packages/parsers/typescript/README.md): supported TypeScript schema-subset parsing
 - [packages/generators/json-schema/README.md](packages/generators/json-schema/README.md): JSON Schema Draft 2020-12 generation
 - [packages/generators/typescript/README.md](packages/generators/typescript/README.md): TypeScript generation
+- [packages/generators/zod/README.md](packages/generators/zod/README.md): Zod 4 TypeScript and JavaScript generation
 - [examples/json-to-typescript.md](examples/json-to-typescript.md): representative `json -> value -> shape -> typescript` examples
 - [examples/json-to-json-schema.md](examples/json-to-json-schema.md): representative `json -> value -> shape -> json-schema` examples
 - [examples/json-schema-to-typescript.md](examples/json-schema-to-typescript.md): representative `json-schema -> shape -> typescript` examples

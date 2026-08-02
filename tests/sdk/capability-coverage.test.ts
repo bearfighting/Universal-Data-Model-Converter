@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { jsonSchemaGeneratorCapabilities } from "@aio/generator-json-schema";
 import { typeScriptGeneratorCapabilities } from "@aio/generator-typescript";
+import { zodGeneratorCapabilities } from "@aio/generator-zod";
 import { jsonParserCapabilities } from "@aio/parser-json";
 import { jsonSchemaParserCapabilities } from "@aio/parser-json-schema";
 import { typeScriptParserCapabilities } from "@aio/parser-typescript";
@@ -53,6 +54,17 @@ describe("semantic fixture capability coverage", () => {
         "generator:typescript",
       ),
     ).toEqual(["shape-ir"]);
+    expect(
+      coveredCapabilitiesForSubject(sharedSemanticFixtures, "generator:zod"),
+    ).toEqual([
+      "collection-constraints",
+      "constraint-ir",
+      "numeric-constraints",
+      "object-constraints",
+      "portable-annotations",
+      "shape-ir",
+      "string-constraints",
+    ]);
   });
 
   it("fully covers the currently declared JSON and TypeScript shape/value capabilities", () => {
@@ -69,6 +81,12 @@ describe("semantic fixture capability coverage", () => {
       missingGeneratorCapabilities(
         sharedSemanticFixtures,
         typeScriptGeneratorCapabilities,
+      ),
+    ).toEqual([]);
+    expect(
+      missingGeneratorCapabilities(
+        sharedSemanticFixtures,
+        zodGeneratorCapabilities,
       ),
     ).toEqual([]);
   });

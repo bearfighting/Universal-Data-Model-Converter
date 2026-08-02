@@ -142,6 +142,7 @@ describe("sdk support matrix", () => {
       "json",
       "json-schema",
       "typescript",
+      "zod",
     ]);
   });
 
@@ -166,7 +167,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(6);
+    expect(listConversionRoutes()).toHaveLength(9);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

@@ -20,6 +20,10 @@ If you are starting from the higher-level pipeline API instead of individual par
 
 - [json-to-typescript.md](json-to-typescript.md): the most familiar current flow and a good first pass through the shared IR semantics
 - [json-schema-to-typescript.md](json-schema-to-typescript.md): the newest parser-to-generator flow and the best entry point for the current JSON Schema subset
+- [json-to-zod.md](json-to-zod.md): JSON inference to a Zod 4 TypeScript or JavaScript module
+- [json-schema-to-zod.md](json-schema-to-zod.md): JSON Schema constraints mapped to Zod 4
+- [typescript-to-zod.md](typescript-to-zod.md): TypeScript schema subset to a Zod 4 runtime schema
+- [zod-recursive-definitions.md](zod-recursive-definitions.md): recursive definition output policy
 - [json-schema-to-json-schema.md](json-schema-to-json-schema.md): the best entry point for understanding the current JSON Schema round-trip boundary
 - [sdk-report-analysis.md](sdk-report-analysis.md): the best entry point for understanding how to read `@aio/sdk` report output after a successful conversion
 - [consumer-golden-examples.md](consumer-golden-examples.md): the best entry point when a downstream product surface needs a compact default sample library

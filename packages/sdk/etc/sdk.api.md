@@ -158,6 +158,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   typescript: "typescript";
   "json-schema": "json-schema";
+  zod: "zod";
 }>;
 export declare const optionMetadataStageSchema: z.ZodEnum<{
   parse: "parse";
@@ -373,6 +374,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
     targetFormat: z.ZodEnum<{
       typescript: "typescript";
       "json-schema": "json-schema";
+      zod: "zod";
     }>;
     parser: z.ZodObject<
       {
@@ -2051,11 +2053,12 @@ import type {
   JsonSchemaOutput,
 } from "@aio/generator-json-schema";
 import type { TypeScriptGeneratorOptions } from "@aio/generator-typescript";
+import type { ZodGeneratorOptions } from "@aio/generator-zod";
 import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
 export type ConversionSourceFormat = "json" | "json-schema" | "typescript";
-export type ConversionTargetFormat = "json-schema" | "typescript";
+export type ConversionTargetFormat = "json-schema" | "typescript" | "zod";
 export interface ConvertAdvancedOptions {
   parser?: {
     json?: JsonParseOptions;
@@ -2065,6 +2068,7 @@ export interface ConvertAdvancedOptions {
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
     typeScript?: TypeScriptGeneratorOptions;
+    zod?: ZodGeneratorOptions;
   };
 }
 export interface ConvertOptions {
