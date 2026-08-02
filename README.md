@@ -237,6 +237,7 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [docs/development/architecture-layering.md](docs/development/architecture-layering.md): IR layering and capability-aware orchestration direction
 - [docs/development/ir-contract.md](docs/development/ir-contract.md): canonical shared IR contract
 - [docs/development/capabilities-and-loss.md](docs/development/capabilities-and-loss.md): conversion-result truthfulness and semantic-loss contract
+- [CHANGELOG.md](CHANGELOG.md): unreleased changes and release history
 - [docs/development/sdk-report-analysis.md](docs/development/sdk-report-analysis.md): how to interpret `sdk` report fields such as `semanticCaveats`, `capabilityRequirements`, and `lossHotspots`
 - [docs/development/json-schema-shape-gap.md](docs/development/json-schema-shape-gap.md): JSON Schema semantic gap inventory against the shared IR
 - [docs/development/typescript-parser-cases.md](docs/development/typescript-parser-cases.md): TypeScript parser support and failure cases
