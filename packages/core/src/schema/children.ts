@@ -57,11 +57,22 @@ export function getSchemaNodeChildren(
         via: { kind: "unionMember", index },
       }));
     case "object":
-      return node.fields.map((field) => ({
-        node: field.type,
-        pathSegment: { kind: "field", name: field.name.source },
-        via: { kind: "field", fieldName: field.name.source },
-      }));
+      return [
+        ...node.fields.map((field) => ({
+          node: field.type,
+          pathSegment: { kind: "field", name: field.name.source } as const,
+          via: { kind: "field", fieldName: field.name.source } as const,
+        })),
+        ...(node.additionalProperties
+          ? [
+              {
+                node: node.additionalProperties,
+                pathSegment: { kind: "objectAdditionalProperties" } as const,
+                via: { kind: "objectAdditionalProperties" } as const,
+              },
+            ]
+          : []),
+      ];
   }
 }
 
@@ -205,10 +216,24 @@ export function mapSchemaNodeChildren(
         };
       });
 
+      const additionalProperties = node.additionalProperties;
+      const nextAdditionalProperties = additionalProperties
+        ? mapper(additionalProperties, {
+            node: additionalProperties,
+            pathSegment: { kind: "objectAdditionalProperties" },
+            via: { kind: "objectAdditionalProperties" },
+          })
+        : undefined;
+
+      if (nextAdditionalProperties !== additionalProperties) changed = true;
+
       return changed
         ? {
             kind: "object",
             fields: nextFields,
+            ...(nextAdditionalProperties
+              ? { additionalProperties: nextAdditionalProperties }
+              : {}),
           }
         : node;
     }

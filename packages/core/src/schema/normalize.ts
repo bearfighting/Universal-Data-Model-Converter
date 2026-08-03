@@ -186,6 +186,9 @@ function normalizeObjectFieldNameWords(
     ? {
         kind: "object",
         fields: nextFields,
+        ...(node.additionalProperties
+          ? { additionalProperties: node.additionalProperties }
+          : {}),
       }
     : node;
 }

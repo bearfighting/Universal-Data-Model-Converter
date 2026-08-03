@@ -6,12 +6,14 @@ export default defineConfig({
       "@aio/core": "/packages/core/src/index.ts",
       "@aio/generator-json-schema":
         "/packages/generators/json-schema/src/index.ts",
+      "@aio/generator-openapi": "/packages/generators/openapi/src/index.ts",
       "@aio/generator-typescript":
         "/packages/generators/typescript/src/index.ts",
       "@aio/generator-zod": "/packages/generators/zod/src/index.ts",
       "@aio/parser-json": "/packages/parsers/json/src/index.ts",
       "@aio/parser-json-schema": "/packages/parsers/json-schema/src/index.ts",
       "@aio/parser-typescript": "/packages/parsers/typescript/src/index.ts",
+      "@aio/parser-openapi": "/packages/parsers/openapi/src/index.ts",
       "@aio/sdk": "/packages/sdk/src/index.ts",
     },
   },

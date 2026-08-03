@@ -155,5 +155,8 @@ function parserOptionsFor(
   if (sourceFormat === "typescript") {
     return options.advanced?.parser?.typeScript ?? {};
   }
+  if (sourceFormat === "openapi") {
+    return options.advanced?.parser?.openapi ?? {};
+  }
   return options.extension?.parser ?? {};
 }

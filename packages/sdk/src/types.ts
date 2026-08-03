@@ -15,18 +15,26 @@ import type {
   JsonSchemaGeneratorOptions,
   JsonSchemaOutput,
 } from "@aio/generator-json-schema";
+import type {
+  OpenApiGeneratorOptions,
+  OpenApiOutput,
+} from "@aio/generator-openapi";
 import type { TypeScriptGeneratorOptions } from "@aio/generator-typescript";
 import type { ZodGeneratorOptions } from "@aio/generator-zod";
 import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
+import type { OpenApiParseOptions } from "@aio/parser-openapi";
 
-export type BuiltinSourceFormat = "json" | "json-schema" | "typescript";
-export type BuiltinTargetFormat = "json-schema" | "typescript" | "zod";
+export type BuiltinSourceFormat =
+  "json" | "json-schema" | "typescript" | "openapi";
+export type BuiltinTargetFormat =
+  "json-schema" | "typescript" | "zod" | "openapi";
 export interface BuiltinGeneratorOutputs {
   "json-schema": JsonSchemaOutput;
   typescript: string;
   zod: string;
+  openapi: OpenApiOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -58,11 +66,13 @@ export interface ConvertAdvancedOptions {
     json?: JsonParseOptions;
     jsonSchema?: JsonSchemaParseOptions;
     typeScript?: TypeScriptParseOptions;
+    openapi?: OpenApiParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
     typeScript?: TypeScriptGeneratorOptions;
     zod?: ZodGeneratorOptions;
+    openapi?: OpenApiGeneratorOptions;
   };
 }
 
@@ -82,7 +92,9 @@ export interface ConversionArtifacts {
   constraints?: ConstraintDocument;
 }
 
-export interface ConvertSuccessResult<TOutput = string | JsonSchemaOutput> {
+export interface ConvertSuccessResult<
+  TOutput = string | JsonSchemaOutput | OpenApiOutput,
+> {
   ok: true;
   output: TOutput;
   plan: ConversionRoute;
@@ -103,5 +115,5 @@ export interface ConvertFailureResult {
   diagnostics?: SchemaDiagnostic[];
 }
 
-export type ConvertResult<TOutput = string | JsonSchemaOutput> =
+export type ConvertResult<TOutput = string | JsonSchemaOutput | OpenApiOutput> =
   ConvertSuccessResult<TOutput> | ConvertFailureResult;

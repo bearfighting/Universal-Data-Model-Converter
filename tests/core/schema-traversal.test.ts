@@ -812,6 +812,8 @@ describe("schema traversal", () => {
                     return "value";
                   case "field":
                     return segment.name;
+                  case "objectAdditionalProperties":
+                    return "additionalProperties";
                 }
               }),
               ...(frame.sourceDefinition

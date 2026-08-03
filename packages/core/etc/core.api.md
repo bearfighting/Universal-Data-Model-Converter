@@ -629,6 +629,9 @@ export declare function schemaFieldNode(
 ): SchemaFieldNode;
 export declare function schemaObjectNode(
   fields: SchemaFieldNode[],
+  options?: {
+    additionalProperties?: SchemaNode;
+  },
 ): SchemaObjectNode;
 export declare function schemaArrayNode(
   elementType: SchemaNode,
@@ -911,6 +914,9 @@ export type SchemaPathSegment =
       name: string;
     }
   | {
+      kind: "objectAdditionalProperties";
+    }
+  | {
       kind: "unionMember";
       index: number;
     };
@@ -1062,6 +1068,9 @@ export type SchemaWalkVia =
   | {
       kind: "field";
       fieldName: string;
+    }
+  | {
+      kind: "objectAdditionalProperties";
     }
   | {
       kind: "unionMember";
@@ -1298,6 +1307,8 @@ export interface SchemaFieldNode extends SchemaBaseNode {
 export interface SchemaObjectNode extends SchemaBaseNode {
   kind: "object";
   fields: SchemaFieldNode[];
+  /** Schema for keys not listed in `fields`, when the source is a typed map. */
+  additionalProperties?: SchemaNode;
 }
 export interface SchemaArrayNode extends SchemaBaseNode {
   kind: "array";

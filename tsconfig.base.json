@@ -8,6 +8,7 @@
       "@aio/generator-json-schema": [
         "./packages/generators/json-schema/src/index.ts"
       ],
+      "@aio/generator-openapi": ["./packages/generators/openapi/src/index.ts"],
       "@aio/generator-typescript": [
         "./packages/generators/typescript/src/index.ts"
       ],
@@ -17,6 +18,7 @@
         "./packages/parsers/json-schema/src/index.ts"
       ],
       "@aio/parser-typescript": ["./packages/parsers/typescript/src/index.ts"],
+      "@aio/parser-openapi": ["./packages/parsers/openapi/src/index.ts"],
       "@aio/sdk": ["./packages/sdk/src/index.ts"]
     },
     "lib": ["ES2022"],

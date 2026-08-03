@@ -15,10 +15,12 @@
   "dependencies": {
     "@aio/core": "workspace:*",
     "@aio/generator-json-schema": "workspace:*",
+    "@aio/generator-openapi": "workspace:*",
     "@aio/generator-typescript": "workspace:*",
     "@aio/generator-zod": "workspace:*",
     "@aio/parser-json": "workspace:*",
     "@aio/parser-json-schema": "workspace:*",
+    "@aio/parser-openapi": "workspace:*",
     "@aio/parser-typescript": "workspace:*",
     "zod": "^4.4.3"
   },

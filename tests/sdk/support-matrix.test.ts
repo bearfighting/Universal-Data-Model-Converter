@@ -10,6 +10,31 @@ import {
 } from "../../packages/sdk/src/index.js";
 
 describe("sdk support matrix", () => {
+  it("describes OpenAPI as a shape and constraint source", () => {
+    expect(describeFormatSupport("openapi")).toMatchObject({
+      format: "openapi",
+      parser: {
+        producesIr: ["shape", "constraint"],
+        capabilities: expect.arrayContaining([
+          "shape-ir",
+          "constraint-ir",
+          "string-constraints",
+          "numeric-constraints",
+          "collection-constraints",
+          "object-constraints",
+        ]),
+      },
+      notableLimitations: [
+        "OpenAPI support is currently limited to extracting schemas from components.schemas rather than processing the full API document.",
+        "OpenAPI generation emits only a canonical 3.1 schema document and does not recreate source metadata or API operations.",
+        "Paths, operations, request and response bodies, parameters, headers, security, callbacks, and webhooks are outside the current parser boundary.",
+        "Only local references to components.schemas are supported; external and URL-based references are unsupported.",
+        "Object-only allOf compositions can be merged into shared IR; conflicting or non-object compositions remain unsupported.",
+      ],
+      experimentalAreas: ["full-document-processing", "allOf-composition"],
+    });
+  });
+
   it("describes json as a source-only consumer surface", () => {
     expect(describeFormatSupport("json")).toEqual({
       format: "json",
@@ -89,7 +114,7 @@ describe("sdk support matrix", () => {
       notableLimitations: [
         "JSON Schema support is limited to the current IR-aligned Draft 2020-12 subset.",
         "Validation-heavy and document-system features such as external references remain unsupported.",
-        "Mixed fixed-field objects plus typed additionalProperties are not currently supported as one shared shape.",
+        "Object-only allOf can be merged; references, non-object compositions, not, and conditional schemas remain outside the current JSON Schema parser subset.",
       ],
       experimentalAreas: ["constraint-round-trip-through-shared-ir"],
     });
@@ -144,19 +169,20 @@ describe("sdk support matrix", () => {
       "json",
       "json-schema",
       "typescript",
+      "openapi",
       "zod",
     ]);
   });
 
   it("keeps generator-only formats out of source format discovery", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "json-schema", "typescript"],
+      ["json", "json-schema", "typescript", "openapi"],
     );
     expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
       true,
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json-schema", "typescript", "zod"],
+      ["json-schema", "typescript", "openapi", "zod"],
     );
   });
 
@@ -181,7 +207,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(9);
+    expect(listConversionRoutes()).toHaveLength(16);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

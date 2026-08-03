@@ -6,6 +6,7 @@ Entry: packages/sdk/src/index.ts
 
 ```ts
 import type { JsonSchemaOutput } from "@aio/generator-json-schema";
+import type { OpenApiOutput } from "@aio/generator-openapi";
 import {
   describeConversionRouteCapabilities,
   listConversionRoutes,
@@ -59,7 +60,9 @@ export interface ConversionConverter<
 export declare function createConverter<
   TExtensions extends Record<string, unknown> = Record<never, never>,
 >(registry: ConversionRegistry): ConversionConverter<TExtensions>;
-export declare function convert<TOutput = string | JsonSchemaOutput>(
+export declare function convert<
+  TOutput = string | JsonSchemaOutput | OpenApiOutput,
+>(
   options: ConvertOptions,
   registry?: ConversionRegistry,
 ): ConvertResult<TOutput>;
@@ -208,11 +211,13 @@ export declare function listOptionCatalogs(
 import { z } from "zod";
 export declare const conversionSourceFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
+  openapi: "openapi";
   typescript: "typescript";
   json: "json";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
+  openapi: "openapi";
   typescript: "typescript";
   zod: "zod";
 }>;
@@ -424,11 +429,13 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
   {
     sourceFormat: z.ZodEnum<{
       "json-schema": "json-schema";
+      openapi: "openapi";
       typescript: "typescript";
       json: "json";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
+      openapi: "openapi";
       typescript: "typescript";
       zod: "zod";
     }>;
@@ -2146,17 +2153,25 @@ import type {
   JsonSchemaGeneratorOptions,
   JsonSchemaOutput,
 } from "@aio/generator-json-schema";
+import type {
+  OpenApiGeneratorOptions,
+  OpenApiOutput,
+} from "@aio/generator-openapi";
 import type { TypeScriptGeneratorOptions } from "@aio/generator-typescript";
 import type { ZodGeneratorOptions } from "@aio/generator-zod";
 import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
-export type BuiltinSourceFormat = "json" | "json-schema" | "typescript";
-export type BuiltinTargetFormat = "json-schema" | "typescript" | "zod";
+import type { OpenApiParseOptions } from "@aio/parser-openapi";
+export type BuiltinSourceFormat =
+  "json" | "json-schema" | "typescript" | "openapi";
+export type BuiltinTargetFormat =
+  "json-schema" | "typescript" | "zod" | "openapi";
 export interface BuiltinGeneratorOutputs {
   "json-schema": JsonSchemaOutput;
   typescript: string;
   zod: string;
+  openapi: OpenApiOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -2185,11 +2200,13 @@ export interface ConvertAdvancedOptions {
     json?: JsonParseOptions;
     jsonSchema?: JsonSchemaParseOptions;
     typeScript?: TypeScriptParseOptions;
+    openapi?: OpenApiParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
     typeScript?: TypeScriptGeneratorOptions;
     zod?: ZodGeneratorOptions;
+    openapi?: OpenApiGeneratorOptions;
   };
 }
 export interface ConvertOptions {
@@ -2206,7 +2223,9 @@ export interface ConversionArtifacts {
   shape?: SchemaDocument;
   constraints?: ConstraintDocument;
 }
-export interface ConvertSuccessResult<TOutput = string | JsonSchemaOutput> {
+export interface ConvertSuccessResult<
+  TOutput = string | JsonSchemaOutput | OpenApiOutput,
+> {
   ok: true;
   output: TOutput;
   plan: ConversionRoute;
@@ -2225,7 +2244,7 @@ export interface ConvertFailureResult {
   plan: ConversionRoute;
   diagnostics?: SchemaDiagnostic[];
 }
-export type ConvertResult<TOutput = string | JsonSchemaOutput> =
+export type ConvertResult<TOutput = string | JsonSchemaOutput | OpenApiOutput> =
   ConvertSuccessResult<TOutput> | ConvertFailureResult;
 ```
 

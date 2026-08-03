@@ -50,6 +50,7 @@ export type SchemaWalkVia =
   | { kind: "recordKey" }
   | { kind: "recordValue" }
   | { kind: "field"; fieldName: string }
+  | { kind: "objectAdditionalProperties" }
   | { kind: "unionMember"; index: number }
   | { kind: "referenceResolution"; referenceName: string };
 
@@ -358,6 +359,17 @@ function walkNode(
         }
 
         walkField(node, field, context, visitor, state);
+      }
+      if (node.additionalProperties && !state.stopped) {
+        const child = getSchemaNodeChildren(node).at(-1);
+        if (child) {
+          walkNode(
+            child.node,
+            createSchemaChildContext(context, node, child),
+            visitor,
+            state,
+          );
+        }
       }
       if (!state.stopped) {
         visitor.leave?.(walkContext);

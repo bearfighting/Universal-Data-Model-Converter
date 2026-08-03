@@ -176,10 +176,16 @@ function isSupportedRecordKeyNode(node: SchemaNode): boolean {
   return node.kind === "scalar" && node.scalar === "string";
 }
 
-export function schemaObjectNode(fields: SchemaFieldNode[]): SchemaObjectNode {
+export function schemaObjectNode(
+  fields: SchemaFieldNode[],
+  options?: { additionalProperties?: SchemaNode },
+): SchemaObjectNode {
   return {
     kind: "object",
     fields,
+    ...(options?.additionalProperties
+      ? { additionalProperties: options.additionalProperties }
+      : {}),
   };
 }
 

@@ -33,6 +33,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@aio/parser-openapi",
+    root: path.join(repoRoot, "packages/parsers/openapi"),
+    entry: path.join(repoRoot, "packages/parsers/openapi/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/openapi/etc/parser-openapi.api.md",
+    ),
+  },
+  {
     name: "@aio/parser-typescript",
     root: path.join(repoRoot, "packages/parsers/typescript"),
     entry: path.join(repoRoot, "packages/parsers/typescript/src/index.ts"),
@@ -48,6 +57,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/json-schema/etc/generator-json-schema.api.md",
+    ),
+  },
+  {
+    name: "@aio/generator-openapi",
+    root: path.join(repoRoot, "packages/generators/openapi"),
+    entry: path.join(repoRoot, "packages/generators/openapi/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/openapi/etc/generator-openapi.api.md",
     ),
   },
   {

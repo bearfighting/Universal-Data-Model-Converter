@@ -58,13 +58,20 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
   "json-schema": [
     "JSON Schema support is limited to the current IR-aligned Draft 2020-12 subset.",
     "Validation-heavy and document-system features such as external references remain unsupported.",
-    "Mixed fixed-field objects plus typed additionalProperties are not currently supported as one shared shape.",
+    "Object-only allOf can be merged; references, non-object compositions, not, and conditional schemas remain outside the current JSON Schema parser subset.",
   ],
   typescript: [
     "TypeScript support is limited to schema-oriented declarations rather than the full language.",
     "Single-file parsing is the current boundary, so imported or cross-file type resolution is unsupported.",
     "Function types, conditional types, mapped types, and intersection types are outside the current supported subset.",
     "TypeScript generation widens integer semantics to number and does not preserve constraint families directly.",
+  ],
+  openapi: [
+    "OpenAPI support is currently limited to extracting schemas from components.schemas rather than processing the full API document.",
+    "OpenAPI generation emits only a canonical 3.1 schema document and does not recreate source metadata or API operations.",
+    "Paths, operations, request and response bodies, parameters, headers, security, callbacks, and webhooks are outside the current parser boundary.",
+    "Only local references to components.schemas are supported; external and URL-based references are unsupported.",
+    "Object-only allOf compositions can be merged into shared IR; conflicting or non-object compositions remain unsupported.",
   ],
   zod: [
     "Zod output targets Zod 4 and assumes the consuming project installs zod.",
@@ -80,6 +87,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "implicit-entry-selection",
     "enum-lowering-within-schema-subset",
   ],
+  openapi: ["full-document-processing", "allOf-composition"],
   zod: ["javascript-output", "constraint-refinement-rendering"],
 };
 
