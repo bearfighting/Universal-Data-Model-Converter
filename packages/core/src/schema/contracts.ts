@@ -4,6 +4,8 @@ import type {
   SchemaSemanticNote,
 } from "./types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
+import type { OptionCatalog } from "../option-metadata.js";
+import type { ValueDocument } from "../value/types.js";
 
 export interface ParseOptions {
   name?: string;
@@ -26,6 +28,7 @@ export interface ConfiguredParser<
 export interface ParseSuccessResult {
   ok: true;
   document: SchemaDocument;
+  value?: ValueDocument;
   constraints?: ConstraintDocument;
   diagnostics?: SchemaDiagnostic[];
   semanticNotes?: SchemaSemanticNote[];
@@ -88,4 +91,40 @@ export interface SchemaGenerator<
 > {
   target: string;
   generate(document: SchemaDocument, options?: TOptions): TResult;
+}
+
+export interface ParserExecutionContext {
+  name: string;
+  targetFormat?: string;
+  options?: unknown;
+}
+
+export interface GeneratorExecutionContext {
+  sourceFormat?: string;
+  options?: unknown;
+  constraints?: ConstraintDocument;
+}
+
+export type DescriptorVersion = "0.1";
+
+export interface ParserDescriptor {
+  kind: "parser";
+  format: string;
+  descriptorVersion: DescriptorVersion;
+  capabilities: import("../pipeline/contracts.js").ParserCapabilities;
+  options: OptionCatalog;
+  parse(input: string, context: ParserExecutionContext): ParseResult;
+}
+
+export interface GeneratorDescriptor<TOutput = unknown> {
+  kind: "generator";
+  format: string;
+  descriptorVersion: DescriptorVersion;
+  capabilities: import("../pipeline/contracts.js").GeneratorCapabilities;
+  options: OptionCatalog;
+  analysis?: import("../pipeline/contracts.js").GeneratorAnalysisHooks;
+  generate(
+    document: SchemaDocument,
+    context: GeneratorExecutionContext,
+  ): GenerateResult<TOutput>;
 }

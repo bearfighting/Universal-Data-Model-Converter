@@ -47,3 +47,14 @@ These should be treated cautiously or left unsupported unless they can be reduce
 - parsers should target schema-oriented subsets of source languages
 - generators should preserve schema meaning, not imitate source-language syntax too closely
 - unsupported source-language features should fail explicitly instead of being approximated loosely
+
+## Shape IR v0 Admission Rule
+
+Until a later IR version is deliberately approved, a new parser may add
+support only by composing existing scalar, literal, object, record, array,
+tuple, union, reference, null, optional, nullable, unknown, and constraint
+semantics. It must not introduce language-specific nodes for conditional,
+mapped, generic-computation, function, class, intersection,
+external-reference, or other non-serializable type behavior. A parser proposal
+that cannot satisfy this rule must remain unsupported and include an explicit
+failure contract.

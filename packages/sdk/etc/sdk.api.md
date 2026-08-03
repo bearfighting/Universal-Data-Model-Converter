@@ -13,6 +13,7 @@ import {
   routeStages,
   routeUsesIr,
 } from "./registry.js";
+import type { ConversionRegistry } from "./types.js";
 export type {
   ConvertAdvancedOptions,
   ConversionArtifacts,
@@ -20,10 +21,22 @@ export type {
   ConvertOptions,
   ConvertResult,
   ConvertSuccessResult,
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+  BuiltinGeneratorOutputs,
+  ConversionFormat,
+  ConversionOutput,
+  ConversionRegistry,
   ConversionSourceFormat,
   ConversionTargetFormat,
+  ExtensionConversionOptions,
 } from "./types.js";
-import type { ConvertResult, ConvertOptions } from "./types.js";
+import type {
+  ConvertOptions,
+  ConvertResult,
+  ConversionFormat,
+  ConversionOutput,
+} from "./types.js";
 export {
   describeConversionRouteCapabilities,
   listConversionRoutes,
@@ -31,9 +44,25 @@ export {
   routeStages,
   routeUsesIr,
 };
-export declare function convert(
+export interface ConversionConverter<
+  TExtensions extends Record<string, unknown> = Record<never, never>,
+> {
+  convert<TTarget extends ConversionFormat>(
+    options: ConvertOptions & {
+      targetFormat: TTarget;
+    },
+  ): ConvertResult<ConversionOutput<TTarget, TExtensions>>;
+  listConversionRoutes(): ReturnType<typeof listConversionRoutes>;
+  planConversion: typeof planConversion;
+  describeConversionRouteCapabilities: typeof describeConversionRouteCapabilities;
+}
+export declare function createConverter<
+  TExtensions extends Record<string, unknown> = Record<never, never>,
+>(registry: ConversionRegistry): ConversionConverter<TExtensions>;
+export declare function convert<TOutput = string | JsonSchemaOutput>(
   options: ConvertOptions,
-): ConvertResult<string | JsonSchemaOutput>;
+  registry?: ConversionRegistry,
+): ConvertResult<TOutput>;
 ```
 
 ## packages/sdk/src/index.d.ts
@@ -41,10 +70,19 @@ export declare function convert(
 ```ts
 export {
   convert,
+  createConverter,
   describeConversionRouteCapabilities,
   listConversionRoutes,
   planConversion,
 } from "./convert.js";
+export {
+  createConversionRegistry,
+  defaultConversionRegistry,
+  DescriptorRegistrationError,
+  resolveGeneratorDescriptor,
+  resolveParserDescriptor,
+} from "./registry.js";
+export type { DescriptorRegistrationErrorCode } from "./registry.js";
 export {
   conversionArtifactsSchema,
   conversionCapabilityRequirementSchema,
@@ -93,6 +131,13 @@ export type {
   ConvertSuccessResult,
   ConversionSourceFormat,
   ConversionTargetFormat,
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+  BuiltinGeneratorOutputs,
+  ConversionFormat,
+  ConversionOutput,
+  ConversionRegistry,
+  ExtensionConversionOptions,
 } from "./convert.js";
 export type {
   ConsumerSurfaceFormat,
@@ -124,6 +169,7 @@ export declare function inspectTypeScriptImplicitEntry(
 ```ts
 import type { OptionCatalog } from "@aio/core";
 import type {
+  ConversionRegistry,
   ConversionSourceFormat,
   ConversionTargetFormat,
 } from "./types.js";
@@ -135,15 +181,20 @@ export interface ConversionOptionCatalogs {
 }
 export declare function describeParserOptions(
   format: ConversionSourceFormat,
+  registry?: ConversionRegistry,
 ): OptionCatalog;
 export declare function describeGeneratorOptions(
   format: ConversionTargetFormat,
+  registry?: ConversionRegistry,
 ): OptionCatalog;
 export declare function describeConversionOptions(
   sourceFormat: ConversionSourceFormat,
   targetFormat: ConversionTargetFormat,
+  registry?: ConversionRegistry,
 ): ConversionOptionCatalogs;
-export declare function listOptionCatalogs(): OptionCatalog[];
+export declare function listOptionCatalogs(
+  registry?: ConversionRegistry,
+): OptionCatalog[];
 ```
 
 ## packages/sdk/src/public-contract.d.ts
@@ -151,13 +202,13 @@ export declare function listOptionCatalogs(): OptionCatalog[];
 ```ts
 import { z } from "zod";
 export declare const conversionSourceFormatSchema: z.ZodEnum<{
-  typescript: "typescript";
   "json-schema": "json-schema";
+  typescript: "typescript";
   json: "json";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
-  typescript: "typescript";
   "json-schema": "json-schema";
+  typescript: "typescript";
   zod: "zod";
 }>;
 export declare const optionMetadataStageSchema: z.ZodEnum<{
@@ -367,13 +418,13 @@ export declare const optionCatalogSchema: z.ZodObject<
 export declare const conversionOptionCatalogsSchema: z.ZodObject<
   {
     sourceFormat: z.ZodEnum<{
-      typescript: "typescript";
       "json-schema": "json-schema";
+      typescript: "typescript";
       json: "json";
     }>;
     targetFormat: z.ZodEnum<{
-      typescript: "typescript";
       "json-schema": "json-schema";
+      typescript: "typescript";
       zod: "zod";
     }>;
     parser: z.ZodObject<
@@ -1967,22 +2018,41 @@ import type {
   ConversionRoute,
   ConversionRouteCapabilities,
   GeneratorCapabilities,
+  GeneratorDescriptor,
   IrKind,
   ParserCapabilities,
+  ParserDescriptor,
   PipelineStage,
 } from "@aio/core";
-import type {
-  ConversionSourceFormat,
-  ConversionTargetFormat,
-} from "./types.js";
-export declare function listConversionRoutes(): ConversionRoute[];
+import type { ConversionFormat, ConversionRegistry } from "./types.js";
+export type DescriptorRegistrationErrorCode =
+  | "descriptor-invalid-version"
+  | "descriptor-format-mismatch"
+  | "descriptor-options-mismatch"
+  | "descriptor-missing-shape-ir"
+  | "descriptor-missing-handler"
+  | "descriptor-duplicate-format";
+export declare class DescriptorRegistrationError extends Error {
+  readonly code: DescriptorRegistrationErrorCode;
+  constructor(code: DescriptorRegistrationErrorCode, message: string);
+}
+export declare function createConversionRegistry(options?: {
+  parsers?: ParserDescriptor[];
+  generators?: GeneratorDescriptor[];
+}): ConversionRegistry;
+export declare const defaultConversionRegistry: ConversionRegistry;
+export declare function listConversionRoutes(
+  registry?: ConversionRegistry,
+): ConversionRoute[];
 export declare function planConversion(
-  sourceFormat: ConversionSourceFormat,
-  targetFormat: ConversionTargetFormat,
+  sourceFormat: ConversionFormat,
+  targetFormat: ConversionFormat,
+  registry?: ConversionRegistry,
 ): ConversionRoute;
 export declare function describeConversionRouteCapabilities(
-  sourceFormat: ConversionSourceFormat,
-  targetFormat: ConversionTargetFormat,
+  sourceFormat: ConversionFormat,
+  targetFormat: ConversionFormat,
+  registry?: ConversionRegistry,
 ): ConversionRouteCapabilities;
 export declare function routeUsesIr(
   route: ConversionRoute,
@@ -1990,11 +2060,21 @@ export declare function routeUsesIr(
 ): boolean;
 export declare function routeStages(route: ConversionRoute): PipelineStage[];
 export declare function resolveParserCapabilities(
-  sourceFormat: ConversionSourceFormat,
+  sourceFormat: ConversionFormat,
+  registry?: ConversionRegistry,
 ): ParserCapabilities;
 export declare function resolveGeneratorCapabilities(
-  targetFormat: ConversionTargetFormat,
+  targetFormat: ConversionFormat,
+  registry?: ConversionRegistry,
 ): GeneratorCapabilities;
+export declare function resolveParserDescriptor(
+  sourceFormat: ConversionFormat,
+  registry?: ConversionRegistry,
+): ParserDescriptor;
+export declare function resolveGeneratorDescriptor<TOutput = unknown>(
+  targetFormat: ConversionFormat,
+  registry?: ConversionRegistry,
+): GeneratorDescriptor<TOutput>;
 ```
 
 ## packages/sdk/src/support-matrix.d.ts
@@ -2005,12 +2085,8 @@ import type {
   GeneratorCapabilities,
   ParserCapabilities,
 } from "@aio/core";
-import type {
-  ConversionSourceFormat,
-  ConversionTargetFormat,
-} from "./types.js";
-export type ConsumerSurfaceFormat =
-  ConversionSourceFormat | ConversionTargetFormat;
+import type { ConversionFormat, ConversionRegistry } from "./types.js";
+export type ConsumerSurfaceFormat = ConversionFormat;
 export interface ParserSupportSummary {
   producesIr: ParserCapabilities["producesIr"];
   capabilities: ConversionCapability[];
@@ -2030,8 +2106,11 @@ export interface FormatSupportSummary {
 }
 export declare function describeFormatSupport(
   format: ConsumerSurfaceFormat,
+  registry?: ConversionRegistry,
 ): FormatSupportSummary;
-export declare function listFormatSupports(): FormatSupportSummary[];
+export declare function listFormatSupports(
+  registry?: ConversionRegistry,
+): FormatSupportSummary[];
 ```
 
 ## packages/sdk/src/types.d.ts
@@ -2047,6 +2126,8 @@ import type {
   SemanticLoss,
   ValueDocument,
   ConversionRoute,
+  ParserDescriptor,
+  GeneratorDescriptor,
 } from "@aio/core";
 import type {
   JsonSchemaGeneratorOptions,
@@ -2057,8 +2138,35 @@ import type { ZodGeneratorOptions } from "@aio/generator-zod";
 import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
-export type ConversionSourceFormat = "json" | "json-schema" | "typescript";
-export type ConversionTargetFormat = "json-schema" | "typescript" | "zod";
+export type BuiltinSourceFormat = "json" | "json-schema" | "typescript";
+export type BuiltinTargetFormat = "json-schema" | "typescript" | "zod";
+export interface BuiltinGeneratorOutputs {
+  "json-schema": JsonSchemaOutput;
+  typescript: string;
+  zod: string;
+}
+export type ConversionFormat =
+  BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
+export type ConversionSourceFormat = ConversionFormat;
+export type ConversionTargetFormat = ConversionFormat;
+export type ConversionOutput<
+  TTarget extends string,
+  TExtensions extends Record<string, unknown> = Record<never, never>,
+> = TTarget extends keyof BuiltinGeneratorOutputs
+  ? BuiltinGeneratorOutputs[TTarget]
+  : TTarget extends keyof TExtensions
+    ? TExtensions[TTarget]
+    : unknown;
+export interface ExtensionConversionOptions {
+  parser?: Record<string, unknown>;
+  generator?: Record<string, unknown>;
+}
+export interface ConversionRegistry {
+  registerParser(descriptor: ParserDescriptor): void;
+  registerGenerator(descriptor: GeneratorDescriptor): void;
+  listParsers(): ParserDescriptor[];
+  listGenerators(): GeneratorDescriptor[];
+}
 export interface ConvertAdvancedOptions {
   parser?: {
     json?: JsonParseOptions;
@@ -2078,6 +2186,7 @@ export interface ConvertOptions {
   name?: string;
   includeArtifacts?: boolean;
   advanced?: ConvertAdvancedOptions;
+  extension?: ExtensionConversionOptions;
 }
 export interface ConversionArtifacts {
   value?: ValueDocument;

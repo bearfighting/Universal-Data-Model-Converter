@@ -74,6 +74,13 @@ import type { ParserCapabilities } from "@aio/core";
 export declare const jsonSchemaParserCapabilities: ParserCapabilities;
 ```
 
+## packages/parsers/json-schema/src/descriptor.d.ts
+
+```ts
+import type { ParserDescriptor } from "@aio/core";
+export declare const jsonSchemaParserDescriptor: ParserDescriptor;
+```
+
 ## packages/parsers/json-schema/src/errors.d.ts
 
 ```ts
@@ -115,6 +122,7 @@ export {
   isJsonSchemaInferenceError,
 } from "./errors.js";
 export { jsonSchemaParserCapabilities } from "./capabilities.js";
+export { jsonSchemaParserDescriptor } from "./descriptor.js";
 export { jsonSchemaParserOptionCatalog } from "./option-metadata.js";
 export {
   inferJsonSchemaDocument,

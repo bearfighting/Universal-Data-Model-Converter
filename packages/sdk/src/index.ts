@@ -1,9 +1,18 @@
 export {
   convert,
+  createConverter,
   describeConversionRouteCapabilities,
   listConversionRoutes,
   planConversion,
 } from "./convert.js";
+export {
+  createConversionRegistry,
+  defaultConversionRegistry,
+  DescriptorRegistrationError,
+  resolveGeneratorDescriptor,
+  resolveParserDescriptor,
+} from "./registry.js";
+export type { DescriptorRegistrationErrorCode } from "./registry.js";
 export {
   conversionArtifactsSchema,
   conversionCapabilityRequirementSchema,
@@ -52,6 +61,13 @@ export type {
   ConvertSuccessResult,
   ConversionSourceFormat,
   ConversionTargetFormat,
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+  BuiltinGeneratorOutputs,
+  ConversionFormat,
+  ConversionOutput,
+  ConversionRegistry,
+  ExtensionConversionOptions,
 } from "./convert.js";
 export type {
   ConsumerSurfaceFormat,

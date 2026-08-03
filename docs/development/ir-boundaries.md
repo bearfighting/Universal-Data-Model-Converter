@@ -149,3 +149,18 @@ The practical rule is:
 - keep this file about semantic placement only
 - do not move a format-local feature into shared IR because one source format can express it
 - require repeated pressure across multiple sources or targets before expanding shared semantics
+
+## Parser Admission Checklist
+
+Before a new parser enters the supported registry, confirm that:
+
+1. its input describes a stable serializable data shape
+2. its supported subset maps to existing Shape IR v0 nodes
+3. optional, nullable, and null-union semantics are distinct and tested
+4. object, record, and additional-property semantics are explicit
+5. references and definitions are document-local unless explicitly rejected
+6. constraints are attached through Constraint IR or kept format-local
+7. unsupported semantics fail explicitly instead of being silently widened
+8. accepted normalization or loss is reported with a semantic note or diagnostic
+9. no format-specific IR node is required
+10. any proposed shared IR addition has pressure from multiple formats

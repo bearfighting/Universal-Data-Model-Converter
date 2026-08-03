@@ -5,7 +5,11 @@ Entry: packages/generators/typescript/src/index.ts
 ## packages/generators/typescript/src/analysis.d.ts
 
 ```ts
-import { type SchemaDocument } from "@aio/core";
+import {
+  type SemanticLoss,
+  type SemanticLossAnalysisContext,
+  type SchemaDocument,
+} from "@aio/core";
 export type TypeScriptLossHotspotCode =
   "integer-widening" | "wide-unknown" | "unknown-union-absorption";
 export interface TypeScriptLossHotspot {
@@ -40,6 +44,9 @@ export declare function collectTypeScriptTargetLossHotspots(
 export declare function collectTypeScriptCapabilityRequirements(
   document: SchemaDocument,
 ): TypeScriptCapabilityRequirement[];
+export declare function planTypeScriptSemanticLosses(
+  context: SemanticLossAnalysisContext,
+): SemanticLoss[];
 ```
 
 ## packages/generators/typescript/src/api.d.ts
@@ -93,6 +100,13 @@ import type { GeneratorCapabilities } from "@aio/core";
 export declare const typeScriptGeneratorCapabilities: GeneratorCapabilities;
 ```
 
+## packages/generators/typescript/src/descriptor.d.ts
+
+```ts
+import type { GeneratorDescriptor } from "@aio/core";
+export declare const typeScriptGeneratorDescriptor: GeneratorDescriptor<string>;
+```
+
 ## packages/generators/typescript/src/failure.d.ts
 
 ```ts
@@ -128,6 +142,7 @@ export {
   collectTypeScriptTargetLossHotspots,
 } from "./analysis.js";
 export { typeScriptGeneratorCapabilities } from "./capabilities.js";
+export { typeScriptGeneratorDescriptor } from "./descriptor.js";
 export { typeScriptGeneratorOptionCatalog } from "./option-metadata.js";
 export type {
   TypeScriptCapabilityRequirement,

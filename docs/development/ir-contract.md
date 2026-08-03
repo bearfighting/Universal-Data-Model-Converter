@@ -147,6 +147,24 @@ The IR contract does not promise:
 - cross-document references
 - preservation of source-only declaration form when shared semantics are equivalent
 
+## Shape IR v0 Parser Extension Boundary
+
+New parsers must lower only stable serializable-data semantics into the
+existing `Shape IR v0` nodes: scalar, literal, object, record, array, tuple,
+union, local reference, reusable definitions, `null`, optional presence,
+nullable values, and `unknown`.
+
+Parsers must preserve the distinctions between optional presence and nullable
+value, object and record, array and tuple, integer and number, local and
+external references, and Shape IR and Constraint IR.
+
+Conditional, mapped, generic-computation, function, class, intersection,
+external-reference, validator-specific, source-language-only, and other
+non-serializable type semantics remain outside Shape IR v0. Parser proposals
+must document their handling of optionality, nullability, records,
+additional-properties, references, constraints, unsupported cases, and any
+semantic notes or losses before implementation.
+
 ## Maintenance Rules
 
 - keep this file about the current shared contract, not future design sketches

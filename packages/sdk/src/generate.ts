@@ -1,36 +1,44 @@
 import type { ConstraintDocument, SchemaDocument } from "@aio/core";
-import {
-  tryGenerateJsonSchema,
-  type JsonSchemaOutput,
-} from "@aio/generator-json-schema";
-import { tryGenerateTypeScript } from "@aio/generator-typescript";
-import { tryGenerateZod } from "@aio/generator-zod";
-import type { ConvertOptions, ConversionTargetFormat } from "./types.js";
+import { resolveGeneratorDescriptor } from "./registry.js";
+import { defaultConversionRegistry } from "./registry.js";
+import type {
+  ConvertOptions,
+  ConversionRegistry,
+  ConversionTargetFormat,
+} from "./types.js";
 
-export type GeneratedOutput = string | JsonSchemaOutput;
+export type GeneratedOutput = string | Record<string, unknown> | boolean;
 
-export function generateTarget(
+export function generateTarget<TOutput = unknown>(
   document: SchemaDocument,
   targetFormat: ConversionTargetFormat,
   options: ConvertOptions,
-  constraints?: ConstraintDocument,
-) {
-  if (targetFormat === "typescript") {
-    return tryGenerateTypeScript(
-      document,
-      options.advanced?.generator?.typeScript ?? {},
-    );
-  }
-
-  if (targetFormat === "zod") {
-    return tryGenerateZod(document, {
-      ...(options.advanced?.generator?.zod ?? {}),
-      ...(constraints ? { constraints } : {}),
-    });
-  }
-
-  return tryGenerateJsonSchema(document, {
-    ...(options.advanced?.generator?.jsonSchema ?? {}),
+  constraints: ConstraintDocument | undefined,
+  registry: ConversionRegistry = defaultConversionRegistry,
+): import("@aio/core").GenerateResult<TOutput> {
+  const descriptor = resolveGeneratorDescriptor<TOutput>(
+    targetFormat,
+    registry,
+  );
+  const context = {
+    sourceFormat: options.sourceFormat,
+    options: generatorOptionsFor(targetFormat, options),
     ...(constraints ? { constraints } : {}),
-  });
+  };
+  const result = descriptor.generate(document, context);
+  return result;
+}
+
+function generatorOptionsFor(
+  targetFormat: ConversionTargetFormat,
+  options: ConvertOptions,
+): unknown {
+  if (targetFormat === "json-schema") {
+    return options.advanced?.generator?.jsonSchema ?? {};
+  }
+  if (targetFormat === "typescript") {
+    return options.advanced?.generator?.typeScript ?? {};
+  }
+  if (targetFormat === "zod") return options.advanced?.generator?.zod ?? {};
+  return options.extension?.generator ?? {};
 }

@@ -51,6 +51,7 @@ function getFixtureRouteInput(
 describe("sdk api contract", () => {
   it("exposes only the stage 1 pipeline runtime surface", () => {
     expect(Object.keys(sdkModule).sort()).toEqual([
+      "DescriptorRegistrationError",
       "collectUserFacingDiagnostics",
       "conversionArtifactsSchema",
       "conversionCapabilityRequirementSchema",
@@ -64,6 +65,9 @@ describe("sdk api contract", () => {
       "convert",
       "convertFailureResultSchema",
       "convertSuccessResultSchema",
+      "createConversionRegistry",
+      "createConverter",
+      "defaultConversionRegistry",
       "describeConversionOptions",
       "describeConversionRouteCapabilities",
       "describeFormatSupport",
@@ -81,6 +85,8 @@ describe("sdk api contract", () => {
       "optionValueMetadataSchema",
       "planConversion",
       "publicConvertResultSchema",
+      "resolveGeneratorDescriptor",
+      "resolveParserDescriptor",
       "schemaDiagnosticSchema",
       "semanticLossSchema",
     ]);

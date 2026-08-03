@@ -1,5 +1,9 @@
 import {
   walkSchemaDocumentFromRoot,
+  type ConstraintDocument,
+  type ConversionRouteCapabilities,
+  type SemanticLoss,
+  type SemanticLossAnalysisContext,
   type SchemaDefinition,
   type SchemaDocument,
   type SchemaNode,
@@ -179,6 +183,124 @@ export function collectTypeScriptCapabilityRequirements(
   );
 
   return requirements;
+}
+
+export function planTypeScriptSemanticLosses(
+  context: SemanticLossAnalysisContext,
+): SemanticLoss[] {
+  const constraints = context.constraints;
+  if (!constraints) return [];
+
+  return planConstraintLosses(
+    constraints,
+    context.routeCapabilities,
+    context.targetFormat,
+  );
+}
+
+function planConstraintLosses(
+  constraints: ConstraintDocument,
+  routeCapabilities: ConversionRouteCapabilities,
+  targetFormat: string,
+): SemanticLoss[] {
+  const seen = new Set<string>();
+  const losses: SemanticLoss[] = [];
+
+  for (const entry of constraints.entries) {
+    for (const item of entry.constraints) {
+      const lostCapability = classifyConstraintCapability(item.kind);
+      if (
+        !routeCapabilities.potentiallyLostCapabilities.includes(lostCapability)
+      ) {
+        continue;
+      }
+
+      const sourcePath = entry.target.path;
+      const key = `${lostCapability}:${sourcePath.join("/")}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      losses.push({
+        code: "target-cannot-preserve-constraint",
+        message: `TypeScript output cannot preserve ${renderLossCapability(
+          lostCapability,
+        )} from ${sourcePath.length > 0 ? sourcePath.join(".") : "root constraint target"}.`,
+        severity: "warning",
+        phase: "generate",
+        lostCapability,
+        sourcePath,
+        targetFormat,
+        evidence: {
+          constraintKind: item.kind,
+          targetKind: entry.target.kind,
+        },
+      });
+    }
+  }
+
+  return losses;
+}
+
+function classifyConstraintCapability(
+  constraintKind: string,
+): SemanticLoss["lostCapability"] {
+  if (
+    [
+      "pattern",
+      "minLength",
+      "maxLength",
+      "min-length",
+      "max-length",
+      "format",
+    ].includes(constraintKind)
+  ) {
+    return "string-constraints";
+  }
+  if (
+    [
+      "minimum",
+      "maximum",
+      "exclusiveMinimum",
+      "exclusiveMaximum",
+      "multipleOf",
+      "exclusive-minimum",
+      "exclusive-maximum",
+      "multiple-of",
+    ].includes(constraintKind)
+  ) {
+    return "numeric-constraints";
+  }
+  if (
+    [
+      "minItems",
+      "maxItems",
+      "uniqueItems",
+      "min-items",
+      "max-items",
+      "unique-items",
+    ].includes(constraintKind)
+  ) {
+    return "collection-constraints";
+  }
+  if (
+    [
+      "closed-object",
+      "minProperties",
+      "maxProperties",
+      "min-properties",
+      "max-properties",
+    ].includes(constraintKind)
+  ) {
+    return "object-constraints";
+  }
+  return "portable-annotations";
+}
+
+function renderLossCapability(
+  capability: SemanticLoss["lostCapability"],
+): string {
+  return capability
+    .replace(/-constraints$/u, " constraints")
+    .replace("portable-annotations", "portable annotations");
 }
 
 function createLossHotspot(

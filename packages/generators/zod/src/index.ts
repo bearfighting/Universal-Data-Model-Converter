@@ -8,6 +8,7 @@ export {
   zodGenerator,
 } from "./api.js";
 export { zodGeneratorCapabilities } from "./capabilities.js";
+export { zodGeneratorDescriptor } from "./descriptor.js";
 export { zodGeneratorOptionCatalog } from "./option-metadata.js";
 export {
   prepareZodGeneratorOptions,

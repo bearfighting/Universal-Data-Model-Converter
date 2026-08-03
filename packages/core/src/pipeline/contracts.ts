@@ -1,4 +1,6 @@
 import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
+import type { ConstraintDocument } from "../constraint/types.js";
+import type { SchemaDocument } from "../schema/types.js";
 
 export type IrKind = "value" | "shape" | "constraint";
 export type ConversionCapability =
@@ -86,6 +88,22 @@ export interface GeneratorCapabilities {
   target: string;
   consumesIr: IrKind[];
   supportsCapabilities: ConversionCapability[];
+}
+
+export interface SemanticLossAnalysisContext {
+  sourceFormat: string;
+  targetFormat: string;
+  routeCapabilities: ConversionRouteCapabilities;
+  document: SchemaDocument;
+  constraints?: ConstraintDocument;
+}
+
+export interface GeneratorAnalysisHooks {
+  collectCapabilityRequirements?(
+    document: SchemaDocument,
+  ): ConversionCapabilityRequirement[];
+  collectLossHotspots?(document: SchemaDocument): ConversionLossHotspot[];
+  planSemanticLosses?(context: SemanticLossAnalysisContext): SemanticLoss[];
 }
 
 export interface ConversionReport {

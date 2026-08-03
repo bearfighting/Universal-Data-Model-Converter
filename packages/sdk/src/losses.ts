@@ -15,11 +15,8 @@ export function planSemanticLosses(
   targetFormat: ConversionTargetFormat,
   sourceFormat: ConversionSourceFormat,
 ): SemanticLoss[] {
-  if (
-    constraintsArtifact === undefined ||
-    sourceFormat !== "json-schema" ||
-    targetFormat !== "typescript"
-  ) {
+  void sourceFormat;
+  if (constraintsArtifact === undefined) {
     return [];
   }
 
@@ -46,7 +43,11 @@ export function planSemanticLosses(
       seen.add(key);
       losses.push({
         code: "target-cannot-preserve-constraint",
-        message: buildConstraintLossMessage(lostCapability, sourcePath),
+        message: buildConstraintLossMessage(
+          lostCapability,
+          sourcePath,
+          targetFormat,
+        ),
         severity: "warning",
         phase: "generate",
         lostCapability,
@@ -117,13 +118,21 @@ export function classifyConstraintCapability(
 function buildConstraintLossMessage(
   lostCapability: ConversionCapability,
   sourcePath: string[],
+  targetFormat: string,
 ): string {
   const renderedPath =
     sourcePath.length > 0 ? sourcePath.join(".") : "root constraint target";
 
-  return `TypeScript output cannot preserve ${renderLossCapability(
+  return `${renderTargetLabel(targetFormat)} output cannot preserve ${renderLossCapability(
     lostCapability,
   )} from ${renderedPath}.`;
+}
+
+function renderTargetLabel(targetFormat: string): string {
+  if (targetFormat === "typescript") return "TypeScript";
+  if (targetFormat === "json-schema") return "JSON Schema";
+  if (targetFormat === "zod") return "Zod";
+  return targetFormat;
 }
 
 function renderLossCapability(capability: ConversionCapability): string {

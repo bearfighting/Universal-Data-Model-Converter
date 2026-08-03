@@ -46,6 +46,13 @@ import type { JsonValue } from "./types.js";
 export declare function decodeJsonText(input: string): JsonValue;
 ```
 
+## packages/parsers/json/src/descriptor.d.ts
+
+```ts
+import type { ParserDescriptor } from "@aio/core";
+export declare const jsonParserDescriptor: ParserDescriptor;
+```
+
 ## packages/parsers/json/src/errors.d.ts
 
 ```ts
@@ -70,6 +77,7 @@ export declare function isJsonInferenceError(
 ```ts
 export { JsonInferenceError, isJsonInferenceError } from "./errors.js";
 export { jsonParserCapabilities } from "./capabilities.js";
+export { jsonParserDescriptor } from "./descriptor.js";
 export { jsonParserOptionCatalog } from "./option-metadata.js";
 export { decodeJsonText } from "./decode.js";
 export { inferJsonType } from "./infer.js";

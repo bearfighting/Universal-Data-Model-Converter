@@ -21,6 +21,8 @@ The repository is past architecture validation and has a stable-enough conversio
 - a shared `Shape IR` traversal helper in `@aio/core` that now backs core schema validation plus generator diagnostics and validation passes
 - a shared immutable `Shape IR` transform layer in `@aio/core`
 - a dedicated shape-normalization exit in `@aio/core` built on top of the shared transform layer
+- a descriptor-driven SDK registry with isolated custom parser/generator registration
+- generic generator output typing, descriptor analysis hooks, versioned registration errors, and shared descriptor contract helpers
 
 Shared normalization coverage currently includes:
 
@@ -141,17 +143,18 @@ The resulting maturity is now:
 - traversal: stable enough for current shared analysis consumers
 - transform: usable but intentionally narrow
 - normalization: real and already reused by test equivalence helpers, but still early enough that new rules should be added selectively
+- registry extensibility: built-in discovery is descriptor-driven; third-party registration is explicit and runtime package scanning remains intentionally deferred
 
 This slice did not expose a blocking parser, IR, generator, or public-surface regression.
 It moved shared traversal extraction from the next refactor into implemented repository infrastructure.
 
 ## Verification
 
-The latest full local verification pass completed on July 24, 2026 and included:
+The latest full local verification pass completed on August 3, 2026 and included:
 
 - `pnpm test`
 
-That pass was green with `46` test files and `579` passing tests.
+That pass was green with `52` test files and `661` passing tests.
 
 A prior broader verification pass completed on July 22, 2026 and included:
 

@@ -182,10 +182,10 @@ pnpm lint
 pnpm check:public-api
 ```
 
-The latest full regression pass on July 22, 2026 was green with:
+The latest full regression pass on August 3, 2026 was green with:
 
 - `pnpm check:api`
 - `pnpm typecheck`
 - `pnpm test`
-- `39` test files
-- `520` passing tests
+- `52` test files
+- `661` passing tests

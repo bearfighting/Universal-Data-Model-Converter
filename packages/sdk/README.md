@@ -238,6 +238,60 @@ For Stage 1 consumers, the most stable expectations are:
 For route-level discovery, pair this with:
 
 - `listConversionRoutes()`
+
+## Extending The Registry
+
+The default SDK registry contains the built-in formats. Extensions can create
+an isolated registry and register parser or generator descriptors explicitly;
+the SDK does not scan installed packages at runtime.
+
+```ts
+import {
+  createConversionRegistry,
+  createConverter,
+  defaultConversionRegistry,
+} from "@aio/sdk";
+
+const registry = createConversionRegistry({
+  parsers: [...defaultConversionRegistry.listParsers(), myParserDescriptor],
+  generators: [
+    ...defaultConversionRegistry.listGenerators(),
+    myGeneratorDescriptor,
+  ],
+});
+
+const converter = createConverter(registry);
+const result = converter.convert({
+  sourceFormat: "json",
+  targetFormat: "my-generator",
+  input: '{"id":1}',
+  extension: { generator: { mode: "runtime" } },
+});
+```
+
+The default `convert(...)` keeps the existing built-in output types. For a
+custom target, pass an output map to `createConverter<TOutputs>(...)`; targets
+not present in that map are typed as `unknown` rather than being coerced to a
+built-in string or JSON Schema output.
+
+Each descriptor owns its format identifier, capabilities, option catalog, and
+execution function. Registration rejects duplicate identifiers and descriptors
+that cannot participate in the shared `Shape IR` pipeline. Built-in format
+options remain strongly typed through the existing `advanced` options; custom
+descriptor options use the extension records and are validated by the
+descriptor implementation.
+
+Descriptors currently use `descriptorVersion: "0.1"`. Registration validates
+the version, format/capability alignment, option catalog role, Shape IR
+support, and execution handler. Registration failures expose a stable
+`DescriptorRegistrationError.code` such as `descriptor-invalid-version` or
+`descriptor-options-mismatch`.
+
+Generators may additionally expose analysis hooks for capability requirements,
+loss hotspots, and semantic losses. The SDK always computes the generic route
+baseline and combines it with these target-specific hooks; a hook failure is
+returned as a structured `generator-analysis-failed` generation result.
+
 - `planConversion(...)`
 - `describeConversionRouteCapabilities(...)`
 

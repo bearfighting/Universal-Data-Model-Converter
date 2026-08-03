@@ -5,19 +5,15 @@ import type {
   SchemaSemanticNote,
   ValueDocument,
 } from "@aio/core";
-import {
-  parseJsonValueDocumentWithOptions,
-  tryInferJsonDocumentFromValueDocumentWithOptions,
-  tryInferJsonDocumentWithOptions,
-} from "@aio/parser-json";
-import { tryInferJsonSchemaDocumentWithOptions } from "@aio/parser-json-schema";
-import { tryInferTypeScriptDocumentWithOptions } from "@aio/parser-typescript";
-import { planConversion } from "./registry.js";
+import { validateSchemaDocument } from "@aio/core";
+import { resolveParserDescriptor } from "./registry.js";
+import { defaultConversionRegistry } from "./registry.js";
 import type {
   ConvertFailureResult,
   ConvertOptions,
   ConversionSourceFormat,
   ConversionTargetFormat,
+  ConversionRegistry,
 } from "./types.js";
 
 export interface ParseSourceSuccessResult {
@@ -37,45 +33,24 @@ export function parseSource(
   targetFormat: ConversionTargetFormat,
   name: string,
   options: ConvertOptions,
+  registry: ConversionRegistry = defaultConversionRegistry,
 ): ParseSourceResult {
-  if (sourceFormat === "json") {
-    return parseJsonSource(input, sourceFormat, targetFormat, name, options);
-  }
-
-  if (sourceFormat === "json-schema") {
-    const parseResult = tryInferJsonSchemaDocumentWithOptions(input, {
-      ...options.advanced?.parser?.jsonSchema,
+  const descriptor = resolveParserDescriptor(sourceFormat, registry);
+  let parseResult;
+  try {
+    parseResult = descriptor.parse(input, {
       name,
+      targetFormat,
+      options: parserOptionsFor(sourceFormat, options),
     });
-
-    if (!parseResult.ok) {
-      return {
-        ok: false,
-        code: parseResult.code,
-        message: parseResult.message,
-        phase: "parse",
-        plan: planConversion(sourceFormat, targetFormat),
-        ...(parseResult.diagnostics
-          ? { diagnostics: parseResult.diagnostics }
-          : {}),
-      };
-    }
-
-    return {
-      ok: true,
-      shape: parseResult.document,
-      diagnostics: parseResult.diagnostics ?? [],
-      semanticNotes: parseResult.semanticNotes ?? [],
-      ...(parseResult.constraints
-        ? { constraints: parseResult.constraints }
-        : {}),
-    };
+  } catch {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-descriptor-failed",
+      "The source parser failed while producing its result.",
+    );
   }
-
-  const parseResult = tryInferTypeScriptDocumentWithOptions(input, {
-    ...options.advanced?.parser?.typeScript,
-    name,
-  });
 
   if (!parseResult.ok) {
     return {
@@ -83,11 +58,50 @@ export function parseSource(
       code: parseResult.code,
       message: parseResult.message,
       phase: "parse",
-      plan: planConversion(sourceFormat, targetFormat),
+      plan: {
+        sourceFormat,
+        targetFormat,
+        irSequence: [],
+        stages: [],
+      },
       ...(parseResult.diagnostics
         ? { diagnostics: parseResult.diagnostics }
         : {}),
     };
+  }
+
+  try {
+    validateSchemaDocument(parseResult.document);
+  } catch {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-invalid-shape",
+      "The source parser produced an invalid Shape IR document.",
+    );
+  }
+
+  if (
+    parseResult.value &&
+    !descriptor.capabilities.producesIr.includes("value")
+  ) {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-capability-mismatch",
+      "The source parser produced Value IR without declaring it.",
+    );
+  }
+  if (
+    parseResult.constraints &&
+    !descriptor.capabilities.producesIr.includes("constraint")
+  ) {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-capability-mismatch",
+      "The source parser produced Constraint IR without declaring it.",
+    );
   }
 
   return {
@@ -95,75 +109,51 @@ export function parseSource(
     shape: parseResult.document,
     diagnostics: parseResult.diagnostics ?? [],
     semanticNotes: parseResult.semanticNotes ?? [],
+    ...(parseResult.value ? { value: parseResult.value } : {}),
+    ...(parseResult.constraints
+      ? { constraints: parseResult.constraints }
+      : {}),
   };
 }
 
-function parseJsonSource(
-  input: string,
-  sourceFormat: ConversionSourceFormat,
-  targetFormat: ConversionTargetFormat,
-  name: string,
-  options: ConvertOptions,
-): ParseSourceResult {
-  try {
-    const value = parseJsonValueDocumentWithOptions(input, {
-      ...options.advanced?.parser?.json,
-      name,
-    });
-    const shapeResult = tryInferJsonDocumentFromValueDocumentWithOptions(
-      value,
+function createParserFailure(
+  sourceFormat: string,
+  targetFormat: string,
+  code: string,
+  message: string,
+): ConvertFailureResult {
+  return {
+    ok: false,
+    code,
+    message,
+    phase: "parse",
+    plan: {
+      sourceFormat,
+      targetFormat,
+      irSequence: [],
+      stages: [],
+    },
+    diagnostics: [
       {
-        ...options.advanced?.parser?.json,
-        name,
+        severity: "error",
+        code,
+        message,
+        source: `parser-${sourceFormat}`,
       },
-    );
+    ],
+  };
+}
 
-    if (!shapeResult.ok) {
-      return {
-        ok: false,
-        code: shapeResult.code,
-        message: shapeResult.message,
-        phase: "parse",
-        plan: planConversion(sourceFormat, targetFormat),
-        ...(shapeResult.diagnostics
-          ? { diagnostics: shapeResult.diagnostics }
-          : {}),
-      };
-    }
-
-    return {
-      ok: true,
-      value,
-      shape: shapeResult.document,
-      diagnostics: shapeResult.diagnostics ?? [],
-      semanticNotes: [],
-    };
-  } catch {
-    const fallback = tryInferJsonDocumentWithOptions(input, {
-      ...options.advanced?.parser?.json,
-      name,
-    });
-
-    if (!fallback.ok) {
-      return {
-        ok: false,
-        code: fallback.code,
-        message: fallback.message,
-        phase: "parse",
-        plan: planConversion(sourceFormat, targetFormat),
-        ...(fallback.diagnostics ? { diagnostics: fallback.diagnostics } : {}),
-      };
-    }
-
-    return {
-      ok: true,
-      value: parseJsonValueDocumentWithOptions(input, {
-        ...options.advanced?.parser?.json,
-        name,
-      }),
-      shape: fallback.document,
-      diagnostics: fallback.diagnostics ?? [],
-      semanticNotes: [],
-    };
+function parserOptionsFor(
+  sourceFormat: ConversionSourceFormat,
+  options: ConvertOptions,
+): unknown {
+  if (sourceFormat === "json") return options.advanced?.parser?.json ?? {};
+  if (sourceFormat === "json-schema") {
+    return options.advanced?.parser?.jsonSchema ?? {};
   }
+  if (sourceFormat === "typescript") {
+    return options.advanced?.parser?.typeScript ?? {};
+  }
+  return options.extension?.parser ?? {};
 }

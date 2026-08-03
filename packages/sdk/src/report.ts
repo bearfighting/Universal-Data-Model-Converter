@@ -19,6 +19,7 @@ import type {
   ConversionSourceFormat,
   ConversionTargetFormat,
 } from "./types.js";
+import type { ConversionRegistry } from "./types.js";
 
 type TargetSemanticCaveatNote = SchemaSemanticNote & {
   kind: Exclude<SchemaSemanticNote["kind"], "policy">;
@@ -225,9 +226,10 @@ export function collectPreservedCapabilities(
   valueArtifact: ValueDocument | undefined,
   shapeArtifact: SchemaDocument | undefined,
   constraintsArtifact: ConstraintDocument | undefined,
+  registry?: ConversionRegistry,
 ): ConversionCapability[] {
   return collectPreservedCapabilitiesFromRoute(
-    describeConversionRouteCapabilities(sourceFormat, targetFormat),
+    describeConversionRouteCapabilities(sourceFormat, targetFormat, registry),
     sourceFormat,
     targetFormat,
     valueArtifact,

@@ -7,6 +7,7 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  GeneratorAnalysisHooks,
   ParserCapabilities,
   ConversionRoute,
   ConversionRouteCapabilities,
@@ -15,4 +16,12 @@ export type {
   PipelineStageKind,
   SemanticLoss,
   SemanticLossPhase,
+  SemanticLossAnalysisContext,
 } from "./contracts.js";
+export type {
+  DescriptorVersion,
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+  ParserDescriptor,
+  ParserExecutionContext,
+} from "../schema/contracts.js";
