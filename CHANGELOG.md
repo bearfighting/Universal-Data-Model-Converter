@@ -8,6 +8,14 @@ when a release is prepared.
 
 ## Unreleased
 
+No unreleased changes.
+
+## 0.1.1-beta.1
+
+This is the first beta release of the shared conversion kernel and the Stage 1
+`@aio/sdk` consumer surface. The release is distributed as a tagged workspace
+snapshot with package tarballs; npm publication remains deferred.
+
 ### Features
 
 - Add `@aio/generator-zod` for generating Zod 4 schemas from the shared Shape
@@ -43,6 +51,16 @@ when a release is prepared.
   code consumers must install Zod 4.
 - Zod 3 compatibility, a Zod parser, transforms, custom validators,
   multi-file output, and cross-file resolution remain deferred.
+
+### Descriptor and extension contracts
+
+- Add versioned parser and generator descriptors with explicit registration
+  validation and stable machine-readable registration errors.
+- Add isolated custom parser/generator registries and generic custom generator
+  output typing without changing the built-in conversion API.
+- Add shared report-analysis hooks and descriptor contract test helpers.
+- Freeze the Shape IR v0 parser extension boundary and document the required
+  checklist for future format integrations.
 
 ## Release history
 
