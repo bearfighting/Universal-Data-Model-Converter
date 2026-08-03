@@ -12,6 +12,7 @@ export default defineConfig({
       "@aio/parser-json": "/packages/parsers/json/src/index.ts",
       "@aio/parser-json-schema": "/packages/parsers/json-schema/src/index.ts",
       "@aio/parser-typescript": "/packages/parsers/typescript/src/index.ts",
+      "@aio/parser-openapi": "/packages/parsers/openapi/src/index.ts",
       "@aio/sdk": "/packages/sdk/src/index.ts",
     },
   },

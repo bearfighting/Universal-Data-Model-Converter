@@ -1,5 +1,5 @@
 {
-  "name": "@aio/sdk",
+  "name": "@aio/parser-openapi",
   "version": "0.1.1-beta.2",
   "private": true,
   "license": "Apache-2.0",
@@ -14,17 +14,11 @@
   },
   "dependencies": {
     "@aio/core": "workspace:*",
-    "@aio/generator-json-schema": "workspace:*",
-    "@aio/generator-typescript": "workspace:*",
-    "@aio/generator-zod": "workspace:*",
-    "@aio/parser-json": "workspace:*",
     "@aio/parser-json-schema": "workspace:*",
-    "@aio/parser-openapi": "workspace:*",
-    "@aio/parser-typescript": "workspace:*",
-    "zod": "^4.4.3"
+    "yaml": "^2.8.1"
   },
   "scripts": {
-    "build": "tsup --config ../../tsup.config.ts",
+    "build": "tsup --config ../../../tsup.config.ts",
     "clean": "rm -rf dist"
   }
 }

@@ -14,6 +14,7 @@ import { zodGeneratorDescriptor } from "@aio/generator-zod";
 import { jsonParserDescriptor } from "@aio/parser-json";
 import { jsonSchemaParserDescriptor } from "@aio/parser-json-schema";
 import { typeScriptParserDescriptor } from "@aio/parser-typescript";
+import { openApiParserDescriptor } from "@aio/parser-openapi";
 import type { ConversionFormat, ConversionRegistry } from "./types.js";
 
 export type DescriptorRegistrationErrorCode =
@@ -104,6 +105,7 @@ export const defaultConversionRegistry = createConversionRegistry({
     jsonParserDescriptor,
     jsonSchemaParserDescriptor,
     typeScriptParserDescriptor,
+    openApiParserDescriptor,
   ],
   generators: [
     jsonSchemaDescriptor,

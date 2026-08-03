@@ -77,6 +77,18 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/parsers/openapi:
+    dependencies:
+      "@aio/core":
+        specifier: workspace:*
+        version: link:../../core
+      "@aio/parser-json-schema":
+        specifier: workspace:*
+        version: link:../json-schema
+      yaml:
+        specifier: ^2.8.1
+        version: 2.9.0
+
   packages/parsers/typescript:
     dependencies:
       "@aio/core":
@@ -106,6 +118,9 @@ importers:
       "@aio/parser-json-schema":
         specifier: workspace:*
         version: link:../parsers/json-schema
+      "@aio/parser-openapi":
+        specifier: workspace:*
+        version: link:../parsers/openapi
       "@aio/parser-typescript":
         specifier: workspace:*
         version: link:../parsers/typescript
