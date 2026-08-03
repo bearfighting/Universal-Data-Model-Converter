@@ -10,6 +10,20 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.1.1-beta.2
+
+This patch release corrects the SDK format discovery contract for generator-only
+targets.
+
+### Fixes
+
+- Add role-specific `listSourceFormatSupports()` and
+  `listTargetFormatSupports()` APIs.
+- Prevent generator-only formats such as Zod from appearing in source parser
+  pickers when consumers build their UI from SDK discovery data.
+- Clarify Web integration guidance for combined versus role-specific format
+  catalogs.
+
 ## 0.1.1-beta.1
 
 This is the first beta release of the shared conversion kernel and the Stage 1

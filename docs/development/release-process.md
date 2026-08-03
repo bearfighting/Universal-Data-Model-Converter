@@ -30,12 +30,12 @@ The repository currently uses one shared version across:
 
 Recommended version forms:
 
-- prerelease: `0.1.1-beta.1`
+- prerelease: `0.1.1-beta.2`
 - stable: `0.1.1`
 
 Recommended tag form:
 
-- `v0.1.1-beta.1`
+- `v0.1.1-beta.2`
 - `v0.1.1`
 
 For now, keep the whole workspace on one version.
@@ -57,7 +57,7 @@ What they do:
 - `release:tag`: creates an annotated `v<version>` git tag from the current shared version
 - `release:pack`: creates release tarballs and a `release-manifest.json` file in `release-artifacts/`
 
-The current release target is `0.1.1-beta.1`, the first beta release of the
+The current release target is `0.1.1-beta.2`, the second beta release of the
 shared conversion kernel and Stage 1 SDK consumer surface.
 
 ## Recommended Local Release Flow
@@ -65,14 +65,14 @@ shared conversion kernel and Stage 1 SDK consumer surface.
 For a normal release:
 
 1. run `pnpm check`
-2. choose the next version, for example `0.1.1-beta.1`
-3. run `pnpm release:version 0.1.1-beta.1`
+2. choose the next version, for example `0.1.1-beta.2`
+3. run `pnpm release:version 0.1.1-beta.2`
 4. review the version-only diff and commit it
 5. run `pnpm release:check`
 6. run `pnpm release:tag`
 7. push the commit and tag:
    - `git push origin main`
-   - `git push origin v0.1.1-beta.1`
+   - `git push origin v0.1.1-beta.2`
 
 After the tag push, GitHub Actions will:
 
@@ -114,7 +114,7 @@ does not disappear from the generated notes. Commit subjects alone do not
 determine categories; maintainers should apply the appropriate pull request
 label before merging.
 
-Tags containing a prerelease identifier, such as `v0.1.1-beta.1`, are created
+Tags containing a prerelease identifier, such as `v0.1.1-beta.2`, are created
 as GitHub prereleases automatically by the release workflow. Stable tags do not
 receive the prerelease flag.
 
