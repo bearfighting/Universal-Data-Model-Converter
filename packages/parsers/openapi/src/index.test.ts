@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { tryParseOpenApiDocument } from "./index.js";
+import { openApiParserDescriptor, tryParseOpenApiDocument } from "./index.js";
+
+function expectOk<T extends { ok: boolean }>(
+  result: T,
+  message: string,
+): asserts result is T & { ok: true } {
+  if (!result.ok) throw new Error(message);
+}
 
 const jsonDocument = JSON.stringify({
   openapi: "3.1.0",
@@ -111,5 +118,178 @@ describe("OpenAPI parser", () => {
         members: [{ kind: "object" }, { kind: "null" }],
       });
     }
+  });
+
+  it.each([
+    ["invalid YAML", "openapi: [", "invalid-openapi-document"],
+    ["non-object input", "[]", "invalid-openapi-document"],
+    ["missing version", JSON.stringify({}), "unsupported-openapi-version"],
+    [
+      "unsupported version",
+      JSON.stringify({ openapi: "2.0", components: {} }),
+      "unsupported-openapi-version",
+    ],
+    [
+      "missing schemas",
+      JSON.stringify({ openapi: "3.1.0", components: {} }),
+      "openapi-schemas-missing",
+    ],
+  ])("rejects %s explicitly", (_case, input, code) => {
+    const result = tryParseOpenApiDocument(input);
+
+    expect(result).toMatchObject({
+      ok: false,
+      code,
+      diagnostics: [
+        expect.objectContaining({ code, source: "parser-openapi" }),
+      ],
+    });
+  });
+
+  it("maps arrays, tuples, records, enums, unions, and constraints", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            Catalog: {
+              type: "object",
+              properties: {
+                tags: {
+                  type: "array",
+                  items: { type: "string", minLength: 2 },
+                  minItems: 1,
+                },
+                pair: {
+                  type: "array",
+                  prefixItems: [{ type: "integer" }, { type: "string" }],
+                  items: false,
+                },
+                labels: {
+                  type: "object",
+                  additionalProperties: { type: "string" },
+                },
+                state: { type: "string", enum: ["active", "closed"] },
+                choice: { anyOf: [{ type: "string" }, { type: "null" }] },
+              },
+              required: ["tags"],
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Expected OpenAPI schema to parse.");
+    expect(result.document.name.source).toBe("Catalog");
+    expect(result.document.root).toMatchObject({ kind: "object" });
+    if (result.document.root.kind === "object") {
+      expect(result.document.root.fields).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: expect.objectContaining({ source: "tags" }),
+            required: true,
+            type: expect.objectContaining({ kind: "array" }),
+          }),
+          expect.objectContaining({
+            name: expect.objectContaining({ source: "pair" }),
+            type: expect.objectContaining({ kind: "tuple" }),
+          }),
+          expect.objectContaining({
+            name: expect.objectContaining({ source: "labels" }),
+            type: expect.objectContaining({ kind: "record" }),
+          }),
+          expect.objectContaining({
+            name: expect.objectContaining({ source: "state" }),
+            type: expect.objectContaining({ kind: "union" }),
+          }),
+          expect.objectContaining({
+            name: expect.objectContaining({ source: "choice" }),
+            nullable: true,
+            type: expect.objectContaining({ kind: "scalar" }),
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("reports unsupported refs, allOf, and invalid nested schemas", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            Root: {
+              type: "object",
+              properties: {
+                external: { $ref: "#/components/parameters/Id" },
+                composed: { allOf: [{ type: "object" }] },
+                invalid: "not-a-schema",
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "invalid-json-schema-shape",
+    });
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported-openapi-ref",
+          severity: "error",
+          path: [
+            "components",
+            "schemas",
+            "Root",
+            "properties",
+            "external",
+            "$ref",
+          ],
+          source: "parser-openapi",
+        }),
+        expect.objectContaining({
+          code: "unsupported-openapi-composition",
+          severity: "warning",
+          path: [
+            "components",
+            "schemas",
+            "Root",
+            "properties",
+            "composed",
+            "allOf",
+          ],
+          source: "parser-openapi",
+        }),
+        expect.objectContaining({
+          code: "invalid-openapi-schema",
+          path: ["components", "schemas", "Root", "properties", "invalid"],
+          source: "parser-openapi",
+        }),
+      ]),
+    );
+  });
+
+  it("honors descriptor context, metadata, and parser options", () => {
+    expect(openApiParserDescriptor.kind).toBe("parser");
+    expect(openApiParserDescriptor.descriptorVersion).toBe("0.1");
+    expect(openApiParserDescriptor.format).toBe("openapi");
+    expect(openApiParserDescriptor.capabilities.producesIr).toContain("shape");
+    expect(openApiParserDescriptor.options.format).toBe("openapi");
+    expect(openApiParserDescriptor.options.role).toBe("parser");
+    expect(openApiParserDescriptor.parse).toEqual(expect.any(Function));
+    expect(openApiParserDescriptor.options.options).toEqual(
+      expect.arrayContaining([expect.objectContaining({ key: "entry" })]),
+    );
+
+    const result = openApiParserDescriptor.parse(jsonDocument, {
+      name: "RenamedUser",
+      options: { entry: "User" },
+    });
+
+    expectOk(result, "Expected descriptor parsing to succeed.");
+    expect(result.document.name.source).toBe("RenamedUser");
   });
 });

@@ -204,6 +204,7 @@ function normalizeSchema(
   path: string[],
   diagnostics: SchemaDiagnostic[],
 ): unknown {
+  if (typeof value === "boolean") return value;
   if (!isRecord(value)) {
     diagnostics.push(
       diagnostic(
