@@ -84,6 +84,13 @@ import type { ParserCapabilities } from "@aio/core";
 export declare const typeScriptParserCapabilities: ParserCapabilities;
 ```
 
+## packages/parsers/typescript/src/descriptor.d.ts
+
+```ts
+import type { ParserDescriptor } from "@aio/core";
+export declare const typeScriptParserDescriptor: ParserDescriptor;
+```
+
 ## packages/parsers/typescript/src/errors.d.ts
 
 ```ts
@@ -230,6 +237,7 @@ export {
   isTypeScriptInferenceError,
 } from "./errors.js";
 export { typeScriptParserCapabilities } from "./capabilities.js";
+export { typeScriptParserDescriptor } from "./descriptor.js";
 export { typeScriptParserOptionCatalog } from "./option-metadata.js";
 export {
   analyzeImplicitEntry,

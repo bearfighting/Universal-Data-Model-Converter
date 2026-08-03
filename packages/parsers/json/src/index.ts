@@ -1,5 +1,6 @@
 export { JsonInferenceError, isJsonInferenceError } from "./errors.js";
 export { jsonParserCapabilities } from "./capabilities.js";
+export { jsonParserDescriptor } from "./descriptor.js";
 export { jsonParserOptionCatalog } from "./option-metadata.js";
 export { decodeJsonText } from "./decode.js";
 export { inferJsonType } from "./infer.js";

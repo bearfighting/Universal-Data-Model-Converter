@@ -3,17 +3,10 @@ import type {
   GeneratorCapabilities,
   ParserCapabilities,
 } from "@aio/core";
-import type {
-  ConversionSourceFormat,
-  ConversionTargetFormat,
-} from "./types.js";
-import {
-  resolveGeneratorCapabilities,
-  resolveParserCapabilities,
-} from "./registry.js";
+import type { ConversionFormat, ConversionRegistry } from "./types.js";
+import { defaultConversionRegistry } from "./registry.js";
 
-export type ConsumerSurfaceFormat =
-  ConversionSourceFormat | ConversionTargetFormat;
+export type ConsumerSurfaceFormat = ConversionFormat;
 
 export interface ParserSupportSummary {
   producesIr: ParserCapabilities["producesIr"];
@@ -57,7 +50,7 @@ const CONSTRAINT_FAMILIES = [
   "portable-annotations",
 ] as const;
 
-const FORMAT_LIMITATIONS: Record<ConsumerSurfaceFormat, string[]> = {
+const FORMAT_LIMITATIONS: Record<string, string[]> = {
   json: [
     "JSON inference is intentionally conservative and is not a universal schema inference engine.",
     "Mixed-type handling depends on parser inference options rather than one always-on widening rule.",
@@ -80,7 +73,7 @@ const FORMAT_LIMITATIONS: Record<ConsumerSurfaceFormat, string[]> = {
   ],
 };
 
-const FORMAT_EXPERIMENTAL_AREAS: Record<ConsumerSurfaceFormat, string[]> = {
+const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
   json: ["tuple-inference-modes", "record-inference-modes"],
   "json-schema": ["constraint-round-trip-through-shared-ir"],
   typescript: [
@@ -92,34 +85,44 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<ConsumerSurfaceFormat, string[]> = {
 
 export function describeFormatSupport(
   format: ConsumerSurfaceFormat,
+  registry: ConversionRegistry = defaultConversionRegistry,
 ): FormatSupportSummary {
-  const parser = isSourceFormat(format)
-    ? toParserSupportSummary(resolveParserCapabilities(format))
-    : undefined;
-  const generator = isTargetFormat(format)
-    ? toGeneratorSupportSummary(resolveGeneratorCapabilities(format))
-    : undefined;
-
+  const parser = findParser(format, registry);
+  const generator = findGenerator(format, registry);
   return {
     format,
-    ...(parser ? { parser } : {}),
-    ...(generator ? { generator } : {}),
+    ...(parser ? { parser: toParserSupportSummary(parser.capabilities) } : {}),
+    ...(generator
+      ? { generator: toGeneratorSupportSummary(generator.capabilities) }
+      : {}),
     sharedShapeKinds: [...SHARED_SHAPE_KINDS],
     constraintFamilies: format === "json" ? [] : [...CONSTRAINT_FAMILIES],
-    notableLimitations: [...FORMAT_LIMITATIONS[format]],
-    experimentalAreas: [...FORMAT_EXPERIMENTAL_AREAS[format]],
+    notableLimitations: [...(FORMAT_LIMITATIONS[format] ?? [])],
+    experimentalAreas: [...(FORMAT_EXPERIMENTAL_AREAS[format] ?? [])],
   };
 }
 
-export function listFormatSupports(): FormatSupportSummary[] {
-  const formats: ConsumerSurfaceFormat[] = [
-    "json",
-    "json-schema",
-    "typescript",
-    "zod",
-  ];
+export function listFormatSupports(
+  registry: ConversionRegistry = defaultConversionRegistry,
+): FormatSupportSummary[] {
+  const formats = new Set<string>();
+  for (const descriptor of registry.listParsers())
+    formats.add(descriptor.format);
+  for (const descriptor of registry.listGenerators())
+    formats.add(descriptor.format);
+  return [...formats].map((format) => describeFormatSupport(format, registry));
+}
 
-  return formats.map(describeFormatSupport);
+function findParser(format: string, registry: ConversionRegistry) {
+  return registry
+    .listParsers()
+    .find((descriptor) => descriptor.format === format);
+}
+
+function findGenerator(format: string, registry: ConversionRegistry) {
+  return registry
+    .listGenerators()
+    .find((descriptor) => descriptor.format === format);
 }
 
 function toParserSupportSummary(
@@ -138,20 +141,4 @@ function toGeneratorSupportSummary(
     consumesIr: [...generatorCapabilities.consumesIr],
     capabilities: [...generatorCapabilities.supportsCapabilities],
   };
-}
-
-function isSourceFormat(
-  format: ConsumerSurfaceFormat,
-): format is ConversionSourceFormat {
-  return (
-    format === "json" || format === "json-schema" || format === "typescript"
-  );
-}
-
-function isTargetFormat(
-  format: ConsumerSurfaceFormat,
-): format is ConversionTargetFormat {
-  return (
-    format === "json-schema" || format === "typescript" || format === "zod"
-  );
 }

@@ -8,6 +8,8 @@ import type {
   SemanticLoss,
   ValueDocument,
   ConversionRoute,
+  ParserDescriptor,
+  GeneratorDescriptor,
 } from "@aio/core";
 import type {
   JsonSchemaGeneratorOptions,
@@ -19,8 +21,37 @@ import type { JsonParseOptions } from "@aio/parser-json";
 import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
 import type { TypeScriptParseOptions } from "@aio/parser-typescript";
 
-export type ConversionSourceFormat = "json" | "json-schema" | "typescript";
-export type ConversionTargetFormat = "json-schema" | "typescript" | "zod";
+export type BuiltinSourceFormat = "json" | "json-schema" | "typescript";
+export type BuiltinTargetFormat = "json-schema" | "typescript" | "zod";
+export interface BuiltinGeneratorOutputs {
+  "json-schema": JsonSchemaOutput;
+  typescript: string;
+  zod: string;
+}
+export type ConversionFormat =
+  BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
+export type ConversionSourceFormat = ConversionFormat;
+export type ConversionTargetFormat = ConversionFormat;
+export type ConversionOutput<
+  TTarget extends string,
+  TExtensions extends Record<string, unknown> = Record<never, never>,
+> = TTarget extends keyof BuiltinGeneratorOutputs
+  ? BuiltinGeneratorOutputs[TTarget]
+  : TTarget extends keyof TExtensions
+    ? TExtensions[TTarget]
+    : unknown;
+
+export interface ExtensionConversionOptions {
+  parser?: Record<string, unknown>;
+  generator?: Record<string, unknown>;
+}
+
+export interface ConversionRegistry {
+  registerParser(descriptor: ParserDescriptor): void;
+  registerGenerator(descriptor: GeneratorDescriptor): void;
+  listParsers(): ParserDescriptor[];
+  listGenerators(): GeneratorDescriptor[];
+}
 
 export interface ConvertAdvancedOptions {
   parser?: {
@@ -42,6 +73,7 @@ export interface ConvertOptions {
   name?: string;
   includeArtifacts?: boolean;
   advanced?: ConvertAdvancedOptions;
+  extension?: ExtensionConversionOptions;
 }
 
 export interface ConversionArtifacts {

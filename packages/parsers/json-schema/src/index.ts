@@ -3,6 +3,7 @@ export {
   isJsonSchemaInferenceError,
 } from "./errors.js";
 export { jsonSchemaParserCapabilities } from "./capabilities.js";
+export { jsonSchemaParserDescriptor } from "./descriptor.js";
 export { jsonSchemaParserOptionCatalog } from "./option-metadata.js";
 export {
   inferJsonSchemaDocument,

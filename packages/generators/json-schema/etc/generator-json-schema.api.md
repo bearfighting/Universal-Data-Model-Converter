@@ -54,6 +54,14 @@ import type { GeneratorCapabilities } from "@aio/core";
 export declare const jsonSchemaGeneratorCapabilities: GeneratorCapabilities;
 ```
 
+## packages/generators/json-schema/src/descriptor.d.ts
+
+```ts
+import type { GeneratorDescriptor } from "@aio/core";
+import type { JsonSchemaOutput } from "./options.js";
+export declare const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<JsonSchemaOutput>;
+```
+
 ## packages/generators/json-schema/src/failure.d.ts
 
 ```ts
@@ -82,6 +90,7 @@ export {
   tryGenerateJsonSchema,
 } from "./api.js";
 export { jsonSchemaGeneratorCapabilities } from "./capabilities.js";
+export { jsonSchemaGeneratorDescriptor } from "./descriptor.js";
 export { jsonSchemaGeneratorOptionCatalog } from "./option-metadata.js";
 export {
   prepareJsonSchemaGeneratorOptions,

@@ -12,6 +12,7 @@ export {
   collectTypeScriptTargetLossHotspots,
 } from "./analysis.js";
 export { typeScriptGeneratorCapabilities } from "./capabilities.js";
+export { typeScriptGeneratorDescriptor } from "./descriptor.js";
 export { typeScriptGeneratorOptionCatalog } from "./option-metadata.js";
 export type {
   TypeScriptCapabilityRequirement,

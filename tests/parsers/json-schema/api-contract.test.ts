@@ -14,6 +14,7 @@ describe("parser-json-schema api contract", () => {
       "isJsonSchemaInferenceError",
       "jsonSchemaParser",
       "jsonSchemaParserCapabilities",
+      "jsonSchemaParserDescriptor",
       "jsonSchemaParserOptionCatalog",
       "prepareJsonSchemaParseOptions",
       "preparedJsonSchemaParserOptions",

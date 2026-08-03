@@ -43,6 +43,13 @@ import type { GeneratorCapabilities } from "@aio/core";
 export declare const zodGeneratorCapabilities: GeneratorCapabilities;
 ```
 
+## packages/generators/zod/src/descriptor.d.ts
+
+```ts
+import type { GeneratorDescriptor } from "@aio/core";
+export declare const zodGeneratorDescriptor: GeneratorDescriptor<string>;
+```
+
 ## packages/generators/zod/src/failure.d.ts
 
 ```ts
@@ -76,6 +83,7 @@ export {
   zodGenerator,
 } from "./api.js";
 export { zodGeneratorCapabilities } from "./capabilities.js";
+export { zodGeneratorDescriptor } from "./descriptor.js";
 export { zodGeneratorOptionCatalog } from "./option-metadata.js";
 export {
   prepareZodGeneratorOptions,

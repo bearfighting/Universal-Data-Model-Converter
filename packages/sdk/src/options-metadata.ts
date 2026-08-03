@@ -1,26 +1,14 @@
 import type { OptionCatalog } from "@aio/core";
-import { jsonSchemaGeneratorOptionCatalog } from "@aio/generator-json-schema";
-import { typeScriptGeneratorOptionCatalog } from "@aio/generator-typescript";
-import { zodGeneratorOptionCatalog } from "@aio/generator-zod";
-import { jsonParserOptionCatalog } from "@aio/parser-json";
-import { jsonSchemaParserOptionCatalog } from "@aio/parser-json-schema";
-import { typeScriptParserOptionCatalog } from "@aio/parser-typescript";
+import {
+  resolveGeneratorDescriptor,
+  resolveParserDescriptor,
+  defaultConversionRegistry,
+} from "./registry.js";
 import type {
+  ConversionRegistry,
   ConversionSourceFormat,
   ConversionTargetFormat,
 } from "./types.js";
-
-const parserCatalogs: Record<ConversionSourceFormat, OptionCatalog> = {
-  json: jsonParserOptionCatalog,
-  "json-schema": jsonSchemaParserOptionCatalog,
-  typescript: typeScriptParserOptionCatalog,
-};
-
-const generatorCatalogs: Record<ConversionTargetFormat, OptionCatalog> = {
-  "json-schema": jsonSchemaGeneratorOptionCatalog,
-  typescript: typeScriptGeneratorOptionCatalog,
-  zod: zodGeneratorOptionCatalog,
-};
 
 export interface ConversionOptionCatalogs {
   sourceFormat: ConversionSourceFormat;
@@ -31,33 +19,37 @@ export interface ConversionOptionCatalogs {
 
 export function describeParserOptions(
   format: ConversionSourceFormat,
+  registry: ConversionRegistry = defaultConversionRegistry,
 ): OptionCatalog {
-  return cloneCatalog(parserCatalogs[format]);
+  return cloneCatalog(resolveParserDescriptor(format, registry).options);
 }
 
 export function describeGeneratorOptions(
   format: ConversionTargetFormat,
+  registry: ConversionRegistry = defaultConversionRegistry,
 ): OptionCatalog {
-  return cloneCatalog(generatorCatalogs[format]);
+  return cloneCatalog(resolveGeneratorDescriptor(format, registry).options);
 }
 
 export function describeConversionOptions(
   sourceFormat: ConversionSourceFormat,
   targetFormat: ConversionTargetFormat,
+  registry: ConversionRegistry = defaultConversionRegistry,
 ): ConversionOptionCatalogs {
   return {
     sourceFormat,
     targetFormat,
-    parser: describeParserOptions(sourceFormat),
-    generator: describeGeneratorOptions(targetFormat),
+    parser: describeParserOptions(sourceFormat, registry),
+    generator: describeGeneratorOptions(targetFormat, registry),
   };
 }
 
-export function listOptionCatalogs(): OptionCatalog[] {
-  return [
-    ...Object.values(parserCatalogs),
-    ...Object.values(generatorCatalogs),
-  ].map(cloneCatalog);
+export function listOptionCatalogs(
+  registry: ConversionRegistry = defaultConversionRegistry,
+): OptionCatalog[] {
+  return [...registry.listParsers(), ...registry.listGenerators()].map(
+    (descriptor) => cloneCatalog(descriptor.options),
+  );
 }
 
 function cloneCatalog(catalog: OptionCatalog): OptionCatalog {
