@@ -169,7 +169,11 @@ function renderObject(
     fields.length === 0
       ? "{}"
       : `\n${INDENT}${fields.replaceAll("\n", `\n${INDENT}`)}\n`;
-  if (closed) return `z.strictObject({${shape}})`;
+  const object = `z.strictObject({${shape}})`;
+  if (node.additionalProperties) {
+    return `${object}.catchall(${renderNode(node.additionalProperties, [...path, "additionalProperties"], options, definitions, observations)})`;
+  }
+  if (closed) return object;
   addPolicyNote(
     observations,
     path,

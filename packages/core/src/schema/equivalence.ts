@@ -52,7 +52,14 @@ export function areEquivalentSchemaNodes(
         left.fields.length === right.fields.length &&
         left.fields.every((field, index) =>
           areEquivalentSchemaFields(field, right.fields[index]),
-        )
+        ) &&
+        (left.additionalProperties === undefined
+          ? right.additionalProperties === undefined
+          : right.additionalProperties !== undefined &&
+            areEquivalentSchemaNodes(
+              left.additionalProperties,
+              right.additionalProperties,
+            ))
       );
     case "union":
       return (

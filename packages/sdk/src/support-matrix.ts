@@ -58,7 +58,7 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
   "json-schema": [
     "JSON Schema support is limited to the current IR-aligned Draft 2020-12 subset.",
     "Validation-heavy and document-system features such as external references remain unsupported.",
-    "Mixed fixed-field objects plus typed additionalProperties are not currently supported as one shared shape.",
+    "Object-only allOf can be merged; references, non-object compositions, not, and conditional schemas remain outside the current JSON Schema parser subset.",
   ],
   typescript: [
     "TypeScript support is limited to schema-oriented declarations rather than the full language.",
@@ -71,7 +71,7 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "OpenAPI generation emits only a canonical 3.1 schema document and does not recreate source metadata or API operations.",
     "Paths, operations, request and response bodies, parameters, headers, security, callbacks, and webhooks are outside the current parser boundary.",
     "Only local references to components.schemas are supported; external and URL-based references are unsupported.",
-    "The current schema subset does not lower all OpenAPI compositions, including allOf, into shared IR.",
+    "Object-only allOf compositions can be merged into shared IR; conflicting or non-object compositions remain unsupported.",
   ],
   zod: [
     "Zod output targets Zod 4 and assumes the consuming project installs zod.",

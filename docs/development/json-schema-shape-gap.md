@@ -31,6 +31,7 @@ The current practical `json-schema -> shape -> json-schema` subset includes:
 - arrays with `items`
 - tuples expressed through `prefixItems`
 - typed records through `additionalProperties: <schema>`
+- fixed-field objects with typed `additionalProperties`
 - document-local `$defs`
 - document-local `$ref`
 - root `$ref`
@@ -54,8 +55,8 @@ These cases still fail because the current shared model cannot represent them sa
 
 - boolean `false` schemas
 - closed objects through `additionalProperties: false`
-- mixed fixed properties plus typed `additionalProperties`
-- unsupported validation keywords such as `allOf`, `not`, `if/then/else`, numeric constraints, string constraints, collection constraints, and most portable annotations
+- unsupported validation keywords such as non-object or reference-based
+  `allOf`, `not`, `if/then/else`, and most portable annotations
 - compact `type: [...]` arrays outside the narrow nullable-property support
 - external or non-local `$ref`
 - unsupported drafts
@@ -68,7 +69,6 @@ The remaining pressure falls into three buckets.
 
 These are the strongest candidates for future shared-shape work, but still need cross-format evidence:
 
-- mixed fixed properties plus typed extra-key semantics
 - possibly an explicit impossible or never-schema concept
 
 ### Likely Future Constraint Or Annotation Pressure

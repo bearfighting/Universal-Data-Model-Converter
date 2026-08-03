@@ -48,5 +48,7 @@ This package does not currently process or select schemas from:
 - external or URL-based references
 - the full OpenAPI document validation surface
 
-Unsupported schema keywords and compositions are reported through structured
-diagnostics. In particular, `allOf` is not currently lowered into shared IR.
+Object-only `allOf` compositions are safely merged into the shared object shape,
+including common local-reference inheritance. Conflicting properties,
+non-object compositions, and other unsupported compositions are reported
+through structured diagnostics.

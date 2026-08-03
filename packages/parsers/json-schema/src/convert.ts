@@ -71,6 +71,7 @@ const ROOT_ALLOWED_KEYWORDS = new Set([
   "readOnly",
   "writeOnly",
   "description",
+  "allOf",
 ]);
 const NODE_ALLOWED_KEYWORDS = new Set([
   "$ref",
@@ -102,6 +103,7 @@ const NODE_ALLOWED_KEYWORDS = new Set([
   "readOnly",
   "writeOnly",
   "description",
+  "allOf",
 ]);
 const SUPPORTED_COMPACT_NULLABLE_TYPE_VALUES = new Set([
   "string",
@@ -111,7 +113,6 @@ const SUPPORTED_COMPACT_NULLABLE_TYPE_VALUES = new Set([
 ]);
 type CompactNullableScalarType = "string" | "integer" | "number" | "boolean";
 const EXPLICITLY_UNSUPPORTED_KEYWORDS = new Set([
-  "allOf",
   "not",
   "if",
   "then",
@@ -305,6 +306,18 @@ function convertSchemaNode(
     throwUnsupportedKeyword("$defs", path);
   }
 
+  if ("allOf" in input) {
+    const merged = mergeObjectAllOf(input);
+    if (merged === undefined) throwUnsupportedKeyword("allOf", path);
+    return convertSchemaNode(
+      merged,
+      path,
+      constraintEntries,
+      diagnostics,
+      semanticNotes,
+    );
+  }
+
   if ("$ref" in input) {
     return convertReferenceNode(input.$ref, path);
   }
@@ -434,6 +447,80 @@ function convertTypeArrayNode(
   }
 
   throwTypeArray(path);
+}
+
+function mergeObjectAllOf(
+  input: JsonSchemaObject,
+): JsonSchemaObject | undefined {
+  if (!Array.isArray(input.allOf) || input.allOf.length === 0) return undefined;
+  const members = [{ ...input, allOf: undefined }, ...input.allOf].filter(
+    (member) => member !== undefined,
+  );
+  const result: JsonSchemaObject = { type: "object" };
+  const properties: JsonSchemaObject = {};
+  const required = new Set<string>();
+  let additionalProperties: unknown = undefined;
+
+  for (const member of members) {
+    if (!isJsonSchemaObject(member)) return undefined;
+    if (member.type !== undefined && member.type !== "object") return undefined;
+    if (
+      member.properties !== undefined &&
+      !isJsonSchemaObject(member.properties)
+    )
+      return undefined;
+    if (isJsonSchemaObject(member.properties)) {
+      for (const [name, schema] of Object.entries(member.properties)) {
+        if (
+          properties[name] !== undefined &&
+          !sameJsonValue(properties[name], schema)
+        )
+          return undefined;
+        properties[name] = schema;
+      }
+    }
+    if (member.required !== undefined) {
+      if (
+        !Array.isArray(member.required) ||
+        member.required.some((name) => typeof name !== "string")
+      )
+        return undefined;
+      for (const name of member.required) required.add(name);
+    }
+    if (member.additionalProperties !== undefined) {
+      if (
+        additionalProperties !== undefined &&
+        !sameJsonValue(additionalProperties, member.additionalProperties)
+      )
+        return undefined;
+      additionalProperties = member.additionalProperties;
+    }
+    for (const [key, value] of Object.entries(member)) {
+      if (
+        [
+          "type",
+          "properties",
+          "required",
+          "additionalProperties",
+          "allOf",
+        ].includes(key)
+      )
+        continue;
+      if (result[key] !== undefined && !sameJsonValue(result[key], value))
+        return undefined;
+      result[key] = value;
+    }
+  }
+
+  if (Object.keys(properties).length > 0) result.properties = properties;
+  if (required.size > 0) result.required = [...required];
+  if (additionalProperties !== undefined)
+    result.additionalProperties = additionalProperties;
+  return result;
+}
+
+function sameJsonValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function convertReferenceNode(refValue: unknown, path: string[]): SchemaNode {
@@ -785,28 +872,6 @@ function convertObjectOrRecordNode(
     }
   }
 
-  if (
-    additionalPropertiesValue !== undefined &&
-    additionalPropertiesValue !== true &&
-    additionalPropertiesValue !== false &&
-    hasProperties
-  ) {
-    throwInferenceError(
-      "unsupported-json-schema-mixed-object-shape",
-      "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-      [
-        jsonSchemaDiagnostic({
-          severity: "error",
-          code: "unsupported-json-schema-mixed-object-shape",
-          message:
-            "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-          path,
-          nodeKind: "object",
-        }),
-      ],
-    );
-  }
-
   if (!hasProperties && additionalPropertiesValue !== undefined) {
     return schemaRecordNode(
       schemaScalarNode("string"),
@@ -859,6 +924,19 @@ function convertObjectOrRecordNode(
         semanticNotes,
       ),
     ),
+    additionalPropertiesValue !== undefined &&
+      additionalPropertiesValue !== true &&
+      additionalPropertiesValue !== false
+      ? {
+          additionalProperties: convertSchemaNode(
+            additionalPropertiesValue,
+            [...path, "additionalProperties"],
+            constraintEntries,
+            diagnostics,
+            semanticNotes,
+          ),
+        }
+      : undefined,
   );
 
   if (additionalPropertiesValue === false) {

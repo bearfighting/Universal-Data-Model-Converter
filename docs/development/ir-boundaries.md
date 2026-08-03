@@ -88,7 +88,7 @@ Otherwise:
 
 Usually `Shape IR`:
 
-- object
+- object, including fixed fields plus typed additional properties
 - record
 - array
 - tuple
@@ -111,6 +111,7 @@ Usually `Constraint IR`:
 These need repeated cross-format pressure before being treated as settled shared semantics:
 
 - object open-versus-closed behavior
+- fixed fields plus typed additional properties
 - portable annotations as first-class generator inputs
 - whether an eventual impossible or never-schema concept belongs in shape or constraints
 

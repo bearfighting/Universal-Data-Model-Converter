@@ -709,39 +709,27 @@ describe("integration: json-schema -> ir -> json-schema", () => {
     });
   });
 
-  it("fails explicitly for mixed fixed-field and typed additionalProperties objects", () => {
-    expect(
-      jsonSchemaParser.parse(
-        JSON.stringify({
-          $schema: "https://json-schema.org/draft/2020-12/schema",
-          title: "UserMap",
-          type: "object",
-          properties: {
-            id: {
-              type: "string",
-            },
+  it("round-trips mixed fixed-field and typed additionalProperties objects", () => {
+    const result = jsonSchemaParser.parse(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        title: "UserMap",
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
           },
-          additionalProperties: {
-            type: "number",
-          },
-        }),
-      ),
-    ).toEqual({
-      ok: false,
-      code: "unsupported-json-schema-mixed-object-shape",
-      message:
-        "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-      diagnostics: [
-        {
-          severity: "error",
-          code: "unsupported-json-schema-mixed-object-shape",
-          message:
-            "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-          path: ["root"],
-          nodeKind: "object",
-          source: "parser-json-schema",
         },
-      ],
+        additionalProperties: {
+          type: "number",
+        },
+      }),
+    );
+    expect(result).toMatchObject({ ok: true });
+    if (!result.ok) return;
+    expect(result.document.root).toMatchObject({
+      kind: "object",
+      additionalProperties: { kind: "scalar", scalar: "number" },
     });
   });
 
@@ -773,51 +761,47 @@ describe("integration: json-schema -> ir -> json-schema", () => {
     });
   });
 
-  it("fails explicitly for allOf-based schemas instead of silently dropping composition semantics", () => {
-    expect(
-      jsonSchemaParser.parse(
-        JSON.stringify({
-          $schema: "https://json-schema.org/draft/2020-12/schema",
-          title: "ComposedUser",
-          allOf: [
-            {
-              type: "object",
-              properties: {
-                id: {
-                  type: "string",
-                },
+  it("round-trips safe object-only allOf compositions", () => {
+    const parsed = jsonSchemaParser.parse(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        title: "ComposedUser",
+        allOf: [
+          {
+            type: "object",
+            properties: {
+              id: {
+                type: "string",
               },
-              required: ["id"],
             },
-            {
-              type: "object",
-              properties: {
-                active: {
-                  type: "boolean",
-                },
-              },
-              required: ["active"],
-            },
-          ],
-        }),
-      ),
-    ).toEqual({
-      ok: false,
-      code: "unsupported-json-schema-keyword",
-      message: "Unsupported JSON Schema keyword: allOf.",
-      diagnostics: [
-        {
-          severity: "error",
-          code: "unsupported-json-schema-keyword",
-          message: "Unsupported JSON Schema keyword: allOf.",
-          path: ["root"],
-          nodeKind: "type",
-          source: "parser-json-schema",
-          evidence: {
-            keyword: "allOf",
+            required: ["id"],
           },
+          {
+            type: "object",
+            properties: {
+              active: {
+                type: "boolean",
+              },
+            },
+            required: ["active"],
+          },
+        ],
+      }),
+    );
+    expect(parsed).toMatchObject({ ok: true });
+    if (!parsed.ok) return;
+    expect(parsed.document.root).toMatchObject({ kind: "object" });
+    const generated = jsonSchemaGenerator.generate(parsed.document);
+    expect(generated).toMatchObject({
+      ok: true,
+      output: {
+        properties: {
+          id: { type: "string" },
+          active: { type: "boolean" },
         },
-      ],
+        required: ["id", "active"],
+        type: "object",
+      },
     });
   });
 

@@ -22,38 +22,26 @@ describe("parser-json-schema failure matrix", () => {
     });
   });
 
-  it("fails explicitly for mixed fixed-field and typed additionalProperties objects", () => {
-    expect(
-      jsonSchemaParser.parse(
-        JSON.stringify({
-          type: "object",
-          properties: {
-            id: {
-              type: "string",
-            },
+  it("accepts mixed fixed-field and typed additionalProperties objects", () => {
+    const result = jsonSchemaParser.parse(
+      JSON.stringify({
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
           },
-          additionalProperties: {
-            type: "number",
-          },
-        }),
-      ),
-    ).toEqual({
-      ok: false,
-      code: "unsupported-json-schema-mixed-object-shape",
-      message:
-        "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-      diagnostics: [
-        {
-          severity: "error",
-          code: "unsupported-json-schema-mixed-object-shape",
-          message:
-            "Mixed fixed-field objects plus typed additionalProperties are not supported by the current shared IR.",
-          path: ["root"],
-          nodeKind: "object",
-          source: "parser-json-schema",
         },
-      ],
-    });
+        additionalProperties: {
+          type: "number",
+        },
+      }),
+    );
+    expect(result).toMatchObject({ ok: true });
+    if (result.ok && result.document.root.kind === "object")
+      expect(result.document.root.additionalProperties).toMatchObject({
+        kind: "scalar",
+        scalar: "number",
+      });
   });
 
   it("fails explicitly for unsupported keywords and compact type arrays", () => {

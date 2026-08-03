@@ -135,6 +135,7 @@ export function tryParseOpenApiDocument(
         transformationDiagnostics,
         parsedSource.version,
         schemaNames,
+        parsedSource.schemas,
       ),
     ]),
   );
@@ -251,14 +252,15 @@ function selectSchemaEntry(
 }
 
 function normalizeSchema(
-  value: unknown,
+  inputValue: unknown,
   path: string[],
   diagnostics: SchemaDiagnostic[],
   version: OpenApiVersion,
   schemaNames: ReadonlySet<string>,
+  schemas: Record<string, unknown>,
 ): unknown {
-  if (typeof value === "boolean") {
-    if (version === "3.1") return value;
+  if (typeof inputValue === "boolean") {
+    if (version === "3.1") return inputValue;
     diagnostics.push(
       diagnostic(
         "invalid-openapi-schema",
@@ -268,7 +270,7 @@ function normalizeSchema(
     );
     return {};
   }
-  if (!isRecord(value)) {
+  if (!isRecord(inputValue)) {
     diagnostics.push(
       diagnostic(
         "invalid-openapi-schema",
@@ -277,6 +279,19 @@ function normalizeSchema(
       ),
     );
     return {};
+  }
+  let value: Record<string, unknown> = inputValue;
+  if ("allOf" in value) {
+    const composed = composeOpenApiObjectSchema(
+      value,
+      schemaNames,
+      schemas,
+      path,
+      diagnostics,
+      new Set(),
+    );
+    if (composed === undefined) return {};
+    value = composed;
   }
   if (typeof value.$ref === "string") {
     const prefix = "#/components/schemas/";
@@ -333,6 +348,8 @@ function normalizeSchema(
     "format",
     "default",
     "examples",
+    "readOnly",
+    "writeOnly",
     "nullable",
     "enum",
     "allOf",
@@ -363,6 +380,7 @@ function normalizeSchema(
           diagnostics,
           version,
           schemaNames,
+          schemas,
         ),
       ]),
     );
@@ -373,6 +391,7 @@ function normalizeSchema(
       diagnostics,
       version,
       schemaNames,
+      schemas,
     );
   for (const key of ["oneOf", "anyOf", "prefixItems"] as const)
     if (supportedKeys.has(key) && Array.isArray(value[key]))
@@ -383,6 +402,7 @@ function normalizeSchema(
           diagnostics,
           version,
           schemaNames,
+          schemas,
         ),
       );
   if (isRecord(value.additionalProperties))
@@ -392,6 +412,7 @@ function normalizeSchema(
       diagnostics,
       version,
       schemaNames,
+      schemas,
     );
   normalizeVersionSpecificKeywords(
     value,
@@ -401,18 +422,205 @@ function normalizeSchema(
     diagnostics,
   );
   normalizeNullableAndEnum(value, normalized);
-  if ("allOf" in value) {
+  return normalized;
+}
+
+function composeOpenApiObjectSchema(
+  source: Record<string, unknown>,
+  schemaNames: ReadonlySet<string>,
+  schemas: Record<string, unknown>,
+  path: string[],
+  diagnostics: SchemaDiagnostic[],
+  seen: Set<string>,
+): Record<string, unknown> | undefined {
+  const members = source.allOf;
+  if (!Array.isArray(members) || members.length === 0) {
     diagnostics.push(
       diagnostic(
         "unsupported-openapi-composition",
-        'The OpenAPI "allOf" composition is not supported in this parser version and was lowered to an unknown schema.',
+        'The OpenAPI "allOf" keyword must contain at least one schema object.',
         [...path, "allOf"],
         "warning",
       ),
     );
-    return {};
+    return undefined;
   }
-  return normalized;
+
+  const expandedMembers = members.map((member, index) =>
+    expandOpenApiCompositionMember(
+      member,
+      schemas,
+      schemaNames,
+      [...path, "allOf", String(index)],
+      diagnostics,
+      new Set(seen),
+    ),
+  );
+  if (expandedMembers.some((member) => member === undefined)) return undefined;
+
+  const siblings = { ...source };
+  delete siblings.allOf;
+  const allMembers = [siblings, ...expandedMembers].filter(
+    (member) => member !== undefined,
+  ) as Record<string, unknown>[];
+  const result: Record<string, unknown> = { type: "object" };
+  const properties: Record<string, unknown> = {};
+  const required = new Set<string>();
+  let additionalProperties: unknown = undefined;
+
+  for (const member of allMembers) {
+    if (member.type !== undefined && member.type !== "object") {
+      return unsupportedComposition(
+        diagnostics,
+        path,
+        'Only object schemas can be safely merged from OpenAPI "allOf".',
+      );
+    }
+    if (isRecord(member.properties)) {
+      for (const [name, schema] of Object.entries(member.properties)) {
+        const previous = properties[name];
+        if (previous !== undefined && !sameJsonValue(previous, schema)) {
+          return unsupportedComposition(
+            diagnostics,
+            [...path, "properties", name],
+            `OpenAPI "allOf" contains conflicting definitions for property "${name}".`,
+          );
+        }
+        properties[name] = schema;
+      }
+    } else if (member.properties !== undefined) {
+      return unsupportedComposition(
+        diagnostics,
+        [...path, "properties"],
+        'OpenAPI "allOf" object properties must be an object.',
+      );
+    }
+    if (Array.isArray(member.required)) {
+      for (const name of member.required)
+        if (typeof name === "string") required.add(name);
+    } else if (member.required !== undefined) {
+      return unsupportedComposition(
+        diagnostics,
+        [...path, "required"],
+        'OpenAPI "allOf" object required must be an array of names.',
+      );
+    }
+    if (member.additionalProperties !== undefined) {
+      if (
+        additionalProperties !== undefined &&
+        !sameJsonValue(additionalProperties, member.additionalProperties)
+      ) {
+        return unsupportedComposition(
+          diagnostics,
+          [...path, "additionalProperties"],
+          'OpenAPI "allOf" contains conflicting additionalProperties rules.',
+        );
+      }
+      additionalProperties = member.additionalProperties;
+    }
+    for (const [key, value] of Object.entries(member)) {
+      if (
+        ["type", "properties", "required", "additionalProperties"].includes(key)
+      )
+        continue;
+      const previous = result[key];
+      if (previous !== undefined && !sameJsonValue(previous, value)) {
+        return unsupportedComposition(
+          diagnostics,
+          [...path, key],
+          `OpenAPI "allOf" contains conflicting values for keyword "${key}".`,
+        );
+      }
+      result[key] = value;
+    }
+  }
+
+  if (Object.keys(properties).length > 0) result.properties = properties;
+  if (required.size > 0) result.required = [...required];
+  if (additionalProperties !== undefined)
+    result.additionalProperties = additionalProperties;
+  return result;
+}
+
+function expandOpenApiCompositionMember(
+  member: unknown,
+  schemas: Record<string, unknown>,
+  schemaNames: ReadonlySet<string>,
+  path: string[],
+  diagnostics: SchemaDiagnostic[],
+  seen: Set<string>,
+): Record<string, unknown> | undefined {
+  if (!isRecord(member))
+    return unsupportedComposition(
+      diagnostics,
+      path,
+      'OpenAPI "allOf" members must be schema objects.',
+    );
+  if (typeof member.$ref === "string") {
+    const prefix = "#/components/schemas/";
+    if (!member.$ref.startsWith(prefix))
+      return unsupportedComposition(
+        diagnostics,
+        [...path, "$ref"],
+        "Only local component references can participate in OpenAPI allOf.",
+      );
+    const name = decodeJsonPointerSegment(member.$ref.slice(prefix.length));
+    if (!name || !schemaNames.has(name) || seen.has(name))
+      return unsupportedComposition(
+        diagnostics,
+        [...path, "$ref"],
+        `The OpenAPI allOf reference "${member.$ref}" cannot be resolved safely.`,
+      );
+    const referenced = schemas[name];
+    if (!isRecord(referenced))
+      return unsupportedComposition(
+        diagnostics,
+        [...path, "$ref"],
+        `The OpenAPI allOf reference "${member.$ref}" is not an object schema.`,
+      );
+    const nextSeen = new Set(seen);
+    nextSeen.add(name);
+    return "allOf" in referenced
+      ? composeOpenApiObjectSchema(
+          referenced,
+          schemaNames,
+          schemas,
+          path,
+          diagnostics,
+          nextSeen,
+        )
+      : referenced;
+  }
+  return "allOf" in member
+    ? composeOpenApiObjectSchema(
+        member,
+        schemaNames,
+        schemas,
+        path,
+        diagnostics,
+        seen,
+      )
+    : member;
+}
+
+function unsupportedComposition(
+  diagnostics: SchemaDiagnostic[],
+  path: string[],
+  message: string,
+): undefined {
+  diagnostics.push(
+    diagnostic(
+      "unsupported-openapi-composition",
+      message,
+      [...path, "allOf"],
+      "warning",
+    ),
+  );
+  return undefined;
+}
+
+function sameJsonValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function decodeJsonPointerSegment(value: string): string | undefined {

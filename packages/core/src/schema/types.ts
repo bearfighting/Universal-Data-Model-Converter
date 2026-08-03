@@ -140,6 +140,8 @@ export interface SchemaFieldNode extends SchemaBaseNode {
 export interface SchemaObjectNode extends SchemaBaseNode {
   kind: "object";
   fields: SchemaFieldNode[];
+  /** Schema for keys not listed in `fields`, when the source is a typed map. */
+  additionalProperties?: SchemaNode;
 }
 
 export interface SchemaArrayNode extends SchemaBaseNode {

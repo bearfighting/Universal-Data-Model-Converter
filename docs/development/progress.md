@@ -64,11 +64,13 @@ Shared shape semantics currently cover:
 - scalar
 - literal
 - object
+- fixed fields with typed additional properties
 - array
 - tuple
 - record or map
 - union
 - local references and reusable definitions
+- safe object-only `allOf` composition
 - `null`
 - optional presence
 - `unknown`

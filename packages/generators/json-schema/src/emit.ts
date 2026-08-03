@@ -183,9 +183,17 @@ function renderObjectNode(
   return {
     type: "object",
     properties,
-    ...(options.objectAdditionalPropertiesMode === "false" || closedByConstraint
-      ? { additionalProperties: false }
-      : {}),
+    ...(node.additionalProperties
+      ? {
+          additionalProperties: renderJsonSchemaNode(
+            node.additionalProperties,
+            options,
+            [...path, "additionalProperties"],
+          ),
+        }
+      : options.objectAdditionalPropertiesMode === "false" || closedByConstraint
+        ? { additionalProperties: false }
+        : {}),
     ...(required.length > 0 ? { required } : {}),
   };
 }

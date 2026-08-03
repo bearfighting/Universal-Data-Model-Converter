@@ -11,7 +11,16 @@ const source = JSON.stringify({
       User: {
         type: "object",
         properties: {
-          id: { type: "string", minLength: 1 },
+          id: {
+            type: "string",
+            minLength: 1,
+            format: "uuid",
+            description: "Stable user identifier",
+            default: "00000000-0000-0000-0000-000000000000",
+            examples: ["123e4567-e89b-12d3-a456-426614174000"],
+            readOnly: true,
+            writeOnly: false,
+          },
           profile: { $ref: "#/components/schemas/Profile" },
           status: {
             type: "string",

@@ -74,6 +74,9 @@ function renderRootInterface(
   options: ResolvedTypeScriptGeneratorOptions,
   definitionLookup: ReadonlyMap<string, SchemaDefinition>,
 ): string {
+  if (node.additionalProperties) {
+    return `export type ${renderTypeName(name, options)} = ${renderInlineObjectType(node, 0, options, definitionLookup)};`;
+  }
   const fields = node.fields
     .map((field) => renderFieldNode(field, 1, options, definitionLookup))
     .join("\n");
@@ -299,8 +302,16 @@ function renderInlineObjectType(
       renderFieldNode(field, depth + 1, options, definitionLookup),
     )
     .join("\n");
+  const object = `{\n${fields}\n${indent(depth)}}`;
+  if (!node.additionalProperties) return object;
 
-  return `{\n${fields}\n${indent(depth)}}`;
+  const value = renderTypeNode(
+    node.additionalProperties,
+    depth,
+    options,
+    definitionLookup,
+  );
+  return `(${object}) & Record<string, ${value}>`;
 }
 
 function wrapForParens(renderedType: string): string {

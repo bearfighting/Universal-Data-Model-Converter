@@ -24,6 +24,7 @@ The parser currently supports:
 - tuple schemas rendered through `prefixItems` plus `items: false`
 - fixed-field objects through `properties` and `required`
 - record-like objects through `additionalProperties`
+- fixed-field objects with typed `additionalProperties`
 - document-local `$defs`
 - document-local `$ref` through `#/$defs/...`
 - `oneOf` and `anyOf` lowered into the current IR union semantics
@@ -36,8 +37,7 @@ The parser currently fails explicitly for:
 - external `$ref`
 - `false` schemas
 - closed objects through `additionalProperties: false`
-- mixed fixed-field plus typed `additionalProperties` object shapes
-- `allOf`, `not`, and conditional keywords
+- non-object or reference-based `allOf`, `not`, and conditional keywords
 - constraint and annotation keywords that the current IR cannot preserve
 - broader `type: [...]` array forms outside the current simple-nullable subset
 

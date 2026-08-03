@@ -63,14 +63,18 @@ Current rules:
 
 ### Structural Nodes
 
-- `SchemaObjectNode` is a fixed named-field shape
+- `SchemaObjectNode` is a fixed named-field shape and may carry a typed
+  `additionalProperties` node for schemas that combine named fields with
+  dynamic string-keyed values
 - `SchemaRecordNode` is a dynamic-key object shape
 - `SchemaArrayNode` is a homogeneous collection
 - `SchemaTupleNode` is a fixed-position ordered sequence
 - `SchemaUnionNode` is one-of-many schema meaning
 - `SchemaReferenceNode` points to a document-local definition
 
-Record and object are intentionally different semantics.
+Record and object are intentionally different semantics. An object with
+`additionalProperties` still preserves its named-field semantics while also
+recording the type of otherwise-unlisted keys.
 Array and tuple are intentionally different semantics.
 
 ## Core Invariants

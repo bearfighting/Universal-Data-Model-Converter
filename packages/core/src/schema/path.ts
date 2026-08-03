@@ -6,6 +6,7 @@ export type SchemaPathSegment =
   | { kind: "recordKey" }
   | { kind: "recordValue" }
   | { kind: "field"; name: string }
+  | { kind: "objectAdditionalProperties" }
   | { kind: "unionMember"; index: number };
 
 export type SchemaPath = readonly SchemaPathSegment[];
@@ -60,6 +61,8 @@ export function schemaPathSegmentToDiagnosticToken(
       return "value";
     case "field":
       return segment.name;
+    case "objectAdditionalProperties":
+      return "additionalProperties";
     case "unionMember":
       return String(segment.index);
   }

@@ -214,6 +214,69 @@ describe("OpenAPI parser", () => {
     expect(result.constraints?.entries.length).toBeGreaterThan(0);
   });
 
+  it("preserves fixed fields alongside typed additional properties", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            Settings: {
+              type: "object",
+              properties: { enabled: { type: "boolean" } },
+              required: ["enabled"],
+              additionalProperties: { type: "string" },
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Expected mixed object schema to parse.");
+    expect(result.document.root).toMatchObject({
+      kind: "object",
+      additionalProperties: { kind: "scalar", scalar: "string" },
+    });
+  });
+
+  it("merges safe object-only allOf compositions, including local refs", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            Base: {
+              type: "object",
+              properties: { id: { type: "string" } },
+              required: ["id"],
+            },
+            User: {
+              allOf: [
+                { $ref: "#/components/schemas/Base" },
+                {
+                  type: "object",
+                  properties: { name: { type: "string" } },
+                  required: ["name"],
+                },
+              ],
+            },
+          },
+        },
+      }),
+      { entry: "User" },
+    );
+
+    expectOk(result, "Expected safe allOf composition to parse.");
+    expect(result.document.root).toMatchObject({ kind: "object" });
+    if (result.document.root.kind === "object") {
+      expect(
+        result.document.root.fields.map((field) => field.name.source),
+      ).toEqual(["id", "name"]);
+      expect(result.document.root.fields.every((field) => field.required)).toBe(
+        true,
+      );
+    }
+  });
+
   it("extracts components schemas without processing API operations", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({
@@ -250,7 +313,7 @@ describe("OpenAPI parser", () => {
     expect(result.document.root).toMatchObject({ kind: "object" });
   });
 
-  it("reports unsupported refs, allOf, and invalid nested schemas", () => {
+  it("reports unsupported refs and invalid nested schemas", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({
         openapi: "3.1.0",
@@ -260,7 +323,7 @@ describe("OpenAPI parser", () => {
               type: "object",
               properties: {
                 external: { $ref: "#/components/parameters/Id" },
-                composed: { allOf: [{ type: "object" }] },
+                composed: { allOf: [{ type: "string" }, { type: "object" }] },
                 invalid: "not-a-schema",
               },
             },
@@ -285,19 +348,6 @@ describe("OpenAPI parser", () => {
             "properties",
             "external",
             "$ref",
-          ],
-          source: "parser-openapi",
-        }),
-        expect.objectContaining({
-          code: "unsupported-openapi-composition",
-          severity: "warning",
-          path: [
-            "components",
-            "schemas",
-            "Root",
-            "properties",
-            "composed",
-            "allOf",
           ],
           source: "parser-openapi",
         }),
@@ -400,7 +450,7 @@ describe("OpenAPI parser", () => {
     expect(result.document.root).toMatchObject({ kind: "object" });
   });
 
-  it("reports ignored schema keywords as warnings", () => {
+  it("preserves portable schema annotations", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({
         openapi: "3.1.0",
@@ -417,15 +467,16 @@ describe("OpenAPI parser", () => {
       }),
     );
 
-    expectOk(result, "Expected unsupported metadata to remain non-fatal.");
-    expect(result.diagnostics).toEqual([
-      expect.objectContaining({
-        code: "unsupported-openapi-keyword",
-        severity: "warning",
-        path: ["components", "schemas", "User", "properties", "id", "readOnly"],
-        source: "parser-openapi",
-      }),
-    ]);
+    expectOk(result, "Expected portable metadata to remain non-fatal.");
+    expect(result.constraints?.entries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          constraints: expect.arrayContaining([
+            expect.objectContaining({ kind: "read-only", value: true }),
+          ]),
+        }),
+      ]),
+    );
   });
 
   it("rejects OpenAPI 3.0 boolean tuple schemas explicitly", () => {

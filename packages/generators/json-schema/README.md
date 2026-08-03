@@ -31,6 +31,7 @@ The current generator supports:
 - record root documents
 - union root documents
 - reusable definitions and `$ref`
+- fixed-field objects with typed `additionalProperties`
 - simple `nullable` fields through compact `type: ["T", "null"]` rendering
 - `unknown` nodes as the widest valid schema
 
