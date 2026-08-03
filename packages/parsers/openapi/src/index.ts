@@ -23,6 +23,7 @@ export type OpenApiParseFailureCode =
   | "openapi-schemas-missing"
   | "openapi-entry-required"
   | "openapi-entry-not-found"
+  | "openapi-ref-not-found"
   | "unsupported-openapi-keyword"
   | "unsupported-openapi-composition";
 export interface OpenApiParseSuccessResult {
@@ -124,6 +125,7 @@ export function tryParseOpenApiDocument(
   if (!entryResult.ok) return entryResult;
 
   const transformationDiagnostics: SchemaDiagnostic[] = [];
+  const schemaNames = new Set(Object.keys(parsedSource.schemas));
   const definitions = Object.fromEntries(
     Object.entries(parsedSource.schemas).map(([name, schema]) => [
       name,
@@ -132,12 +134,23 @@ export function tryParseOpenApiDocument(
         ["components", "schemas", name],
         transformationDiagnostics,
         parsedSource.version,
+        schemaNames,
       ),
     ]),
   );
   const { [entryResult.entry]: selectedSchema, ...referencedDefinitions } =
     definitions;
   const rootSchema = isRecord(selectedSchema) ? selectedSchema : {};
+  const danglingReference = transformationDiagnostics.find(
+    (item) => item.code === "openapi-ref-not-found",
+  );
+  if (danglingReference)
+    return {
+      ok: false,
+      code: "openapi-ref-not-found",
+      message: danglingReference.message,
+      diagnostics: transformationDiagnostics,
+    };
   const jsonSchema = JSON.stringify({
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: options.name ?? entryResult.entry,
@@ -242,6 +255,7 @@ function normalizeSchema(
   path: string[],
   diagnostics: SchemaDiagnostic[],
   version: OpenApiVersion,
+  schemaNames: ReadonlySet<string>,
 ): unknown {
   if (typeof value === "boolean") {
     if (version === "3.1") return value;
@@ -266,8 +280,20 @@ function normalizeSchema(
   }
   if (typeof value.$ref === "string") {
     const prefix = "#/components/schemas/";
-    if (value.$ref.startsWith(prefix))
-      return { $ref: `#/$defs/${value.$ref.slice(prefix.length)}` };
+    if (value.$ref.startsWith(prefix)) {
+      const encodedName = value.$ref.slice(prefix.length);
+      const name = decodeJsonPointerSegment(encodedName);
+      if (name && schemaNames.has(name))
+        return { $ref: `#/$defs/${encodedName}` };
+      diagnostics.push(
+        diagnostic(
+          "openapi-ref-not-found",
+          `The referenced OpenAPI schema "${value.$ref}" was not found under "components.schemas".`,
+          [...path, "$ref"],
+        ),
+      );
+      return {};
+    }
     diagnostics.push(
       diagnostic(
         "unsupported-openapi-ref",
@@ -336,6 +362,7 @@ function normalizeSchema(
           [...path, "properties", name],
           diagnostics,
           version,
+          schemaNames,
         ),
       ]),
     );
@@ -345,6 +372,7 @@ function normalizeSchema(
       [...path, "items"],
       diagnostics,
       version,
+      schemaNames,
     );
   for (const key of ["oneOf", "anyOf", "prefixItems"] as const)
     if (supportedKeys.has(key) && Array.isArray(value[key]))
@@ -354,6 +382,7 @@ function normalizeSchema(
           [...path, key, String(index)],
           diagnostics,
           version,
+          schemaNames,
         ),
       );
   if (isRecord(value.additionalProperties))
@@ -362,6 +391,7 @@ function normalizeSchema(
       [...path, "additionalProperties"],
       diagnostics,
       version,
+      schemaNames,
     );
   normalizeVersionSpecificKeywords(
     value,
@@ -383,6 +413,22 @@ function normalizeSchema(
     return {};
   }
   return normalized;
+}
+
+function decodeJsonPointerSegment(value: string): string | undefined {
+  let decoded = "";
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index];
+    if (character !== "~") {
+      decoded += character;
+      continue;
+    }
+    const escape = value[index + 1];
+    if (escape !== "0" && escape !== "1") return undefined;
+    decoded += escape === "0" ? "~" : "/";
+    index += 1;
+  }
+  return decoded;
 }
 
 function normalizeVersionSpecificKeywords(

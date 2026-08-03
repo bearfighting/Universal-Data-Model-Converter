@@ -274,6 +274,60 @@ describe("OpenAPI parser", () => {
     );
   });
 
+  it("fails on dangling local refs in nested schema positions", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            Root: {
+              type: "object",
+              properties: {
+                profile: { $ref: "#/components/schemas/Profile" },
+                history: {
+                  type: "array",
+                  items: { $ref: "#/components/schemas/Event" },
+                },
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "openapi-ref-not-found",
+      diagnostics: expect.arrayContaining([
+        expect.objectContaining({
+          code: "openapi-ref-not-found",
+          path: [
+            "components",
+            "schemas",
+            "Root",
+            "properties",
+            "profile",
+            "$ref",
+          ],
+          source: "parser-openapi",
+        }),
+        expect.objectContaining({
+          code: "openapi-ref-not-found",
+          path: [
+            "components",
+            "schemas",
+            "Root",
+            "properties",
+            "history",
+            "items",
+            "$ref",
+          ],
+          source: "parser-openapi",
+        }),
+      ]),
+    });
+  });
+
   it("applies OpenAPI 3.0 keyword semantics before JSON Schema conversion", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({
