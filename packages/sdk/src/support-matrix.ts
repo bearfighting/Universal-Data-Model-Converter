@@ -66,6 +66,12 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Function types, conditional types, mapped types, and intersection types are outside the current supported subset.",
     "TypeScript generation widens integer semantics to number and does not preserve constraint families directly.",
   ],
+  openapi: [
+    "OpenAPI support is currently limited to extracting schemas from components.schemas rather than processing the full API document.",
+    "Paths, operations, request and response bodies, parameters, headers, security, callbacks, and webhooks are outside the current parser boundary.",
+    "Only local references to components.schemas are supported; external and URL-based references are unsupported.",
+    "The current schema subset does not lower all OpenAPI compositions, including allOf, into shared IR.",
+  ],
   zod: [
     "Zod output targets Zod 4 and assumes the consuming project installs zod.",
     "JavaScript output provides runtime schemas only; TypeScript output additionally emits z.infer types.",
@@ -80,6 +86,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "implicit-entry-selection",
     "enum-lowering-within-schema-subset",
   ],
+  openapi: ["full-document-processing", "allOf-composition"],
   zod: ["javascript-output", "constraint-refinement-rendering"],
 };
 

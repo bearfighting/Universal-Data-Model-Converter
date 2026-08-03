@@ -214,6 +214,42 @@ describe("OpenAPI parser", () => {
     expect(result.constraints?.entries.length).toBeGreaterThan(0);
   });
 
+  it("extracts components schemas without processing API operations", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        info: { title: "Example", version: "1.0.0" },
+        paths: {
+          "/users": {
+            get: {
+              responses: {
+                "200": {
+                  content: {
+                    "application/json": {
+                      schema: { $ref: "#/components/schemas/User" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            User: {
+              type: "object",
+              properties: { id: { type: "integer" } },
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Expected component schema extraction to succeed.");
+    expect(result.document.name.source).toBe("User");
+    expect(result.document.root).toMatchObject({ kind: "object" });
+  });
+
   it("reports unsupported refs, allOf, and invalid nested schemas", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({
