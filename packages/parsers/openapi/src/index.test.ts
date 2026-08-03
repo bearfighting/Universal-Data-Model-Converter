@@ -272,6 +272,101 @@ describe("OpenAPI parser", () => {
     );
   });
 
+  it("applies OpenAPI 3.0 keyword semantics before JSON Schema conversion", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.0.3",
+        components: {
+          schemas: {
+            Bounds: {
+              type: "object",
+              properties: {
+                amount: {
+                  type: "number",
+                  minimum: 1,
+                  exclusiveMinimum: true,
+                },
+                state: {
+                  type: "string",
+                  enum: ["active", "closed"],
+                  nullable: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Expected OpenAPI 3.0 schema to parse.");
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({
+        code: "json-schema-nullable-property-normalized",
+        source: "parser-openapi",
+      }),
+    ]);
+    expect(result.document.root).toMatchObject({ kind: "object" });
+  });
+
+  it("reports ignored schema keywords as warnings", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            User: {
+              type: "object",
+              properties: {
+                id: { type: "string", readOnly: true },
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Expected unsupported metadata to remain non-fatal.");
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({
+        code: "unsupported-openapi-keyword",
+        severity: "warning",
+        path: ["components", "schemas", "User", "properties", "id", "readOnly"],
+        source: "parser-openapi",
+      }),
+    ]);
+  });
+
+  it("rejects OpenAPI 3.0 boolean tuple schemas explicitly", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.0.3",
+        components: {
+          schemas: {
+            Pair: {
+              type: "array",
+              prefixItems: [{ type: "integer" }, { type: "string" }],
+              items: false,
+            },
+          },
+        },
+      }),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported-openapi-keyword",
+          path: ["components", "schemas", "Pair", "prefixItems"],
+        }),
+        expect.objectContaining({
+          code: "invalid-openapi-schema",
+          path: ["components", "schemas", "Pair", "items"],
+        }),
+      ]),
+    });
+  });
+
   it("honors descriptor context, metadata, and parser options", () => {
     expect(openApiParserDescriptor.kind).toBe("parser");
     expect(openApiParserDescriptor.descriptorVersion).toBe("0.1");

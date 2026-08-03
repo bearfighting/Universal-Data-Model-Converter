@@ -24,6 +24,7 @@ export type OpenApiParseFailureCode =
   | "openapi-schemas-missing"
   | "openapi-entry-required"
   | "openapi-entry-not-found"
+  | "unsupported-openapi-keyword"
   | "unsupported-openapi-composition";
 export interface OpenApiParseSuccessResult {
   ok: true;
