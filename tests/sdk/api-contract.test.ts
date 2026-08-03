@@ -77,6 +77,8 @@ describe("sdk api contract", () => {
       "listConversionRoutes",
       "listFormatSupports",
       "listOptionCatalogs",
+      "listSourceFormatSupports",
+      "listTargetFormatSupports",
       "optionCatalogSchema",
       "optionMetadataCategorySchema",
       "optionMetadataExampleSchema",

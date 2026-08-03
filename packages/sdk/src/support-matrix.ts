@@ -113,6 +113,20 @@ export function listFormatSupports(
   return [...formats].map((format) => describeFormatSupport(format, registry));
 }
 
+/** Lists formats that can be selected as conversion sources. */
+export function listSourceFormatSupports(
+  registry: ConversionRegistry = defaultConversionRegistry,
+): FormatSupportSummary[] {
+  return listFormatSupports(registry).filter((summary) => summary.parser);
+}
+
+/** Lists formats that can be selected as conversion targets. */
+export function listTargetFormatSupports(
+  registry: ConversionRegistry = defaultConversionRegistry,
+): FormatSupportSummary[] {
+  return listFormatSupports(registry).filter((summary) => summary.generator);
+}
+
 function findParser(format: string, registry: ConversionRegistry) {
   return registry
     .listParsers()

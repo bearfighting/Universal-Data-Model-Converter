@@ -9,7 +9,9 @@ Use [consumer-surface-checklist.md](consumer-surface-checklist.md) for repositor
 
 For a first Web integration, treat these `@aio/sdk` helpers as the main building blocks:
 
-- `listFormatSupports()`
+- `listSourceFormatSupports()`
+- `listTargetFormatSupports()`
+- `listFormatSupports()` (combined view)
 - `describeFormatSupport(...)`
 - `listConversionRoutes()`
 - `planConversion(...)`
@@ -30,7 +32,9 @@ That split maps naturally to typical UI concerns:
 
 For a simple converter UI, the recommended order is:
 
-1. call `listFormatSupports()` once to build source and target format pickers
+1. call `listSourceFormatSupports()` and `listTargetFormatSupports()` once to
+   build the source and target format pickers; use `listFormatSupports()` only
+   when a combined format catalog is needed
 2. call `listConversionRoutes()` once to derive available route pairs
 3. when the user changes formats, call `planConversion(...)` and `describeConversionRouteCapabilities(...)` for route copy and support hints
 4. when the user runs a conversion, call `convert(...)`
@@ -80,7 +84,9 @@ For Stage 1, do not hard-code format names in the UI.
 
 Instead:
 
-- derive all known formats from `listFormatSupports()`
+- derive source formats from `listSourceFormatSupports()` and target formats
+  from `listTargetFormatSupports()`; use `listFormatSupports()` only for a
+  combined catalog
 - derive valid routes from `listConversionRoutes()`
 - use `describeFormatSupport(...)` for help text and limitations
 - use `describeConversionRouteCapabilities(...)` for route-level capability copy

@@ -113,7 +113,12 @@ export {
 } from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
 export { collectUserFacingDiagnostics } from "./ui-diagnostics.js";
-export { describeFormatSupport, listFormatSupports } from "./support-matrix.js";
+export {
+  describeFormatSupport,
+  listFormatSupports,
+  listSourceFormatSupports,
+  listTargetFormatSupports,
+} from "./support-matrix.js";
 export type {
   UserFacingDiagnostic,
   UserFacingSourcePosition,
@@ -2109,6 +2114,14 @@ export declare function describeFormatSupport(
   registry?: ConversionRegistry,
 ): FormatSupportSummary;
 export declare function listFormatSupports(
+  registry?: ConversionRegistry,
+): FormatSupportSummary[];
+/** Lists formats that can be selected as conversion sources. */
+export declare function listSourceFormatSupports(
+  registry?: ConversionRegistry,
+): FormatSupportSummary[];
+/** Lists formats that can be selected as conversion targets. */
+export declare function listTargetFormatSupports(
   registry?: ConversionRegistry,
 ): FormatSupportSummary[];
 ```
