@@ -61,6 +61,40 @@ describe("sdk source parsing", () => {
     expect(result.semanticNotes).not.toEqual([]);
   });
 
+  it("preserves OpenAPI schema constraints in the source artifact", () => {
+    const result = parseSource(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            User: {
+              type: "object",
+              properties: {
+                id: { type: "string", minLength: 1 },
+              },
+            },
+          },
+        },
+      }),
+      "openapi",
+      "zod",
+      "User",
+      {
+        sourceFormat: "openapi",
+        targetFormat: "zod",
+        input: "",
+        name: "User",
+      },
+    );
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.constraints?.kind).toBe("constraint-document");
+    expect(result.constraints?.entries.length).toBeGreaterThan(0);
+  });
+
   it("returns a parse failure with route context for invalid sources", () => {
     const result = parseSource("{ invalid", "json", "typescript", "Broken", {
       sourceFormat: "json",

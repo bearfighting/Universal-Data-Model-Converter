@@ -7,6 +7,7 @@ Entry: packages/parsers/openapi/src/index.ts
 ```ts
 import type {
   OptionCatalog,
+  ConstraintDocument,
   ParseFailureResult,
   ParseOptions,
   ParserCapabilities,
@@ -29,6 +30,7 @@ export type OpenApiParseFailureCode =
 export interface OpenApiParseSuccessResult {
   ok: true;
   document: SchemaDocument;
+  constraints?: ConstraintDocument;
   diagnostics?: SchemaDiagnostic[];
   semanticNotes?: SchemaSemanticNote[];
 }

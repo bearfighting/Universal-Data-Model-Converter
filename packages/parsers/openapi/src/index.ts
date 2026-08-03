@@ -1,5 +1,6 @@
 import type {
   OptionCatalog,
+  ConstraintDocument,
   ParseFailureResult,
   ParseOptions,
   ParseResult,
@@ -27,6 +28,7 @@ export type OpenApiParseFailureCode =
 export interface OpenApiParseSuccessResult {
   ok: true;
   document: SchemaDocument;
+  constraints?: ConstraintDocument;
   diagnostics?: SchemaDiagnostic[];
   semanticNotes?: SchemaSemanticNote[];
 }
@@ -57,9 +59,10 @@ const diagnostic = (
 
 export const openApiParserCapabilities: ParserCapabilities = {
   format: "openapi",
-  producesIr: ["shape"],
+  producesIr: ["shape", "constraint"],
   capabilities: [
     "shape-ir",
+    "constraint-ir",
     "object-constraints",
     "collection-constraints",
     "string-constraints",
@@ -156,6 +159,7 @@ export function tryParseOpenApiDocument(
   return {
     ok: true,
     document: result.document,
+    ...(result.constraints ? { constraints: result.constraints } : {}),
     ...(transformationDiagnostics.length > 0 || rewrittenDiagnostics.length > 0
       ? { diagnostics: [...transformationDiagnostics, ...rewrittenDiagnostics] }
       : {}),

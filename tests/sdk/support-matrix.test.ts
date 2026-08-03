@@ -10,6 +10,23 @@ import {
 } from "../../packages/sdk/src/index.js";
 
 describe("sdk support matrix", () => {
+  it("describes OpenAPI as a shape and constraint source", () => {
+    expect(describeFormatSupport("openapi")).toMatchObject({
+      format: "openapi",
+      parser: {
+        producesIr: ["shape", "constraint"],
+        capabilities: expect.arrayContaining([
+          "shape-ir",
+          "constraint-ir",
+          "string-constraints",
+          "numeric-constraints",
+          "collection-constraints",
+          "object-constraints",
+        ]),
+      },
+    });
+  });
+
   it("describes json as a source-only consumer surface", () => {
     expect(describeFormatSupport("json")).toEqual({
       format: "json",

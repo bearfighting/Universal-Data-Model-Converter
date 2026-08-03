@@ -210,6 +210,8 @@ describe("OpenAPI parser", () => {
         ]),
       );
     }
+    expect(result.constraints?.kind).toBe("constraint-document");
+    expect(result.constraints?.entries.length).toBeGreaterThan(0);
   });
 
   it("reports unsupported refs, allOf, and invalid nested schemas", () => {
