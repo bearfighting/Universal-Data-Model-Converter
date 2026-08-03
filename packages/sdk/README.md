@@ -11,6 +11,9 @@ TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
 runtime-schema module. The consuming project must install Zod 4.
 
+The OpenAPI schema boundary and unsupported-feature diagnostics are documented
+in [OpenAPI Schema Compatibility](../../docs/development/openapi-schema-compatibility.md).
+
 Use it when you want to:
 
 - convert between supported source and target formats

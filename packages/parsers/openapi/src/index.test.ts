@@ -479,6 +479,92 @@ describe("OpenAPI parser", () => {
     );
   });
 
+  it("emits stable diagnostics for unsupported schema keywords", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            User: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  patternProperties: { "^x-": { type: "string" } },
+                  discriminator: { propertyName: "kind" },
+                },
+              },
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(
+      result,
+      "Unsupported keywords should not corrupt supported shape.",
+    );
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported-openapi-keyword",
+          severity: "warning",
+          source: "parser-openapi",
+          path: [
+            "components",
+            "schemas",
+            "User",
+            "properties",
+            "id",
+            "patternProperties",
+          ],
+        }),
+        expect.objectContaining({
+          code: "unsupported-openapi-keyword",
+          severity: "warning",
+          source: "parser-openapi",
+          path: [
+            "components",
+            "schemas",
+            "User",
+            "properties",
+            "id",
+            "discriminator",
+          ],
+        }),
+      ]),
+    );
+  });
+
+  it("diagnoses conflicting allOf properties instead of merging them", () => {
+    const result = tryParseOpenApiDocument(
+      JSON.stringify({
+        openapi: "3.1.0",
+        components: {
+          schemas: {
+            User: {
+              allOf: [
+                { type: "object", properties: { id: { type: "string" } } },
+                { type: "object", properties: { id: { type: "integer" } } },
+              ],
+            },
+          },
+        },
+      }),
+    );
+
+    expectOk(result, "Unsafe allOf should remain non-fatal with diagnostics.");
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported-openapi-composition",
+          severity: "warning",
+          source: "parser-openapi",
+        }),
+      ]),
+    );
+  });
+
   it("rejects OpenAPI 3.0 boolean tuple schemas explicitly", () => {
     const result = tryParseOpenApiDocument(
       JSON.stringify({

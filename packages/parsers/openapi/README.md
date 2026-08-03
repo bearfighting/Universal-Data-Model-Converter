@@ -52,3 +52,6 @@ Object-only `allOf` compositions are safely merged into the shared object shape,
 including common local-reference inheritance. Conflicting properties,
 non-object compositions, and other unsupported compositions are reported
 through structured diagnostics.
+
+For the complete schema keyword matrix and diagnostic contract, see
+[OpenAPI Schema Compatibility](../../../docs/development/openapi-schema-compatibility.md).
