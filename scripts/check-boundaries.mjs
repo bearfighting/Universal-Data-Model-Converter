@@ -41,6 +41,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/generators/json-schema"),
   },
   {
+    name: "@aio/generator-openapi",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/openapi"),
+  },
+  {
     name: "@aio/generator-typescript",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/typescript"),
@@ -248,6 +253,9 @@ function getAllowedDependencies(pkg) {
     if (pkg.name === "@aio/parser-openapi") {
       return new Set(["@aio/core", "@aio/parser-json-schema"]);
     }
+    if (pkg.name === "@aio/generator-openapi") {
+      return new Set(["@aio/core", "@aio/generator-json-schema"]);
+    }
     return new Set(["@aio/core"]);
   }
 
@@ -258,6 +266,7 @@ function getAllowedDependencies(pkg) {
     "@aio/parser-openapi",
     "@aio/parser-typescript",
     "@aio/generator-json-schema",
+    "@aio/generator-openapi",
     "@aio/generator-typescript",
     "@aio/generator-zod",
   ]);

@@ -4,12 +4,14 @@ export const conversionSourceFormatSchema = z.enum([
   "json",
   "json-schema",
   "typescript",
+  "openapi",
 ]);
 
 export const conversionTargetFormatSchema = z.enum([
   "json-schema",
   "typescript",
   "zod",
+  "openapi",
 ]);
 
 export const optionMetadataStageSchema = z.enum([

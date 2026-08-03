@@ -13,15 +13,19 @@ describe("sdk registry", () => {
       planConversion("json", "json-schema"),
       planConversion("json", "typescript"),
       planConversion("json", "zod"),
+      planConversion("json", "openapi"),
       planConversion("json-schema", "json-schema"),
       planConversion("json-schema", "typescript"),
       planConversion("json-schema", "zod"),
+      planConversion("json-schema", "openapi"),
       planConversion("typescript", "json-schema"),
       planConversion("typescript", "typescript"),
       planConversion("typescript", "zod"),
+      planConversion("typescript", "openapi"),
       planConversion("openapi", "json-schema"),
       planConversion("openapi", "typescript"),
       planConversion("openapi", "zod"),
+      planConversion("openapi", "openapi"),
     ]);
   });
 

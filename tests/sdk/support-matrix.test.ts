@@ -26,6 +26,7 @@ describe("sdk support matrix", () => {
       },
       notableLimitations: [
         "OpenAPI support is currently limited to extracting schemas from components.schemas rather than processing the full API document.",
+        "OpenAPI generation emits only a canonical 3.1 schema document and does not recreate source metadata or API operations.",
         "Paths, operations, request and response bodies, parameters, headers, security, callbacks, and webhooks are outside the current parser boundary.",
         "Only local references to components.schemas are supported; external and URL-based references are unsupported.",
         "The current schema subset does not lower all OpenAPI compositions, including allOf, into shared IR.",
@@ -181,7 +182,7 @@ describe("sdk support matrix", () => {
       true,
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json-schema", "typescript", "zod"],
+      ["json-schema", "typescript", "openapi", "zod"],
     );
   });
 
@@ -206,7 +207,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(12);
+    expect(listConversionRoutes()).toHaveLength(16);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

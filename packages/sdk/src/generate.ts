@@ -40,5 +40,7 @@ function generatorOptionsFor(
     return options.advanced?.generator?.typeScript ?? {};
   }
   if (targetFormat === "zod") return options.advanced?.generator?.zod ?? {};
+  if (targetFormat === "openapi")
+    return options.advanced?.generator?.openapi ?? {};
   return options.extension?.generator ?? {};
 }

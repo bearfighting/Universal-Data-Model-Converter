@@ -34,6 +34,7 @@ describe("SDK option metadata", () => {
       "generator:json-schema",
       "generator:typescript",
       "generator:zod",
+      "generator:openapi",
     ]);
   });
 

@@ -9,6 +9,7 @@ import type {
   ValueDocument,
 } from "@aio/core";
 import type { JsonSchemaOutput } from "@aio/generator-json-schema";
+import type { OpenApiOutput } from "@aio/generator-openapi";
 import { generateTarget } from "./generate.js";
 import { planSemanticLosses } from "./losses.js";
 import {
@@ -85,7 +86,7 @@ export function createConverter<
   };
 }
 
-export function convert<TOutput = string | JsonSchemaOutput>(
+export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   options: ConvertOptions,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): ConvertResult<TOutput> {

@@ -10,6 +10,7 @@ import type {
 } from "@aio/core";
 import { typeScriptGeneratorDescriptor } from "@aio/generator-typescript";
 import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@aio/generator-json-schema";
+import { openApiGeneratorDescriptor } from "@aio/generator-openapi";
 import { zodGeneratorDescriptor } from "@aio/generator-zod";
 import { jsonParserDescriptor } from "@aio/parser-json";
 import { jsonSchemaParserDescriptor } from "@aio/parser-json-schema";
@@ -111,6 +112,7 @@ export const defaultConversionRegistry = createConversionRegistry({
     jsonSchemaDescriptor,
     typeScriptGeneratorDescriptor,
     zodGeneratorDescriptor,
+    openApiGeneratorDescriptor,
   ],
 });
 

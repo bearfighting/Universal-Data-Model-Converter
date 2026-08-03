@@ -13,7 +13,7 @@ It should stay short and answer:
 The repository is past architecture validation and has a stable-enough conversion kernel:
 
 - multi-layer IR with `Value IR`, `Shape IR`, `Constraint IR`, and `IrModel`
-- parser and generator packages for JSON, JSON Schema, TypeScript, and Zod 4
+- parser and generator packages for JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4
 - structured diagnostics, semantic notes, capability declarations, and semantic-loss reporting
 - an SDK planner that derives routes and route summaries from registries
 - an SDK report layer that now includes higher-level `capabilityRequirements` and `lossHotspots` analysis for `typescript` targets
@@ -54,6 +54,10 @@ Validated end-to-end routes today:
 - `json -> shape -> zod`
 - `json-schema -> shape + constraint -> zod`
 - `typescript -> shape -> zod`
+- `json -> shape -> openapi`
+- `json-schema -> shape + constraint -> openapi`
+- `typescript -> shape -> openapi`
+- `openapi -> shape + constraint -> openapi`
 
 Shared shape semantics currently cover:
 
@@ -90,9 +94,9 @@ Recommended order for the next repository slice:
 4. keep the public SDK contract and UI-friendly diagnostic model small and stable
 5. continue expanding shared IR only when pressure appears across multiple formats, not because one source format wants a local convenience
 
-The first additional target family is now implemented as `@aio/generator-zod`.
-It is intentionally a generator-only target; Zod parsing and other format
-families remain deferred until real cross-format pressure appears.
+The first additional target families are now implemented as `@aio/generator-zod`
+and `@aio/generator-openapi`. OpenAPI generation is intentionally limited to
+canonical 3.1 schema documents; full API document generation remains deferred.
 
 This page is intentionally only a short status summary.
 Use [consumer-surface-checklist.md](consumer-surface-checklist.md) as the single detailed readiness checklist instead of duplicating its task breakdown here.

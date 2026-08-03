@@ -60,6 +60,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@aio/generator-openapi",
+    root: path.join(repoRoot, "packages/generators/openapi"),
+    entry: path.join(repoRoot, "packages/generators/openapi/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/openapi/etc/generator-openapi.api.md",
+    ),
+  },
+  {
     name: "@aio/generator-typescript",
     root: path.join(repoRoot, "packages/generators/typescript"),
     entry: path.join(repoRoot, "packages/generators/typescript/src/index.ts"),

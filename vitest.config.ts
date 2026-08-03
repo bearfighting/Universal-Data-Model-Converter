@@ -6,6 +6,7 @@ export default defineConfig({
       "@aio/core": "/packages/core/src/index.ts",
       "@aio/generator-json-schema":
         "/packages/generators/json-schema/src/index.ts",
+      "@aio/generator-openapi": "/packages/generators/openapi/src/index.ts",
       "@aio/generator-typescript":
         "/packages/generators/typescript/src/index.ts",
       "@aio/generator-zod": "/packages/generators/zod/src/index.ts",

@@ -5,7 +5,7 @@
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
 Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
 
-The current target formats are JSON Schema, TypeScript, and Zod 4. Selecting
+The current target formats are JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
