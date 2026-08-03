@@ -43,7 +43,12 @@ export {
 } from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
 export { collectUserFacingDiagnostics } from "./ui-diagnostics.js";
-export { describeFormatSupport, listFormatSupports } from "./support-matrix.js";
+export {
+  describeFormatSupport,
+  listFormatSupports,
+  listSourceFormatSupports,
+  listTargetFormatSupports,
+} from "./support-matrix.js";
 export type {
   UserFacingDiagnostic,
   UserFacingSourcePosition,

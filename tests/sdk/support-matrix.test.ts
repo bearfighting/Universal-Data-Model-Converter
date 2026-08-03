@@ -4,6 +4,8 @@ import {
   describeFormatSupport,
   listConversionRoutes,
   listFormatSupports,
+  listSourceFormatSupports,
+  listTargetFormatSupports,
   planConversion,
 } from "../../packages/sdk/src/index.js";
 
@@ -144,6 +146,18 @@ describe("sdk support matrix", () => {
       "typescript",
       "zod",
     ]);
+  });
+
+  it("keeps generator-only formats out of source format discovery", () => {
+    expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
+      ["json", "json-schema", "typescript"],
+    );
+    expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
+      true,
+    );
+    expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
+      ["json-schema", "typescript", "zod"],
+    );
   });
 
   it("exposes the stable consumer-facing summary fields for format pickers and route copy", () => {
