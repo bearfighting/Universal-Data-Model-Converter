@@ -136,6 +136,9 @@ importers:
       "@schema-transformation-toolkit/parser-typescript":
         specifier: workspace:*
         version: link:../parsers/typescript
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -2868,8 +2871,7 @@ snapshots:
 
   word-wrap@1.2.5: {}
 
-  yaml@2.9.0:
-    optional: true
+  yaml@2.9.0: {}
 
   yocto-queue@0.1.0: {}
 

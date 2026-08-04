@@ -10,6 +10,27 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.0
+
+This prerelease establishes the `schema-transformation-toolkit` package
+identity and the public package layout for the unified SDK.
+
+### Breaking changes
+
+- Rename the npm scope from `@aio/*` to `@schema-transformation-toolkit/*`.
+- Rename the primary consumer package from `@aio/sdk` to
+  `@schema-transformation-toolkit/sdk`.
+- Update workspace imports, package metadata, documentation, and public API
+  snapshots to use the new package names.
+
+### Packaging
+
+- Make the workspace packages publishable under the new scope.
+- Keep the unified SDK bundle as the recommended single-package consumer
+  entry point.
+- Add package-level smoke coverage for building and installing the SDK tarball
+  with workspace dependencies resolved locally.
+
 ## 0.1.1-beta.3
 
 This prerelease adds OpenAPI schema conversion to the shared conversion kernel

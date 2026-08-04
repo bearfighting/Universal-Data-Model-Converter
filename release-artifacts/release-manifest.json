@@ -1,49 +1,67 @@
 {
-  "tag": "v0.1.1-alpha.1",
-  "version": "0.1.1-alpha.1",
-  "generatedAt": "2026-07-24T14:30:19.477Z",
+  "tag": "v0.2.0-beta.0",
+  "version": "0.2.0-beta.0",
+  "generatedAt": "2026-08-04T16:18:02.228Z",
   "packages": [
     {
-      "name": "@aio/core",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-core-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/core",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-core-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/generator-json-schema",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-generator-json-schema-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/generator-json-schema",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-json-schema-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/generator-typescript",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-generator-typescript-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/generator-openapi",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-openapi-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/parser-json-schema",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-parser-json-schema-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/generator-typescript",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-typescript-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/parser-json",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-parser-json-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/generator-zod",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-zod-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/parser-typescript",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-parser-typescript-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/parser-json-schema",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-json-schema-0.2.0-beta.0.tgz"
     },
     {
-      "name": "@aio/sdk",
-      "version": "0.1.1-alpha.1",
-      "private": true,
-      "tarball": "aio-sdk-0.1.1-alpha.1.tgz"
+      "name": "@schema-transformation-toolkit/parser-json",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-json-0.2.0-beta.0.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-openapi",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-openapi-0.2.0-beta.0.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-typescript",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-typescript-0.2.0-beta.0.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/sdk",
+      "version": "0.2.0-beta.0",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-sdk-0.2.0-beta.0.tgz"
     }
   ]
 }
