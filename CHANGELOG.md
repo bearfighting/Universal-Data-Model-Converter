@@ -10,6 +10,19 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.1
+
+This prerelease fixes the SDK's ESM distribution boundary for OpenAPI YAML
+support.
+
+### Fixes
+
+- Keep the CommonJS `yaml` runtime dependency external to the SDK ESM bundle.
+- Declare `yaml` as a direct SDK runtime dependency so Node and strict ESM
+  runtimes can resolve it normally.
+- Add a package smoke guard against dynamic-require compatibility code in the
+  published SDK entry point.
+
 ## 0.2.0-beta.0
 
 This prerelease establishes the `schema-transformation-toolkit` package
