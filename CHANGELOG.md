@@ -10,6 +10,35 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.1.1-beta.3
+
+This prerelease adds OpenAPI schema conversion to the shared conversion kernel
+and SDK route surface.
+
+### Features
+
+- Add `@aio/parser-openapi` for OpenAPI 3.0 and 3.1 schema documents.
+- Add `@aio/generator-openapi` for canonical OpenAPI 3.1.0 schema documents.
+- Add SDK routes for OpenAPI input and output across the supported formats.
+- Preserve supported constraints, local references, reusable definitions, and
+  safe object-only `allOf` composition through the shared IR.
+- Report unsupported OpenAPI keywords, references, and compositions through
+  structured diagnostics instead of silently approximating them.
+
+### Tests and documentation
+
+- Add parser coverage for OpenAPI versions, YAML input, references,
+  constraints, unsupported features, and composition boundaries.
+- Add OpenAPI generator contract and SDK integration tests.
+- Document the OpenAPI schema compatibility boundary and current limitations.
+
+### Compatibility notes
+
+- OpenAPI support is currently limited to schema documents; full API document
+  processing for paths, operations, and request/response metadata remains
+  deferred.
+- OpenAPI generation always emits canonical version `3.1.0`.
+
 ## 0.1.1-beta.2
 
 This patch release corrects the SDK format discovery contract for generator-only
