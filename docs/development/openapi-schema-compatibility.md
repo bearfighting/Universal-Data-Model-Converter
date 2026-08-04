@@ -1,7 +1,7 @@
 # OpenAPI Schema Compatibility
 
 This matrix describes the current `components.schemas` boundary of
-`@aio/parser-openapi` and `@aio/generator-openapi`. It does not describe full
+`@schema-transformation-toolkit/parser-openapi` and `@schema-transformation-toolkit/generator-openapi`. It does not describe full
 OpenAPI document support; paths, operations, request/response metadata,
 parameters, headers, security, callbacks, and webhooks are outside this
 boundary.
@@ -50,7 +50,7 @@ boundary.
 
 ## Generator policy
 
-`@aio/generator-openapi` emits only canonical OpenAPI 3.1.0 schema documents:
+`@schema-transformation-toolkit/generator-openapi` emits only canonical OpenAPI 3.1.0 schema documents:
 
 - `info.title` comes from the IR document name.
 - `info.version` is `0.1.0`.

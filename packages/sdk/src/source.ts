@@ -4,8 +4,8 @@ import type {
   SchemaDocument,
   SchemaSemanticNote,
   ValueDocument,
-} from "@aio/core";
-import { validateSchemaDocument } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import { validateSchemaDocument } from "@schema-transformation-toolkit/core";
 import { resolveParserDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
 import type {

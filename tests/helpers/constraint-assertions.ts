@@ -1,5 +1,5 @@
 import { expect } from "vitest";
-import type { ConstraintDocument } from "@aio/core";
+import type { ConstraintDocument } from "@schema-transformation-toolkit/core";
 
 export function expectConstraint(
   document: ConstraintDocument | undefined,

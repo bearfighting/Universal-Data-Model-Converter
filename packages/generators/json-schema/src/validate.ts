@@ -1,9 +1,9 @@
-import { walkSchemaDocument } from "@aio/core";
+import { walkSchemaDocument } from "@schema-transformation-toolkit/core";
 import type {
   SchemaDiagnostic,
   SchemaDiagnosticNodeKind,
   SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaGenerateFailureResult } from "./failure.js";
 
 export function validateJsonSchemaDocument(

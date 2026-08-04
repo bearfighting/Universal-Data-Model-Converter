@@ -4,7 +4,7 @@ import {
   type GeneratorDescriptor,
   type ParserDescriptor,
   type SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   DescriptorRegistrationError,
   type DescriptorRegistrationErrorCode,

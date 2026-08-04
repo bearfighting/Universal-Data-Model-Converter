@@ -1,11 +1,11 @@
-# API Snapshot: @aio/generator-openapi
+# API Snapshot: @schema-transformation-toolkit/generator-openapi
 
 Entry: packages/generators/openapi/src/index.ts
 
 ## packages/generators/openapi/src/api.d.ts
 
 ```ts
-import type { SchemaDocument } from "@aio/core";
+import type { SchemaDocument } from "@schema-transformation-toolkit/core";
 import type { OpenApiGenerateResult } from "./failure.js";
 import {
   type ConfiguredOpenApiGenerator,
@@ -28,26 +28,26 @@ export declare function createOpenApiGenerator(
 export declare function configureOpenApiGenerator(
   options?: OpenApiGeneratorOptions,
 ): ConfiguredOpenApiGenerator;
-export declare const openApiGenerator: import("@aio/core").SchemaGenerator<
+export declare const openApiGenerator: import("@schema-transformation-toolkit/core").SchemaGenerator<
   OpenApiOutput,
   OpenApiGeneratorOptions,
   OpenApiGenerateResult
 >;
-export declare const preparedOpenApiGeneratorOptions: import("@aio/core").PreparedOptions<ResolvedOpenApiGeneratorOptions>;
+export declare const preparedOpenApiGeneratorOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedOpenApiGeneratorOptions>;
 export { DEFAULT_OPENAPI_GENERATOR_OPTIONS };
 ```
 
 ## packages/generators/openapi/src/capabilities.d.ts
 
 ```ts
-import type { GeneratorCapabilities } from "@aio/core";
+import type { GeneratorCapabilities } from "@schema-transformation-toolkit/core";
 export declare const openApiGeneratorCapabilities: GeneratorCapabilities;
 ```
 
 ## packages/generators/openapi/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@aio/core";
+import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
 import type { OpenApiOutput } from "./options.js";
 export declare const openApiGeneratorDescriptor: GeneratorDescriptor<OpenApiOutput>;
 ```
@@ -55,7 +55,10 @@ export declare const openApiGeneratorDescriptor: GeneratorDescriptor<OpenApiOutp
 ## packages/generators/openapi/src/failure.d.ts
 
 ```ts
-import type { GenerateFailureResult, GenerateSuccessResult } from "@aio/core";
+import type {
+  GenerateFailureResult,
+  GenerateSuccessResult,
+} from "@schema-transformation-toolkit/core";
 import type { OpenApiOutput } from "./options.js";
 export type OpenApiGeneratorFailureCode =
   "openapi-definition-name-conflict" | "openapi-schema-generation-failed";
@@ -101,7 +104,7 @@ export type {
 ## packages/generators/openapi/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const openApiGeneratorOptionCatalog: OptionCatalog;
 ```
 
@@ -114,7 +117,7 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { OpenApiGenerateResult } from "./failure.js";
 export type OpenApiOutput = Record<string, unknown>;
 export interface OpenApiGeneratorOptions extends GenerateOptions {

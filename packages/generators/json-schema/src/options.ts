@@ -4,7 +4,7 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaGenerateResult } from "./failure.js";
 
 export type JsonSchemaDraft = "2020-12";

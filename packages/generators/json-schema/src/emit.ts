@@ -7,7 +7,7 @@ import type {
   SchemaRecordNode,
   SchemaTupleNode,
   SchemaUnionNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type {
   JsonSchemaOutput,
   ResolvedJsonSchemaGeneratorOptions,

@@ -10,7 +10,7 @@ import {
   schemaUnionNode,
   schemaLiteralNode,
   type SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   tryGenerateZod,
   zodGenerator,

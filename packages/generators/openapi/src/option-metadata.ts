@@ -1,4 +1,4 @@
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 
 export const openApiGeneratorOptionCatalog: OptionCatalog = {
   format: "openapi",

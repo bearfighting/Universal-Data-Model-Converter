@@ -1,4 +1,4 @@
-# @aio/parser-json
+# @schema-transformation-toolkit/parser-json
 
 JSON parser and schema inference package for the current shared IR.
 

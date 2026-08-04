@@ -1,9 +1,12 @@
 {
-  "name": "@aio/parser-openapi",
+  "name": "@schema-transformation-toolkit/parser-openapi",
   "version": "0.1.1-beta.3",
-  "private": true,
+  "private": false,
   "license": "Apache-2.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -13,8 +16,8 @@
     }
   },
   "dependencies": {
-    "@aio/core": "workspace:*",
-    "@aio/parser-json-schema": "workspace:*",
+    "@schema-transformation-toolkit/core": "workspace:*",
+    "@schema-transformation-toolkit/parser-json-schema": "workspace:*",
     "yaml": "^2.8.1"
   },
   "scripts": {

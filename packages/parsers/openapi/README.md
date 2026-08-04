@@ -1,4 +1,4 @@
-# `@aio/parser-openapi`
+# `@schema-transformation-toolkit/parser-openapi`
 
 This package is an OpenAPI schema extractor. It reads JSON or YAML OpenAPI
 3.0.x and 3.1.x documents and converts a selected entry from

@@ -1,4 +1,4 @@
-import { walkSchemaDocument } from "@aio/core";
+import { walkSchemaDocument } from "@schema-transformation-toolkit/core";
 import type {
   IdentifierName,
   SchemaDiagnostic,
@@ -7,7 +7,7 @@ import type {
   SchemaDocument,
   SchemaNode,
   SchemaObjectNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ResolvedTypeScriptGeneratorOptions } from "./options.js";
 import type { TypeScriptGenerateFailureResult } from "./failure.js";
 import { TYPESCRIPT_RESERVED_WORDS } from "./naming.js";

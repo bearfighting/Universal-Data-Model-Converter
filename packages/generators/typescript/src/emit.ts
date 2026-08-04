@@ -13,7 +13,7 @@ import type {
   SchemaTupleElement,
   SchemaTupleNode,
   SchemaUnionNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ResolvedTypeScriptGeneratorOptions } from "./options.js";
 
 const INDENT = "  ";

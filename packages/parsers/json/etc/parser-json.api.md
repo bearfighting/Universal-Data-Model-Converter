@@ -1,4 +1,4 @@
-# API Snapshot: @aio/parser-json
+# API Snapshot: @schema-transformation-toolkit/parser-json
 
 Entry: packages/parsers/json/src/index.ts
 
@@ -35,7 +35,7 @@ export {
 ## packages/parsers/json/src/capabilities.d.ts
 
 ```ts
-import type { ParserCapabilities } from "@aio/core";
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
 export declare const jsonParserCapabilities: ParserCapabilities;
 ```
 
@@ -49,14 +49,14 @@ export declare function decodeJsonText(input: string): JsonValue;
 ## packages/parsers/json/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@aio/core";
+import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
 export declare const jsonParserDescriptor: ParserDescriptor;
 ```
 
 ## packages/parsers/json/src/errors.d.ts
 
 ```ts
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 export type JsonInferenceErrorCode = "invalid-json" | "unsupported-mixed-types";
 export declare class JsonInferenceError extends Error {
   readonly code: JsonInferenceErrorCode;
@@ -141,7 +141,10 @@ export type {
 
 ```ts
 import { type ResolvedJsonParseOptions } from "./options.js";
-import { type SchemaDiagnostic, type SchemaNode } from "@aio/core";
+import {
+  type SchemaDiagnostic,
+  type SchemaNode,
+} from "@schema-transformation-toolkit/core";
 import type { JsonValue } from "./types.js";
 export declare function inferJsonType(
   value: JsonValue,
@@ -158,7 +161,7 @@ export declare function inferSchemaNodeFromJsonValue(
 ## packages/parsers/json/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const jsonParserOptionCatalog: OptionCatalog;
 ```
 
@@ -248,7 +251,7 @@ import type {
   PreparedOptions,
   ParseOptions,
   SchemaParser,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonInferenceResult } from "./parse.js";
 export type JsonParseStrictness = "strict";
 export type JsonNumericMode = "distinguish" | "number-only";
@@ -347,7 +350,7 @@ import type {
   ParseFailureResult,
   SchemaDiagnostic,
   SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   type JsonParseOptions,
   type ResolvedJsonParseOptions,
@@ -383,13 +386,13 @@ export declare function tryInferJsonDocumentWithOptions(
   options?: JsonParseOptions,
 ): JsonInferenceResult;
 /** Shared default JSON parser instance using the default v0 options. */
-export declare const jsonParser: import("@aio/core").SchemaParser<
+export declare const jsonParser: import("@schema-transformation-toolkit/core").SchemaParser<
   string,
   JsonParseOptions,
   JsonInferenceResult
 >;
 /** Prepared default option state for the shared JSON parser instance. */
-export declare const preparedJsonParserOptions: import("@aio/core").PreparedOptions<ResolvedJsonParseOptions>;
+export declare const preparedJsonParserOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedJsonParseOptions>;
 ```
 
 ## packages/parsers/json/src/types.d.ts
@@ -412,7 +415,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   ValueDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { type JsonParseOptions } from "./schema/options.js";
 export interface JsonValueDocumentSuccessResult {
   ok: true;

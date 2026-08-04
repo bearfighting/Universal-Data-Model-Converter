@@ -10,8 +10,8 @@ import type {
   SchemaTupleNode,
   SchemaUnionNode,
   SchemaUnknownNode,
-} from "@aio/core";
-import { schemaUnionNode } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import { schemaUnionNode } from "@schema-transformation-toolkit/core";
 import { isNumericScalar } from "./shared.js";
 import { JsonInferenceError } from "./errors.js";
 import type { JsonMixedTypeMode } from "./options.js";

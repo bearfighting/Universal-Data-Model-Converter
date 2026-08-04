@@ -2,10 +2,10 @@ import type {
   ConstraintDocument,
   ConversionCapability,
   SchemaDocument,
-} from "@aio/core";
-import type { JsonParseOptions } from "@aio/parser-json";
-import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
-import type { TypeScriptParseOptions } from "@aio/parser-typescript";
+} from "@schema-transformation-toolkit/core";
+import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-json";
+import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
+import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
 
 export type SemanticFixtureFormatId = "json" | "json-schema" | "typescript";
 export type SemanticFixtureCoverageSubject =

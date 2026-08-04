@@ -1,4 +1,4 @@
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 import ts from "typescript";
 import { createTypeScriptUnsupportedDiagnostic } from "./diagnostics.js";
 import { getTypeScriptSourceLocation } from "./syntax.js";

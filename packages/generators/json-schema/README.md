@@ -1,4 +1,4 @@
-# @aio/generator-json-schema
+# @schema-transformation-toolkit/generator-json-schema
 
 JSON Schema generator for the shared schema IR.
 
@@ -67,8 +67,8 @@ import {
   schemaFieldNode,
   schemaObjectNode,
   schemaScalarNode,
-} from "@aio/core";
-import { generateJsonSchema } from "@aio/generator-json-schema";
+} from "@schema-transformation-toolkit/core";
+import { generateJsonSchema } from "@schema-transformation-toolkit/generator-json-schema";
 
 const document = schemaDocument(
   "User",

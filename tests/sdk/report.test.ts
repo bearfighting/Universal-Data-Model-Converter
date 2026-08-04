@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { SchemaDiagnostic, SchemaSemanticNote } from "@aio/core";
+import type {
+  SchemaDiagnostic,
+  SchemaSemanticNote,
+} from "@schema-transformation-toolkit/core";
 import {
   buildConversionReport,
   collectPreservedCapabilities,

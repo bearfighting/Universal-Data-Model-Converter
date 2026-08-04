@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tryGenerateJsonSchema } from "@aio/generator-json-schema";
+import { tryGenerateJsonSchema } from "@schema-transformation-toolkit/generator-json-schema";
 import { sharedSemanticFixtures } from "../../fixtures/semantics/index.js";
 import {
   expectDiagnosticCodes,

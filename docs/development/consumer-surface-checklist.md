@@ -19,7 +19,7 @@ As of July 23, 2026:
 The goal is to clear the minimum library-level blockers and then let downstream consumer surfaces move.
 The goal is not to wait for the core to become "fully complete."
 
-The first additional target family is now available through `@aio/generator-zod`
+The first additional target family is now available through `@schema-transformation-toolkit/generator-zod`
 and the SDK `zod` target. It supports TypeScript and plain JavaScript output,
 assumes Zod 4 in the consuming project, and remains generator-only; this does
 not imply that a Zod parser or additional parser families are part of Stage 1.
@@ -35,7 +35,7 @@ Treat the remaining work in three buckets:
 
 These are the true library-facing blockers before a downstream Web app should rely on the current surface as its stable base.
 
-1. freeze a clearly documented Stage 1 consumer contract in `@aio/sdk`
+1. freeze a clearly documented Stage 1 consumer contract in `@schema-transformation-toolkit/sdk`
 2. add a small product-scenario matrix that tests end-user conversion flows rather than only parser or generator internals
 3. finish the remaining contract documentation around the already-implemented machine-readable format and route surface
 
@@ -45,7 +45,7 @@ These are important near-term improvements, but a downstream Web prototype or ea
 
 1. establish a first release and versioning baseline such as an alpha tag and release notes
 2. make the diagnostic location contract more explicit for editor and code-highlighting integrations
-3. decide whether a stable UI-summary layer belongs in `@aio/sdk` or should stay in the downstream presentation layer
+3. decide whether a stable UI-summary layer belongs in `@schema-transformation-toolkit/sdk` or should stay in the downstream presentation layer
 4. reserve a Worker-friendly integration path without forcing async execution into the core SDK immediately
 
 ### Can Wait Until After The First Web Iteration
@@ -67,7 +67,7 @@ Status: in progress
 
 Why it matters:
 
-- downstream apps should depend only on the stable `@aio/sdk` surface
+- downstream apps should depend only on the stable `@schema-transformation-toolkit/sdk` surface
 - consumer code should not need parser internals, generator internals, traversal helpers, or raw IR utility details
 
 The intended consumer-facing entry points are already clear:
@@ -86,7 +86,7 @@ Minimum acceptance:
 
 Current repository status:
 
-- this is materially in place through `publicConvertResultSchema` and companion schemas in `@aio/sdk`
+- this is materially in place through `publicConvertResultSchema` and companion schemas in `@schema-transformation-toolkit/sdk`
 - current stable consumer entry points are already centered on:
   - `convert()`
   - `planConversion()`
@@ -182,7 +182,7 @@ It does require one stable presentation-oriented model.
 
 Current repository status:
 
-- this is now materially in place through `collectUserFacingDiagnostics(...)` in `@aio/sdk`
+- this is now materially in place through `collectUserFacingDiagnostics(...)` in `@schema-transformation-toolkit/sdk`
 - remaining work is mostly around deciding whether more convenience summaries belong here or should stay in downstream presentation code
 
 The Stage 1 UI-facing diagnostic contract should now be read as:
@@ -445,7 +445,7 @@ They may matter later, but they are not the reason downstream product work shoul
 
 ## Recommended Start Order
 
-1. freeze and document the Stage 1 consumer contract already implied by `@aio/sdk`
+1. freeze and document the Stage 1 consumer contract already implied by `@schema-transformation-toolkit/sdk`
 2. add the small product-scenario matrix from the SDK entry point
 3. finish the machine-readable route and format surface needed by downstream consumers
 4. let downstream consumer surfaces iterate on top of that contract

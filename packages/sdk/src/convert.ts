@@ -7,9 +7,9 @@ import type {
   SchemaDocument,
   SchemaSemanticNote,
   ValueDocument,
-} from "@aio/core";
-import type { JsonSchemaOutput } from "@aio/generator-json-schema";
-import type { OpenApiOutput } from "@aio/generator-openapi";
+} from "@schema-transformation-toolkit/core";
+import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
+import type { OpenApiOutput } from "@schema-transformation-toolkit/generator-openapi";
 import { generateTarget } from "./generate.js";
 import { planSemanticLosses } from "./losses.js";
 import {

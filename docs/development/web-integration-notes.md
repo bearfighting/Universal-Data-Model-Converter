@@ -1,13 +1,13 @@
 # Web Integration Notes
 
-This note describes the smallest recommended way to wire `@aio/sdk` into an early downstream Web surface.
+This note describes the smallest recommended way to wire `@schema-transformation-toolkit/sdk` into an early downstream Web surface.
 
 It is intentionally practical rather than exhaustive.
 Use [consumer-surface-checklist.md](consumer-surface-checklist.md) for repository readiness status and [../../packages/sdk/README.md](../../packages/sdk/README.md) for the package-local API overview.
 
 ## Recommended Stage 1 Surfaces
 
-For a first Web integration, treat these `@aio/sdk` helpers as the main building blocks:
+For a first Web integration, treat these `@schema-transformation-toolkit/sdk` helpers as the main building blocks:
 
 - `listSourceFormatSupports()`
 - `listTargetFormatSupports()`
@@ -148,7 +148,7 @@ import {
   listFormatSupports,
   planConversion,
   publicConvertResultSchema,
-} from "@aio/sdk";
+} from "@schema-transformation-toolkit/sdk";
 
 const formats = listFormatSupports();
 const routes = listConversionRoutes();

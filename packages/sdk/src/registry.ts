@@ -7,15 +7,15 @@ import type {
   ParserCapabilities,
   ParserDescriptor,
   PipelineStage,
-} from "@aio/core";
-import { typeScriptGeneratorDescriptor } from "@aio/generator-typescript";
-import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@aio/generator-json-schema";
-import { openApiGeneratorDescriptor } from "@aio/generator-openapi";
-import { zodGeneratorDescriptor } from "@aio/generator-zod";
-import { jsonParserDescriptor } from "@aio/parser-json";
-import { jsonSchemaParserDescriptor } from "@aio/parser-json-schema";
-import { typeScriptParserDescriptor } from "@aio/parser-typescript";
-import { openApiParserDescriptor } from "@aio/parser-openapi";
+} from "@schema-transformation-toolkit/core";
+import { typeScriptGeneratorDescriptor } from "@schema-transformation-toolkit/generator-typescript";
+import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
+import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
+import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
+import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
+import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
+import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
+import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
 import type { ConversionFormat, ConversionRegistry } from "./types.js";
 
 export type DescriptorRegistrationErrorCode =

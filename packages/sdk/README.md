@@ -1,6 +1,11 @@
-# `@aio/sdk`
+# `@schema-transformation-toolkit/sdk`
 
-`@aio/sdk` is the highest-level package in the repository.
+`@schema-transformation-toolkit/sdk` is the highest-level package in the repository.
+
+It is the single-package installation for the built-in parser and generator
+surface. Install `@schema-transformation-toolkit/sdk` alone for the normal pipeline API; the individual
+`@schema-transformation-toolkit/parser-*` and `@schema-transformation-toolkit/generator-*` packages remain available for advanced,
+format-specific integrations.
 
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
 Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
@@ -25,7 +30,7 @@ Use it when you want to:
 ## Main Entry Point
 
 ```ts
-import { convert } from "@aio/sdk";
+import { convert } from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json-schema",
@@ -49,6 +54,14 @@ if (!result.ok) {
   console.log(result.report);
 }
 ```
+
+The default registry includes JSON, JSON Schema, TypeScript, and OpenAPI
+parsers, plus JSON Schema, TypeScript, Zod, and OpenAPI generators. The SDK
+bundles those implementations into its distributable runtime. TypeScript is
+installed as a runtime dependency because the TypeScript parser uses the
+official compiler API; Zod remains a dependency for the public contract
+schemas. Consumers do not need to install any parser or generator package
+separately.
 
 ## Stage 1 Contract
 
@@ -110,7 +123,7 @@ if (result.ok) {
 
 ## Consumer-Facing Helpers
 
-`@aio/sdk` now also exposes two small consumer-facing helper layers.
+`@schema-transformation-toolkit/sdk` now also exposes two small consumer-facing helper layers.
 
 ### Public Contract Schemas
 
@@ -131,7 +144,7 @@ Use the option metadata helpers when a consumer needs to explain advanced
 configuration without parsing package README files:
 
 ```ts
-import { describeConversionOptions } from "@aio/sdk";
+import { describeConversionOptions } from "@schema-transformation-toolkit/sdk";
 
 const options = describeConversionOptions("json", "typescript");
 for (const option of options.parser.options) {
@@ -155,7 +168,10 @@ of the consuming application.
 Example:
 
 ```ts
-import { convert, publicConvertResultSchema } from "@aio/sdk";
+import {
+  convert,
+  publicConvertResultSchema,
+} from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json",
@@ -178,7 +194,10 @@ Use `collectUserFacingDiagnostics(...)` when a downstream consumer should not ne
 Example:
 
 ```ts
-import { collectUserFacingDiagnostics, convert } from "@aio/sdk";
+import {
+  collectUserFacingDiagnostics,
+  convert,
+} from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json-schema",
@@ -216,7 +235,10 @@ Use `describeFormatSupport(...)` or `listFormatSupports()` when a downstream app
 Example:
 
 ```ts
-import { describeFormatSupport, listFormatSupports } from "@aio/sdk";
+import {
+  describeFormatSupport,
+  listFormatSupports,
+} from "@schema-transformation-toolkit/sdk";
 
 const typeScriptSupport = describeFormatSupport("typescript");
 const allSupports = listFormatSupports();
@@ -253,7 +275,7 @@ import {
   createConversionRegistry,
   createConverter,
   defaultConversionRegistry,
-} from "@aio/sdk";
+} from "@schema-transformation-toolkit/sdk";
 
 const registry = createConversionRegistry({
   parsers: [...defaultConversionRegistry.listParsers(), myParserDescriptor],

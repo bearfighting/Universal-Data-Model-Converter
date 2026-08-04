@@ -24,7 +24,7 @@ import {
   type SchemaSemanticNote,
   type ConstraintDocument,
   type ConstraintEntry,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   jsonSchemaDiagnostic,
   jsonSchemaObservation,

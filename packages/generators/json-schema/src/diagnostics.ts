@@ -3,13 +3,13 @@ import {
   pushSchemaObservation,
   walkSchemaDocument,
   type SchemaNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type {
   SchemaDefinition,
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ResolvedJsonSchemaGeneratorOptions } from "./options.js";
 
 export interface JsonSchemaSemanticObservations {

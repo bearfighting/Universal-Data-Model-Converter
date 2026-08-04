@@ -2,7 +2,7 @@ import type {
   ParseResult,
   ParserDescriptor,
   ParserExecutionContext,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   parseJsonValueDocumentWithOptions,
   tryInferJsonDocumentFromValueDocumentWithOptions,

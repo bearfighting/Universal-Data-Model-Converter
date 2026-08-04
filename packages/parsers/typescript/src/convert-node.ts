@@ -15,7 +15,7 @@ import {
   type SchemaDiagnosticNodeKind,
   type SchemaFieldNode,
   type SchemaNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import ts from "typescript";
 import { convertTypeScriptEnumDeclaration } from "./convert-enum.js";
 import {

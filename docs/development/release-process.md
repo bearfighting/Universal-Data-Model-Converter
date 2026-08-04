@@ -1,6 +1,6 @@
 # Release Process
 
-This repository now supports a minimal release path for GitHub tags and GitHub Releases without publishing any packages to npm.
+This repository now supports a minimal release path for GitHub tags and GitHub Releases without publishing packages to npm. The public `@schema-transformation-toolkit/sdk` package is the single-package consumer entry point; its runtime bundle contains the built-in parser and generator implementations.
 
 That is the intended current baseline.
 Until the parser and generator surface is broader and the consumer contract has settled further, releases should be treated as tagged engine snapshots plus attached package tarballs rather than as public npm publication events.
@@ -17,8 +17,8 @@ The current release path is meant to provide:
 
 It is intentionally not meant to provide:
 
-- npm publication
-- a public package-registry support promise
+- npm publication for the workspace as a whole
+- a public package-registry support promise for independent package consumption
 - independent per-package versioning
 
 ## Versioning Model
@@ -142,9 +142,10 @@ This is the current non-npm distribution path.
 
 Until npm publication is introduced, downstream consumers should prefer one of these models:
 
-1. depend on a tagged repository snapshot inside a larger internal workspace
-2. consume the release tarballs from a matching GitHub Release
-3. vendor the tagged source snapshot directly when a monorepo-style integration is simpler
+1. depend on the public `@schema-transformation-toolkit/sdk` tarball from a matching GitHub Release when only the unified API is needed
+2. depend on a tagged repository snapshot inside a larger internal workspace
+3. consume the complete set of release tarballs when direct parser/generator APIs are needed
+4. vendor the tagged source snapshot directly when a monorepo-style integration is simpler
 
 The important rule is consistency:
 
@@ -158,7 +159,7 @@ Likely later follow-up includes:
 
 - a public changelog policy
 - npm publication
-- package visibility changes from `private: true`
+- package-level publish filtering and independent package compatibility guarantees
 - possible package-level publish filtering
 - stronger automation around release PRs or prerelease channels
 

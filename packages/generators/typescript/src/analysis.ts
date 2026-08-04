@@ -7,7 +7,7 @@ import {
   type SchemaDefinition,
   type SchemaDocument,
   type SchemaNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 
 export type TypeScriptLossHotspotCode =
   "integer-widening" | "wide-unknown" | "unknown-union-absorption";

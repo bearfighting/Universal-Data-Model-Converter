@@ -1,4 +1,4 @@
-# @aio/generator-openapi
+# @schema-transformation-toolkit/generator-openapi
 
 Canonical OpenAPI 3.1 generator for the shared schema IR.
 
@@ -20,7 +20,10 @@ version. OpenAPI 3.0 remains an input-only parser format.
 ## API
 
 ```ts
-import { generateOpenApi, tryGenerateOpenApi } from "@aio/generator-openapi";
+import {
+  generateOpenApi,
+  tryGenerateOpenApi,
+} from "@schema-transformation-toolkit/generator-openapi";
 
 const output = generateOpenApi(document);
 const result = tryGenerateOpenApi(document);

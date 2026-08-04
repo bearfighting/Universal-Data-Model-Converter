@@ -12,7 +12,7 @@ import {
   schemaUnknownNode,
   type SchemaNode,
   type SchemaObjectNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   inferArrayNodeFromSamples,
   inferArrayNodeWithTupleFallback,

@@ -101,5 +101,5 @@ Some current JSON Schema generator behavior is target policy rather than parser 
 ## Maintenance Rules
 
 - treat this file as a boundary summary, not a feature wishlist
-- classify each new JSON Schema pressure as shared-shape, constraint, or format-local before changing `@aio/core`
+- classify each new JSON Schema pressure as shared-shape, constraint, or format-local before changing `@schema-transformation-toolkit/core`
 - keep examples representative and short

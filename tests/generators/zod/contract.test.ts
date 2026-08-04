@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tryGenerateZod } from "@aio/generator-zod";
+import { tryGenerateZod } from "@schema-transformation-toolkit/generator-zod";
 import { sharedSemanticFixtures } from "../../fixtures/semantics/index.js";
 import {
   expectDiagnosticCodes,

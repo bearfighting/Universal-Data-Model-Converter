@@ -6,11 +6,11 @@ import {
   schemaScalarNode,
   schemaUnionNode,
   schemaUnknownNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   generateJsonSchema,
   tryGenerateJsonSchema,
-} from "@aio/generator-json-schema";
+} from "@schema-transformation-toolkit/generator-json-schema";
 import {
   sharedSemanticFixtures,
   unknownRootFixture,

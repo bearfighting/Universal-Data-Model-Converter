@@ -3,7 +3,7 @@
 The SDK can generate a Zod 4 module from JSON-inferred shape semantics.
 
 ```ts
-import { convert } from "@aio/sdk";
+import { convert } from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json",

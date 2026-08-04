@@ -1,4 +1,4 @@
-import type { ParserCapabilities } from "@aio/core";
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
 
 export const typeScriptParserCapabilities: ParserCapabilities = {
   format: "typescript",

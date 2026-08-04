@@ -2,7 +2,7 @@ import type {
   ConversionSemanticCaveat,
   SchemaDiagnostic,
   SemanticLoss,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ConvertFailureResult, ConvertResult } from "./types.js";
 
 export interface UserFacingSourcePosition {

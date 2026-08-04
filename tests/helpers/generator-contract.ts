@@ -1,4 +1,7 @@
-import type { ConstraintDocument, SchemaDocument } from "@aio/core";
+import type {
+  ConstraintDocument,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
 import type { SemanticFixture } from "../fixtures/semantics/types.js";
 
 export function getFixtureDocument(fixture: SemanticFixture): SchemaDocument {

@@ -4,7 +4,7 @@ import type {
   SchemaDocument,
   ValueDocument,
   ValueNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   schemaDocument,
   valueArrayNode,
@@ -12,7 +12,7 @@ import {
   valueObjectField,
   valueObjectNode,
   valueScalarNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { decodeJsonText } from "./decode.js";
 import { isJsonInferenceError } from "./errors.js";
 import { inferSchemaNodeFromJsonValue } from "./schema/infer.js";

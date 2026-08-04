@@ -1,4 +1,4 @@
-# API Snapshot: @aio/core
+# API Snapshot: @schema-transformation-toolkit/core
 
 Entry: packages/core/src/index.ts
 

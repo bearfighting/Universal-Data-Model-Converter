@@ -12,7 +12,7 @@ import type {
   SchemaSemanticNote,
   SemanticLoss,
   ValueDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { classifyConstraintCapability } from "./losses.js";
 import { describeConversionRouteCapabilities } from "./registry.js";
 import type {

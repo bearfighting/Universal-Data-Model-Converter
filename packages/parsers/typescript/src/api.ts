@@ -3,7 +3,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { getTypeScriptSourceLocation } from "./syntax.js";
 import { convertTypeScriptEntryDeclarationToSchemaDocument } from "./convert.js";
 import {

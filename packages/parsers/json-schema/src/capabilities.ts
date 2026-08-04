@@ -1,4 +1,4 @@
-import type { ParserCapabilities } from "@aio/core";
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
 
 export const jsonSchemaParserCapabilities: ParserCapabilities = {
   format: "json-schema",

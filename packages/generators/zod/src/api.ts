@@ -1,4 +1,7 @@
-import type { SchemaDocument, SchemaGenerator } from "@aio/core";
+import type {
+  SchemaDocument,
+  SchemaGenerator,
+} from "@schema-transformation-toolkit/core";
 import { createObservations } from "./diagnostics.js";
 import { renderZodDocument } from "./emit.js";
 import type { ZodGenerateResult } from "./failure.js";

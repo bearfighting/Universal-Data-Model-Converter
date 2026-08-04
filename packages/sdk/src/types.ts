@@ -10,21 +10,21 @@ import type {
   ConversionRoute,
   ParserDescriptor,
   GeneratorDescriptor,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type {
   JsonSchemaGeneratorOptions,
   JsonSchemaOutput,
-} from "@aio/generator-json-schema";
+} from "@schema-transformation-toolkit/generator-json-schema";
 import type {
   OpenApiGeneratorOptions,
   OpenApiOutput,
-} from "@aio/generator-openapi";
-import type { TypeScriptGeneratorOptions } from "@aio/generator-typescript";
-import type { ZodGeneratorOptions } from "@aio/generator-zod";
-import type { JsonParseOptions } from "@aio/parser-json";
-import type { JsonSchemaParseOptions } from "@aio/parser-json-schema";
-import type { TypeScriptParseOptions } from "@aio/parser-typescript";
-import type { OpenApiParseOptions } from "@aio/parser-openapi";
+} from "@schema-transformation-toolkit/generator-openapi";
+import type { TypeScriptGeneratorOptions } from "@schema-transformation-toolkit/generator-typescript";
+import type { ZodGeneratorOptions } from "@schema-transformation-toolkit/generator-zod";
+import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-json";
+import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
+import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
+import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
 
 export type BuiltinSourceFormat =
   "json" | "json-schema" | "typescript" | "openapi";

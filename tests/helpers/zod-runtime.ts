@@ -17,7 +17,11 @@ export async function expectGeneratedZodRuntimeBehavior(
   language: "typescript" | "javascript",
 ): Promise<void> {
   const directory = await mkdtemp(
-    join(process.cwd(), "node_modules", ".aio-zod-runtime-"),
+    join(
+      process.cwd(),
+      "node_modules",
+      ".schema-transformation-toolkit-zod-runtime-",
+    ),
   );
   const sourcePath = join(directory, "generated.mjs");
 

@@ -1,4 +1,7 @@
-import type { ConstraintDocument, SchemaDocument } from "@aio/core";
+import type {
+  ConstraintDocument,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
 import { resolveGeneratorDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
 import type {
@@ -15,7 +18,7 @@ export function generateTarget<TOutput = unknown>(
   options: ConvertOptions,
   constraints: ConstraintDocument | undefined,
   registry: ConversionRegistry = defaultConversionRegistry,
-): import("@aio/core").GenerateResult<TOutput> {
+): import("@schema-transformation-toolkit/core").GenerateResult<TOutput> {
   const descriptor = resolveGeneratorDescriptor<TOutput>(
     targetFormat,
     registry,

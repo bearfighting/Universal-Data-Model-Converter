@@ -2,7 +2,7 @@ import {
   type SchemaDiagnostic,
   type SchemaNode,
   schemaUnknownNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { JsonInferenceError, isJsonInferenceError } from "./errors.js";
 import { mergeTypeNodes } from "./merge.js";
 import type { ResolvedJsonParseOptions } from "./options.js";

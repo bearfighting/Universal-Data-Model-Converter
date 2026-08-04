@@ -3,7 +3,7 @@ import type {
   PreparedOptions,
   ParseOptions,
   SchemaParser,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonInferenceResult } from "./parse.js";
 
 export type JsonParseStrictness = "strict";

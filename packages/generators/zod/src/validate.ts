@@ -1,4 +1,8 @@
-import type { SchemaDiagnostic, SchemaDocument, SchemaNode } from "@aio/core";
+import type {
+  SchemaDiagnostic,
+  SchemaDocument,
+  SchemaNode,
+} from "@schema-transformation-toolkit/core";
 import type { ResolvedZodGeneratorOptions } from "./options.js";
 import type { ZodGeneratorFailureResult } from "./failure.js";
 

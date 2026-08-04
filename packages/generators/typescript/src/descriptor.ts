@@ -1,4 +1,7 @@
-import type { GeneratorDescriptor, GeneratorExecutionContext } from "@aio/core";
+import type {
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+} from "@schema-transformation-toolkit/core";
 import { typeScriptGeneratorCapabilities } from "./capabilities.js";
 import {
   collectTypeScriptCapabilityRequirements,

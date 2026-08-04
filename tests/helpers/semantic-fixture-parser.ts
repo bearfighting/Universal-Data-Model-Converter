@@ -3,10 +3,10 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
-import { tryInferJsonDocumentWithOptions } from "@aio/parser-json";
-import { tryInferJsonSchemaDocumentWithOptions } from "@aio/parser-json-schema";
-import { tryInferTypeScriptDocumentWithOptions } from "@aio/parser-typescript";
+} from "@schema-transformation-toolkit/core";
+import { tryInferJsonDocumentWithOptions } from "@schema-transformation-toolkit/parser-json";
+import { tryInferJsonSchemaDocumentWithOptions } from "@schema-transformation-toolkit/parser-json-schema";
+import { tryInferTypeScriptDocumentWithOptions } from "@schema-transformation-toolkit/parser-typescript";
 import type {
   SemanticFixture,
   SemanticFixtureFormatId,

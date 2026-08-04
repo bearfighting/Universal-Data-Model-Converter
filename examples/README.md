@@ -25,7 +25,7 @@ If you are starting from the higher-level pipeline API instead of individual par
 - [typescript-to-zod.md](typescript-to-zod.md): TypeScript schema subset to a Zod 4 runtime schema
 - [zod-recursive-definitions.md](zod-recursive-definitions.md): recursive definition output policy
 - [json-schema-to-json-schema.md](json-schema-to-json-schema.md): the best entry point for understanding the current JSON Schema round-trip boundary
-- [sdk-report-analysis.md](sdk-report-analysis.md): the best entry point for understanding how to read `@aio/sdk` report output after a successful conversion
+- [sdk-report-analysis.md](sdk-report-analysis.md): the best entry point for understanding how to read `@schema-transformation-toolkit/sdk` report output after a successful conversion
 - [consumer-golden-examples.md](consumer-golden-examples.md): the best entry point when a downstream product surface needs a compact default sample library
 
 ## By Source Input
@@ -62,5 +62,5 @@ If you are starting from the higher-level pipeline API instead of individual par
 
 - these documents show current supported behavior, not aspirational future behavior
 - they focus on successful end-to-end flows, while tests and development docs track failure matrices and design tradeoffs
-- `sdk-report-analysis.mjs` is a runnable example after `pnpm build` when you want to inspect real higher-level `@aio/sdk` report output
+- `sdk-report-analysis.mjs` is a runnable example after `pnpm build` when you want to inspect real higher-level `@schema-transformation-toolkit/sdk` report output
 - `consumer-golden-examples.md` is the right starting point when another repo wants a smaller curated sample set instead of the full examples tour

@@ -1,6 +1,6 @@
-import type { SchemaDocument } from "@aio/core";
-import { tryGenerateJsonSchema } from "@aio/generator-json-schema";
-import type { JsonSchemaOutput } from "@aio/generator-json-schema";
+import type { SchemaDocument } from "@schema-transformation-toolkit/core";
+import { tryGenerateJsonSchema } from "@schema-transformation-toolkit/generator-json-schema";
+import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
 import type { OpenApiGenerateResult } from "./failure.js";
 import {
   type ConfiguredOpenApiGenerator,
@@ -219,7 +219,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function rewriteDiagnostics(
-  diagnostics: import("@aio/core").SchemaDiagnostic[] | undefined,
+  diagnostics:
+    | import("@schema-transformation-toolkit/core").SchemaDiagnostic[]
+    | undefined,
 ) {
   return (diagnostics ?? []).map((diagnostic) => ({
     ...diagnostic,
@@ -227,7 +229,9 @@ function rewriteDiagnostics(
   }));
 }
 
-function rewriteSemanticNotes(notes: import("@aio/core").SchemaSemanticNote[]) {
+function rewriteSemanticNotes(
+  notes: import("@schema-transformation-toolkit/core").SchemaSemanticNote[],
+) {
   return notes.map((note) => ({
     ...note,
     source: "generator-openapi",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tryGenerateTypeScript } from "@aio/generator-typescript";
+import { tryGenerateTypeScript } from "@schema-transformation-toolkit/generator-typescript";
 import { sharedSemanticFixtures } from "../../fixtures/semantics/index.js";
 import {
   expectDiagnosticCodes,

@@ -2,8 +2,8 @@ import type {
   ParseFailureResult,
   SchemaDiagnostic,
   SchemaDocument,
-} from "@aio/core";
-import { schemaDocument } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import { schemaDocument } from "@schema-transformation-toolkit/core";
 import { decodeJsonText } from "../decode.js";
 import { isJsonInferenceError } from "../errors.js";
 import { inferSchemaNodeFromJsonValue } from "./infer.js";

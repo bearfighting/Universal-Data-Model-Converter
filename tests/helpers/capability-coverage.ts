@@ -2,7 +2,7 @@ import type {
   ConversionCapability,
   GeneratorCapabilities,
   ParserCapabilities,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type {
   SemanticFixture,
   SemanticFixtureCoverageSubject,

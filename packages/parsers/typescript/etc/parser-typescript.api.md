@@ -1,4 +1,4 @@
-# API Snapshot: @aio/parser-typescript
+# API Snapshot: @schema-transformation-toolkit/parser-typescript
 
 Entry: packages/parsers/typescript/src/index.ts
 
@@ -10,7 +10,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   type ResolvedTypeScriptParseOptions,
   type TypeScriptParseOptions,
@@ -68,33 +68,33 @@ export declare function tryInferTypeScriptDocumentWithOptions(
   options?: TypeScriptParseOptions,
 ): TypeScriptInferenceResult;
 /** Shared default TypeScript parser instance using the default v0 options. */
-export declare const typeScriptParser: import("@aio/core").SchemaParser<
+export declare const typeScriptParser: import("@schema-transformation-toolkit/core").SchemaParser<
   string,
   TypeScriptParseOptions,
   TypeScriptInferenceResult
 >;
 /** Prepared default option state for the shared TypeScript parser instance. */
-export declare const preparedTypeScriptParserOptions: import("@aio/core").PreparedOptions<ResolvedTypeScriptParseOptions>;
+export declare const preparedTypeScriptParserOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedTypeScriptParseOptions>;
 ```
 
 ## packages/parsers/typescript/src/capabilities.d.ts
 
 ```ts
-import type { ParserCapabilities } from "@aio/core";
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
 export declare const typeScriptParserCapabilities: ParserCapabilities;
 ```
 
 ## packages/parsers/typescript/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@aio/core";
+import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
 export declare const typeScriptParserDescriptor: ParserDescriptor;
 ```
 
 ## packages/parsers/typescript/src/errors.d.ts
 
 ```ts
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 export type TypeScriptInferenceErrorCode =
   | "unsupported-typescript-enum-member-initializer"
   | "unsupported-typescript-entry-declaration-kind"
@@ -282,7 +282,7 @@ export {
 ## packages/parsers/typescript/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const typeScriptParserOptionCatalog: OptionCatalog;
 ```
 
@@ -294,7 +294,7 @@ import type {
   ParseOptions,
   PreparedOptions,
   SchemaParser,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { TypeScriptInferenceResult } from "./api.js";
 export type TypeScriptParseStrictness = "strict";
 export interface TypeScriptDiagnosticsOptions {
@@ -348,7 +348,7 @@ export declare function configureTypeScriptParser(
 ## packages/parsers/typescript/src/preprocess.d.ts
 
 ```ts
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 import ts from "typescript";
 import { type TypeScriptImplicitEntryAnalysis } from "./implicit-entry.js";
 import type { ResolvedTypeScriptParseOptions } from "./options.js";
@@ -410,7 +410,7 @@ import type {
   SchemaDefinition,
   SchemaDiagnostic,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type ts from "typescript";
 export type TypeScriptEntryDeclaration =
   ts.TypeAliasDeclaration | ts.InterfaceDeclaration | ts.EnumDeclaration;

@@ -7,7 +7,7 @@ import type {
   SchemaNode,
   SchemaObjectNode,
   SchemaTupleElement,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ZodSemanticObservations } from "./diagnostics.js";
 import { addCaveat, addPolicyNote, constraintsAt } from "./diagnostics.js";
 import type { ResolvedZodGeneratorOptions } from "./options.js";

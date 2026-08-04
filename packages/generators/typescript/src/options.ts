@@ -3,8 +3,8 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
-import type { NamingStrategy } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import type { NamingStrategy } from "@schema-transformation-toolkit/core";
 import { createTypeScriptNamingStrategy } from "./naming.js";
 import type { TypeScriptGenerateResult } from "./failure.js";
 

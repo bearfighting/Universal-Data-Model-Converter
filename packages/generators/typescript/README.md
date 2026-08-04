@@ -1,4 +1,4 @@
-# @aio/generator-typescript
+# @schema-transformation-toolkit/generator-typescript
 
 TypeScript generator for the shared schema IR.
 
@@ -146,8 +146,8 @@ import {
   schemaFieldNode,
   schemaObjectNode,
   schemaScalarNode,
-} from "@aio/core";
-import { generateTypeScript } from "@aio/generator-typescript";
+} from "@schema-transformation-toolkit/core";
+import { generateTypeScript } from "@schema-transformation-toolkit/generator-typescript";
 
 const document = schemaDocument(
   "User",

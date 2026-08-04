@@ -3,18 +3,24 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@aio/core": "/packages/core/src/index.ts",
-      "@aio/generator-json-schema":
+      "@schema-transformation-toolkit/core": "/packages/core/src/index.ts",
+      "@schema-transformation-toolkit/generator-json-schema":
         "/packages/generators/json-schema/src/index.ts",
-      "@aio/generator-openapi": "/packages/generators/openapi/src/index.ts",
-      "@aio/generator-typescript":
+      "@schema-transformation-toolkit/generator-openapi":
+        "/packages/generators/openapi/src/index.ts",
+      "@schema-transformation-toolkit/generator-typescript":
         "/packages/generators/typescript/src/index.ts",
-      "@aio/generator-zod": "/packages/generators/zod/src/index.ts",
-      "@aio/parser-json": "/packages/parsers/json/src/index.ts",
-      "@aio/parser-json-schema": "/packages/parsers/json-schema/src/index.ts",
-      "@aio/parser-typescript": "/packages/parsers/typescript/src/index.ts",
-      "@aio/parser-openapi": "/packages/parsers/openapi/src/index.ts",
-      "@aio/sdk": "/packages/sdk/src/index.ts",
+      "@schema-transformation-toolkit/generator-zod":
+        "/packages/generators/zod/src/index.ts",
+      "@schema-transformation-toolkit/parser-json":
+        "/packages/parsers/json/src/index.ts",
+      "@schema-transformation-toolkit/parser-json-schema":
+        "/packages/parsers/json-schema/src/index.ts",
+      "@schema-transformation-toolkit/parser-typescript":
+        "/packages/parsers/typescript/src/index.ts",
+      "@schema-transformation-toolkit/parser-openapi":
+        "/packages/parsers/openapi/src/index.ts",
+      "@schema-transformation-toolkit/sdk": "/packages/sdk/src/index.ts",
     },
   },
   test: {

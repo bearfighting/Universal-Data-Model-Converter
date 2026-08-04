@@ -3,7 +3,7 @@ import type {
   ParseOptions,
   PreparedOptions,
   SchemaParser,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { TypeScriptInferenceResult } from "./api.js";
 
 export type TypeScriptParseStrictness = "strict";

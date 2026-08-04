@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { schemaDocument, schemaScalarNode } from "@aio/core";
+import {
+  schemaDocument,
+  schemaScalarNode,
+} from "@schema-transformation-toolkit/core";
 import { jsonParserDescriptor } from "../../packages/parsers/json/src/index.js";
 import { jsonSchemaParserDescriptor } from "../../packages/parsers/json-schema/src/index.js";
 import { typeScriptParserDescriptor } from "../../packages/parsers/typescript/src/index.js";

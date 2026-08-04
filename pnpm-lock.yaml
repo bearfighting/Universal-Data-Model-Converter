@@ -49,49 +49,49 @@ importers:
 
   packages/generators/json-schema:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
 
   packages/generators/openapi:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
-      "@aio/generator-json-schema":
+      "@schema-transformation-toolkit/generator-json-schema":
         specifier: workspace:*
         version: link:../json-schema
 
   packages/generators/typescript:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
 
   packages/generators/zod:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
 
   packages/parsers/json:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
 
   packages/parsers/json-schema:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
 
   packages/parsers/openapi:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
-      "@aio/parser-json-schema":
+      "@schema-transformation-toolkit/parser-json-schema":
         specifier: workspace:*
         version: link:../json-schema
       yaml:
@@ -100,7 +100,7 @@ importers:
 
   packages/parsers/typescript:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
       typescript:
@@ -109,31 +109,31 @@ importers:
 
   packages/sdk:
     dependencies:
-      "@aio/core":
+      "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../core
-      "@aio/generator-json-schema":
+      "@schema-transformation-toolkit/generator-json-schema":
         specifier: workspace:*
         version: link:../generators/json-schema
-      "@aio/generator-openapi":
+      "@schema-transformation-toolkit/generator-openapi":
         specifier: workspace:*
         version: link:../generators/openapi
-      "@aio/generator-typescript":
+      "@schema-transformation-toolkit/generator-typescript":
         specifier: workspace:*
         version: link:../generators/typescript
-      "@aio/generator-zod":
+      "@schema-transformation-toolkit/generator-zod":
         specifier: workspace:*
         version: link:../generators/zod
-      "@aio/parser-json":
+      "@schema-transformation-toolkit/parser-json":
         specifier: workspace:*
         version: link:../parsers/json
-      "@aio/parser-json-schema":
+      "@schema-transformation-toolkit/parser-json-schema":
         specifier: workspace:*
         version: link:../parsers/json-schema
-      "@aio/parser-openapi":
+      "@schema-transformation-toolkit/parser-openapi":
         specifier: workspace:*
         version: link:../parsers/openapi
-      "@aio/parser-typescript":
+      "@schema-transformation-toolkit/parser-typescript":
         specifier: workspace:*
         version: link:../parsers/typescript
       zod:

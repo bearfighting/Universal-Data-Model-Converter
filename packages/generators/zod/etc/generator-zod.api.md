@@ -1,11 +1,14 @@
-# API Snapshot: @aio/generator-zod
+# API Snapshot: @schema-transformation-toolkit/generator-zod
 
 Entry: packages/generators/zod/src/index.ts
 
 ## packages/generators/zod/src/api.d.ts
 
 ```ts
-import type { SchemaDocument, SchemaGenerator } from "@aio/core";
+import type {
+  SchemaDocument,
+  SchemaGenerator,
+} from "@schema-transformation-toolkit/core";
 import type { ZodGenerateResult } from "./failure.js";
 import {
   type ConfiguredZodGenerator,
@@ -32,28 +35,31 @@ export declare const zodGenerator: SchemaGenerator<
   ZodGeneratorOptions,
   ZodGenerateResult
 >;
-export declare const preparedZodGeneratorOptions: import("@aio/core").PreparedOptions<ResolvedZodGeneratorOptions>;
+export declare const preparedZodGeneratorOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedZodGeneratorOptions>;
 export { DEFAULT_ZOD_GENERATOR_OPTIONS };
 ```
 
 ## packages/generators/zod/src/capabilities.d.ts
 
 ```ts
-import type { GeneratorCapabilities } from "@aio/core";
+import type { GeneratorCapabilities } from "@schema-transformation-toolkit/core";
 export declare const zodGeneratorCapabilities: GeneratorCapabilities;
 ```
 
 ## packages/generators/zod/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@aio/core";
+import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
 export declare const zodGeneratorDescriptor: GeneratorDescriptor<string>;
 ```
 
 ## packages/generators/zod/src/failure.d.ts
 
 ```ts
-import type { GenerateFailureResult, GenerateSuccessResult } from "@aio/core";
+import type {
+  GenerateFailureResult,
+  GenerateSuccessResult,
+} from "@schema-transformation-toolkit/core";
 export type ZodGeneratorFailureCode =
   | "invalid-schema-name"
   | "duplicate-rendered-schema-name"
@@ -106,7 +112,7 @@ export type {
 ## packages/generators/zod/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const zodGeneratorOptionCatalog: OptionCatalog;
 ```
 
@@ -120,7 +126,7 @@ import type {
   NamingStrategy,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ZodGenerateResult } from "./failure.js";
 export type ZodOutputLanguage = "typescript" | "javascript";
 export interface ZodGeneratorOptions extends GenerateOptions {

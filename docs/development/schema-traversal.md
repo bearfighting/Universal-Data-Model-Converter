@@ -11,7 +11,7 @@ It should stay smaller than a framework spec and more concrete than a vague dire
 
 ## Implementation Status
 
-The first traversal extraction is now implemented in `@aio/core`.
+The first traversal extraction is now implemented in `@schema-transformation-toolkit/core`.
 The first immutable transform extraction is also now implemented there.
 The first dedicated shape-normalization exit is also now implemented there.
 
@@ -73,7 +73,7 @@ The current bottleneck is semantic clarity, not feature richness.
 
 ## Current Repository State
 
-The repository now has these concrete entry points in `@aio/core`:
+The repository now has these concrete entry points in `@schema-transformation-toolkit/core`:
 
 - traversal:
   - `walkSchemaDocument()`
@@ -209,7 +209,7 @@ The traversal layer should follow these rules:
 
 ## API Boundary
 
-The first helper should live in `@aio/core`, but it should not be treated as a permanently frozen top-level SDK contract on day one.
+The first helper should live in `@schema-transformation-toolkit/core`, but it should not be treated as a permanently frozen top-level SDK contract on day one.
 
 The boundary should be:
 
@@ -219,7 +219,7 @@ The boundary should be:
 
 Practical guidance:
 
-- export the helper from the schema layer in `@aio/core`
+- export the helper from the schema layer in `@schema-transformation-toolkit/core`
 - treat the first version as a focused shared core utility, not as a broad framework promise
 - avoid coupling `sdk` route or report abstractions directly to traversal internals
 
@@ -647,9 +647,9 @@ These questions should stay deferred until either:
 
 The repository should now continue with:
 
-- one lightweight shared traversal helper in `@aio/core`
-- one small immutable transform helper in `@aio/core`
-- one dedicated normalization exit in `@aio/core` built on top of transform
+- one lightweight shared traversal helper in `@schema-transformation-toolkit/core`
+- one small immutable transform helper in `@schema-transformation-toolkit/core`
+- one dedicated normalization exit in `@schema-transformation-toolkit/core` built on top of transform
 - explicit path and reference conventions
 - a `Shape IR`-specific API instead of a speculative multi-IR abstraction
 - continued hardening through consumer adoption and focused traversal tests

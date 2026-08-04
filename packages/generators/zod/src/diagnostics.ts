@@ -3,7 +3,7 @@ import type {
   ConstraintDocument,
   SchemaDiagnostic,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 
 export interface ZodSemanticObservations {
   diagnostics: SchemaDiagnostic[];
