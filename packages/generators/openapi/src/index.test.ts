@@ -10,7 +10,7 @@ import {
   schemaObjectNode,
   schemaReferenceNode,
   schemaScalarNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { generateOpenApi, tryGenerateOpenApi } from "./index.js";
 
 describe("OpenAPI generator", () => {

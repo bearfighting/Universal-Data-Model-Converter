@@ -1,4 +1,7 @@
-import type { OptionCatalog, OptionMetadataExample } from "@aio/core";
+import type {
+  OptionCatalog,
+  OptionMetadataExample,
+} from "@schema-transformation-toolkit/core";
 
 const example = (
   title: string,

@@ -1,6 +1,6 @@
 # SDK Report Analysis Example
 
-This example shows how to read the higher-level `report` returned by `@aio/sdk`.
+This example shows how to read the higher-level `report` returned by `@schema-transformation-toolkit/sdk`.
 
 It focuses on the fields that are most useful after a successful conversion:
 
@@ -34,7 +34,7 @@ The script prints two sections:
 ### Input
 
 ```ts
-import { convert } from "@aio/sdk";
+import { convert } from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json-schema",

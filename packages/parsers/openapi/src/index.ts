@@ -10,8 +10,8 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
-import { tryInferJsonSchemaDocumentWithOptions } from "@aio/parser-json-schema";
+} from "@schema-transformation-toolkit/core";
+import { tryInferJsonSchemaDocumentWithOptions } from "@schema-transformation-toolkit/parser-json-schema";
 import { parse as parseYaml, YAMLParseError } from "yaml";
 
 export interface OpenApiParseOptions extends ParseOptions {

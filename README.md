@@ -16,25 +16,25 @@ That separation is intended to make parsers and generators independently replace
 
 ## Current Packages
 
-- `@aio/core`: shared IR, contracts, and core result types
-- `@aio/parser-json`: JSON to IR parsing and inference
-- `@aio/parser-json-schema`: JSON Schema Draft 2020-12 parser for the current shared IR subset
-- `@aio/parser-typescript`: TypeScript schema-subset parser for the shared IR
-- `@aio/generator-json-schema`: IR to JSON Schema generation
-- `@aio/generator-typescript`: IR to TypeScript generation
-- `@aio/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
-- `@aio/sdk`: optional aggregate re-export package
+- `@schema-transformation-toolkit/core`: shared IR, contracts, and core result types
+- `@schema-transformation-toolkit/parser-json`: JSON to IR parsing and inference
+- `@schema-transformation-toolkit/parser-json-schema`: JSON Schema Draft 2020-12 parser for the current shared IR subset
+- `@schema-transformation-toolkit/parser-typescript`: TypeScript schema-subset parser for the shared IR
+- `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
+- `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
+- `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
+- `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
 
 ## Current Status
 
 The current implementation is intentionally conservative.
 
-- `@aio/parser-json` supports the currently implemented IR subset
-- `@aio/parser-json-schema` supports a strict, generator-aligned JSON Schema Draft 2020-12 subset that fits the current IR without new core expansion
-- `@aio/parser-typescript` supports a narrow, explicit TypeScript schema subset with structured failures for unsupported syntax
-- `@aio/generator-json-schema` supports the currently implemented IR subset
-- `@aio/generator-typescript` supports the currently implemented IR subset
-- `@aio/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
+- `@schema-transformation-toolkit/parser-json` supports the currently implemented IR subset
+- `@schema-transformation-toolkit/parser-json-schema` supports a strict, generator-aligned JSON Schema Draft 2020-12 subset that fits the current IR without new core expansion
+- `@schema-transformation-toolkit/parser-typescript` supports a narrow, explicit TypeScript schema subset with structured failures for unsupported syntax
+- `@schema-transformation-toolkit/generator-json-schema` supports the currently implemented IR subset
+- `@schema-transformation-toolkit/generator-typescript` supports the currently implemented IR subset
+- `@schema-transformation-toolkit/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
 - unsupported cases are reported through structured failures instead of silent guessing
 
 ## Current End-To-End Flows
@@ -76,9 +76,9 @@ If you need the exact current boundary for one surface, prefer the package READM
 This workspace is still in active development, but the intended package usage looks like this:
 
 ```ts
-import { jsonParser } from "@aio/parser-json";
-import { tryGenerateJsonSchema } from "@aio/generator-json-schema";
-import { tryGenerateTypeScript } from "@aio/generator-typescript";
+import { jsonParser } from "@schema-transformation-toolkit/parser-json";
+import { tryGenerateJsonSchema } from "@schema-transformation-toolkit/generator-json-schema";
+import { tryGenerateTypeScript } from "@schema-transformation-toolkit/generator-typescript";
 
 const parsed = jsonParser.parse('{"user_id":1}', { name: "UserProfile" });
 
@@ -101,16 +101,16 @@ The `tryGenerate...()` functions are often a better fit when you want structured
 
 ## Recommended Stage 1 API
 
-For most users, the recommended entry point is now the Stage 1 pipeline API from `@aio/sdk`.
+For most users, install only `@schema-transformation-toolkit/sdk`; it is the recommended Stage 1 pipeline entry point and includes the built-in parser/generator implementations.
 
-Use `@aio/sdk` when you want:
+Use `@schema-transformation-toolkit/sdk` when you want:
 
 - one supported source format in
 - one supported target format out
 - route planning, diagnostics, losses, and preserved-capability reporting
 
 ```ts
-import { convert } from "@aio/sdk";
+import { convert } from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json",
@@ -173,7 +173,7 @@ Use [packages/sdk/README.md](packages/sdk/README.md) for the package-local quick
 After `pnpm build`, you can also run [examples/sdk-report-analysis.mjs](examples/sdk-report-analysis.mjs) to inspect a real `result.report` payload.
 
 ```ts
-import { convert } from "@aio/sdk";
+import { convert } from "@schema-transformation-toolkit/sdk";
 
 const result = convert({
   sourceFormat: "json",
@@ -197,11 +197,11 @@ const result = convert({
 });
 ```
 
-If you need direct parser control, direct generator control, or low-level IR contracts, prefer the lower-level packages instead:
+If you need direct parser control, direct generator control, or low-level IR contracts, prefer the lower-level packages instead. They are advanced, format-specific integrations and are not required when using `@schema-transformation-toolkit/sdk`:
 
-- `@aio/parser-*`
-- `@aio/generator-*`
-- `@aio/core`
+- `@schema-transformation-toolkit/parser-*`
+- `@schema-transformation-toolkit/generator-*`
+- `@schema-transformation-toolkit/core`
 
 The SDK is meant to be the product-facing pipeline layer, not a re-export umbrella for the whole workspace.
 
@@ -228,7 +228,7 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [examples/json-schema-to-typescript.md](examples/json-schema-to-typescript.md): representative `json-schema -> shape -> typescript` examples
 - [examples/json-schema-to-json-schema.md](examples/json-schema-to-json-schema.md): representative `json-schema -> shape + constraint -> json-schema` examples
 - [examples/typescript-to-json-schema.md](examples/typescript-to-json-schema.md): representative `typescript -> schema ir -> json-schema` examples
-- [examples/sdk-report-analysis.md](examples/sdk-report-analysis.md): representative walkthrough of higher-level `@aio/sdk` report interpretation
+- [examples/sdk-report-analysis.md](examples/sdk-report-analysis.md): representative walkthrough of higher-level `@schema-transformation-toolkit/sdk` report interpretation
 
 ### Deep Dive
 

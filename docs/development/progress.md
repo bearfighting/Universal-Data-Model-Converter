@@ -18,9 +18,9 @@ The repository is past architecture validation and has a stable-enough conversio
 - an SDK planner that derives routes and route summaries from registries
 - an SDK report layer that now includes higher-level `capabilityRequirements` and `lossHotspots` analysis for `typescript` targets
 - shared semantic fixtures, generator contract helpers, cross-parser equivalence smoke, and a real-world corpus
-- a shared `Shape IR` traversal helper in `@aio/core` that now backs core schema validation plus generator diagnostics and validation passes
-- a shared immutable `Shape IR` transform layer in `@aio/core`
-- a dedicated shape-normalization exit in `@aio/core` built on top of the shared transform layer
+- a shared `Shape IR` traversal helper in `@schema-transformation-toolkit/core` that now backs core schema validation plus generator diagnostics and validation passes
+- a shared immutable `Shape IR` transform layer in `@schema-transformation-toolkit/core`
+- a dedicated shape-normalization exit in `@schema-transformation-toolkit/core` built on top of the shared transform layer
 - a descriptor-driven SDK registry with isolated custom parser/generator registration
 - generic generator output typing, descriptor analysis hooks, versioned registration errors, and shared descriptor contract helpers
 
@@ -88,16 +88,16 @@ Shared constraint and annotation coverage currently includes:
 Recommended order for the next repository slice:
 
 1. finish the remaining documented pre-Web blockers in [consumer-surface-checklist.md](consumer-surface-checklist.md):
-   - explicitly freeze the Stage 1 `@aio/sdk` consumer contract
+   - explicitly freeze the Stage 1 `@schema-transformation-toolkit/sdk` consumer contract
    - expand and settle the new small product-scenario matrix
    - keep the already-implemented machine-readable route and format surface documented as the downstream source of truth
-2. keep traversal, transform, normalization, and reporting stable while downstream consumer surfaces start depending on `@aio/sdk`
+2. keep traversal, transform, normalization, and reporting stable while downstream consumer surfaces start depending on `@schema-transformation-toolkit/sdk`
 3. treat release notes, richer diagnostic-location guidance, and Worker-oriented integration notes as urgent follow-up work, but not reasons to block the first downstream Web iteration
 4. keep the public SDK contract and UI-friendly diagnostic model small and stable
 5. continue expanding shared IR only when pressure appears across multiple formats, not because one source format wants a local convenience
 
-The first additional target families are now implemented as `@aio/generator-zod`
-and `@aio/generator-openapi`. OpenAPI generation is intentionally limited to
+The first additional target families are now implemented as `@schema-transformation-toolkit/generator-zod`
+and `@schema-transformation-toolkit/generator-openapi`. OpenAPI generation is intentionally limited to
 canonical 3.1 schema documents; full API document generation remains deferred.
 
 This page is intentionally only a short status summary.
@@ -125,21 +125,21 @@ As of July 23, 2026, the latest completed slice includes:
 - generator truthfulness assertions for `integer`, `unknown`, and `unknown`-absorbing unions
 - route-local integration shrinkage away from duplicate full payload snapshots
 - real-world corpus expansion from 6 to 10 cases
-- first shared `Shape IR` traversal extraction in `@aio/core`
+- first shared `Shape IR` traversal extraction in `@schema-transformation-toolkit/core`
 - migration of core schema validation and both generator diagnostics and validation passes onto the shared walker
 - focused traversal contract tests for path rules, reference-follow behavior, cycle guards, and traversal context metadata
 - public API snapshot updates for the new traversal exports
-- first shared immutable `Shape IR` transform extraction in `@aio/core`
+- first shared immutable `Shape IR` transform extraction in `@schema-transformation-toolkit/core`
 - explicit transform entry semantics aligned with traversal across structure, root, and definitions modes
 - explicit transform reference policy for root-reachable definition rewriting
 - first dedicated `normalizeSchema...` exit built on top of transform, currently covering union flattening, union deduplication, single-member union collapse, unknown-evidence canonicalization, and identifier-word metadata canonicalization
 - focused normalization tests covering structure-wide, root-reachable, and definitions-only normalization behavior
 - first traversal-policy-backed `sdk` report analysis fields for `capabilityRequirements` and `lossHotspots`
 - development documentation for interpreting higher-level `sdk` report analysis
-- a package-local `@aio/sdk` README with `convert(...)` and report-reading guidance
+- a package-local `@schema-transformation-toolkit/sdk` README with `convert(...)` and report-reading guidance
 - a report-contract test that keeps the documented `sdk` analysis example aligned with real output
-- an examples walkthrough and runnable script for higher-level `@aio/sdk` report interpretation
-- public `@aio/sdk` contract schemas and a UI-friendly diagnostic normalization helper for downstream consumers
+- an examples walkthrough and runnable script for higher-level `@schema-transformation-toolkit/sdk` report interpretation
+- public `@schema-transformation-toolkit/sdk` contract schemas and a UI-friendly diagnostic normalization helper for downstream consumers
 - a first dedicated SDK product-scenario matrix covering `success`, `caveat`, `unsupported`, and `invalid-input` flows, plus `typescript -> typescript`, `json-schema -> json-schema`, and source-range-bearing parser failures
 - a first dedicated Web integration note for wiring format discovery, route discovery, conversion execution, and normalized diagnostics together
 - a first non-npm release path with version-sync scripts, annotated tags, tag-driven GitHub Releases, and attached package tarballs
@@ -184,7 +184,7 @@ For active implementation work:
 - read [test_plan.md](test_plan.md) for the current testing strategy
 - read [consumer-surface-checklist.md](consumer-surface-checklist.md) before deciding whether more core work should block downstream product integration
 - read [release-process.md](release-process.md) when cutting a GitHub-tagged engine release without npm publication
-- read [web-integration-notes.md](web-integration-notes.md) when wiring the first downstream Web surface onto `@aio/sdk`
+- read [web-integration-notes.md](web-integration-notes.md) when wiring the first downstream Web surface onto `@schema-transformation-toolkit/sdk`
 - read [schema-traversal.md](schema-traversal.md) before changing shared IR traversal, transform, or normalization behavior
 - read [sdk-report-analysis.md](sdk-report-analysis.md) or [../../packages/sdk/README.md](../../packages/sdk/README.md) when changing higher-level `sdk` report interpretation or examples
 - read [typescript-parser-cases.md](typescript-parser-cases.md) and [typescript-parser-preprocess.md](typescript-parser-preprocess.md) only when touching the TypeScript parser boundary

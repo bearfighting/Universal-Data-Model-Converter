@@ -4,7 +4,7 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { OpenApiGenerateResult } from "./failure.js";
 
 export type OpenApiOutput = Record<string, unknown>;

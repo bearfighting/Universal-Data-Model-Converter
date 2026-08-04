@@ -4,7 +4,7 @@ import {
   type SchemaLiteralNode,
   type SchemaNode,
   type SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import ts from "typescript";
 import {
   createTypeScriptUnsupportedDiagnostic,

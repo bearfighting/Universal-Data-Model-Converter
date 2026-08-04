@@ -5,7 +5,7 @@ import {
   schemaTupleElement,
   schemaTupleNode,
   schemaUnionNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { isJsonInferenceError } from "./errors.js";
 import type { ResolvedJsonParseOptions } from "./options.js";
 import type { JsonValue } from "./types.js";

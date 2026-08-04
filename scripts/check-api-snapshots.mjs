@@ -9,13 +9,13 @@ const updateSnapshots = process.argv.includes("--update");
 
 const packageConfigs = [
   {
-    name: "@aio/core",
+    name: "@schema-transformation-toolkit/core",
     root: path.join(repoRoot, "packages/core"),
     entry: path.join(repoRoot, "packages/core/src/index.ts"),
     snapshot: path.join(repoRoot, "packages/core/etc/core.api.md"),
   },
   {
-    name: "@aio/parser-json",
+    name: "@schema-transformation-toolkit/parser-json",
     root: path.join(repoRoot, "packages/parsers/json"),
     entry: path.join(repoRoot, "packages/parsers/json/src/index.ts"),
     snapshot: path.join(
@@ -24,7 +24,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/parser-json-schema",
+    name: "@schema-transformation-toolkit/parser-json-schema",
     root: path.join(repoRoot, "packages/parsers/json-schema"),
     entry: path.join(repoRoot, "packages/parsers/json-schema/src/index.ts"),
     snapshot: path.join(
@@ -33,7 +33,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/parser-openapi",
+    name: "@schema-transformation-toolkit/parser-openapi",
     root: path.join(repoRoot, "packages/parsers/openapi"),
     entry: path.join(repoRoot, "packages/parsers/openapi/src/index.ts"),
     snapshot: path.join(
@@ -42,7 +42,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/parser-typescript",
+    name: "@schema-transformation-toolkit/parser-typescript",
     root: path.join(repoRoot, "packages/parsers/typescript"),
     entry: path.join(repoRoot, "packages/parsers/typescript/src/index.ts"),
     snapshot: path.join(
@@ -51,7 +51,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/generator-json-schema",
+    name: "@schema-transformation-toolkit/generator-json-schema",
     root: path.join(repoRoot, "packages/generators/json-schema"),
     entry: path.join(repoRoot, "packages/generators/json-schema/src/index.ts"),
     snapshot: path.join(
@@ -60,7 +60,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/generator-openapi",
+    name: "@schema-transformation-toolkit/generator-openapi",
     root: path.join(repoRoot, "packages/generators/openapi"),
     entry: path.join(repoRoot, "packages/generators/openapi/src/index.ts"),
     snapshot: path.join(
@@ -69,7 +69,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/generator-typescript",
+    name: "@schema-transformation-toolkit/generator-typescript",
     root: path.join(repoRoot, "packages/generators/typescript"),
     entry: path.join(repoRoot, "packages/generators/typescript/src/index.ts"),
     snapshot: path.join(
@@ -78,7 +78,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/generator-zod",
+    name: "@schema-transformation-toolkit/generator-zod",
     root: path.join(repoRoot, "packages/generators/zod"),
     entry: path.join(repoRoot, "packages/generators/zod/src/index.ts"),
     snapshot: path.join(
@@ -87,7 +87,7 @@ const packageConfigs = [
     ),
   },
   {
-    name: "@aio/sdk",
+    name: "@schema-transformation-toolkit/sdk",
     root: path.join(repoRoot, "packages/sdk"),
     entry: path.join(repoRoot, "packages/sdk/src/index.ts"),
     snapshot: path.join(repoRoot, "packages/sdk/etc/sdk.api.md"),
@@ -138,7 +138,9 @@ if (updateSnapshots) {
 }
 
 async function renderApiSnapshot(pkg, prettierConfig) {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "aio-api-"));
+  const tempDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "schema-transformation-toolkit-api-"),
+  );
   const parsedConfig = loadPackageTsConfig(pkg.root);
 
   const options = {

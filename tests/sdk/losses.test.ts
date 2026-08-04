@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { constraintDocument } from "@aio/core";
+import { constraintDocument } from "@schema-transformation-toolkit/core";
 import { planSemanticLosses } from "../../packages/sdk/src/losses.js";
 import { describeConversionRouteCapabilities } from "../../packages/sdk/src/registry.js";
 import { sharedSemanticFixtures } from "../fixtures/semantics/index.js";

@@ -10,6 +10,35 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.1.1-beta.3
+
+This prerelease adds OpenAPI schema conversion to the shared conversion kernel
+and SDK route surface.
+
+### Features
+
+- Add `@schema-transformation-toolkit/parser-openapi` for OpenAPI 3.0 and 3.1 schema documents.
+- Add `@schema-transformation-toolkit/generator-openapi` for canonical OpenAPI 3.1.0 schema documents.
+- Add SDK routes for OpenAPI input and output across the supported formats.
+- Preserve supported constraints, local references, reusable definitions, and
+  safe object-only `allOf` composition through the shared IR.
+- Report unsupported OpenAPI keywords, references, and compositions through
+  structured diagnostics instead of silently approximating them.
+
+### Tests and documentation
+
+- Add parser coverage for OpenAPI versions, YAML input, references,
+  constraints, unsupported features, and composition boundaries.
+- Add OpenAPI generator contract and SDK integration tests.
+- Document the OpenAPI schema compatibility boundary and current limitations.
+
+### Compatibility notes
+
+- OpenAPI support is currently limited to schema documents; full API document
+  processing for paths, operations, and request/response metadata remains
+  deferred.
+- OpenAPI generation always emits canonical version `3.1.0`.
+
 ## 0.1.1-beta.2
 
 This patch release corrects the SDK format discovery contract for generator-only
@@ -27,12 +56,12 @@ targets.
 ## 0.1.1-beta.1
 
 This is the first beta release of the shared conversion kernel and the Stage 1
-`@aio/sdk` consumer surface. The release is distributed as a tagged workspace
+`@schema-transformation-toolkit/sdk` consumer surface. The release is distributed as a tagged workspace
 snapshot with package tarballs; npm publication remains deferred.
 
 ### Features
 
-- Add `@aio/generator-zod` for generating Zod 4 schemas from the shared Shape
+- Add `@schema-transformation-toolkit/generator-zod` for generating Zod 4 schemas from the shared Shape
   IR and Constraint IR.
 - Support TypeScript and JavaScript ESM output, including `z.infer` types for
   TypeScript output.
@@ -61,7 +90,7 @@ snapshot with package tarballs; npm publication remains deferred.
 
 ### Compatibility notes
 
-- `@aio/generator-zod` does not depend on or bundle Zod at runtime; generated
+- `@schema-transformation-toolkit/generator-zod` does not depend on or bundle Zod at runtime; generated
   code consumers must install Zod 4.
 - Zod 3 compatibility, a Zod parser, transforms, custom validators,
   multi-file output, and cross-file resolution remain deferred.

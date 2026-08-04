@@ -1,11 +1,14 @@
-# API Snapshot: @aio/generator-json-schema
+# API Snapshot: @schema-transformation-toolkit/generator-json-schema
 
 Entry: packages/generators/json-schema/src/index.ts
 
 ## packages/generators/json-schema/src/api.d.ts
 
 ```ts
-import type { SchemaDocument, SchemaGenerator } from "@aio/core";
+import type {
+  SchemaDocument,
+  SchemaGenerator,
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaGenerateResult } from "./failure.js";
 import {
   type ConfiguredJsonSchemaGenerator,
@@ -43,21 +46,21 @@ export declare const jsonSchemaGenerator: SchemaGenerator<
   JsonSchemaGenerateResult
 >;
 /** Prepared default option state for the shared JSON Schema generator instance. */
-export declare const preparedJsonSchemaGeneratorOptions: import("@aio/core").PreparedOptions<ResolvedJsonSchemaGeneratorOptions>;
+export declare const preparedJsonSchemaGeneratorOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedJsonSchemaGeneratorOptions>;
 export { DEFAULT_JSON_SCHEMA_GENERATOR_OPTIONS };
 ```
 
 ## packages/generators/json-schema/src/capabilities.d.ts
 
 ```ts
-import type { GeneratorCapabilities } from "@aio/core";
+import type { GeneratorCapabilities } from "@schema-transformation-toolkit/core";
 export declare const jsonSchemaGeneratorCapabilities: GeneratorCapabilities;
 ```
 
 ## packages/generators/json-schema/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@aio/core";
+import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
 import type { JsonSchemaOutput } from "./options.js";
 export declare const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<JsonSchemaOutput>;
 ```
@@ -65,7 +68,10 @@ export declare const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<JsonSche
 ## packages/generators/json-schema/src/failure.d.ts
 
 ```ts
-import type { GenerateFailureResult, GenerateSuccessResult } from "@aio/core";
+import type {
+  GenerateFailureResult,
+  GenerateSuccessResult,
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaOutput } from "./options.js";
 export type JsonSchemaGeneratorFailureCode =
   | "invalid-json-schema-reference"
@@ -117,7 +123,7 @@ export type {
 ## packages/generators/json-schema/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const jsonSchemaGeneratorOptionCatalog: OptionCatalog;
 ```
 
@@ -130,7 +136,7 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaGenerateResult } from "./failure.js";
 export type JsonSchemaDraft = "2020-12";
 export type JsonSchemaUnknownStrategy = "true";

@@ -1,4 +1,4 @@
-# API Snapshot: @aio/parser-json-schema
+# API Snapshot: @schema-transformation-toolkit/parser-json-schema
 
 Entry: packages/parsers/json-schema/src/index.ts
 
@@ -11,7 +11,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   type JsonSchemaParseOptions,
   type ResolvedJsonSchemaParseOptions,
@@ -58,33 +58,33 @@ export declare function tryInferJsonSchemaDocumentWithOptions(
   options?: JsonSchemaParseOptions,
 ): JsonSchemaInferenceResult;
 /** Shared default JSON Schema parser instance using the default v0 options. */
-export declare const jsonSchemaParser: import("@aio/core").SchemaParser<
+export declare const jsonSchemaParser: import("@schema-transformation-toolkit/core").SchemaParser<
   string,
   JsonSchemaParseOptions,
   JsonSchemaInferenceResult
 >;
 /** Prepared default option state for the shared JSON Schema parser instance. */
-export declare const preparedJsonSchemaParserOptions: import("@aio/core").PreparedOptions<ResolvedJsonSchemaParseOptions>;
+export declare const preparedJsonSchemaParserOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedJsonSchemaParseOptions>;
 ```
 
 ## packages/parsers/json-schema/src/capabilities.d.ts
 
 ```ts
-import type { ParserCapabilities } from "@aio/core";
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
 export declare const jsonSchemaParserCapabilities: ParserCapabilities;
 ```
 
 ## packages/parsers/json-schema/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@aio/core";
+import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
 export declare const jsonSchemaParserDescriptor: ParserDescriptor;
 ```
 
 ## packages/parsers/json-schema/src/errors.d.ts
 
 ```ts
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 export type JsonSchemaInferenceErrorCode =
   | "invalid-json-schema-json"
   | "unsupported-json-schema-draft"
@@ -153,7 +153,7 @@ export {
 ## packages/parsers/json-schema/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const jsonSchemaParserOptionCatalog: OptionCatalog;
 ```
 
@@ -165,7 +165,7 @@ import type {
   ParseOptions,
   PreparedOptions,
   SchemaParser,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { JsonSchemaInferenceResult } from "./api.js";
 export type JsonSchemaParseStrictness = "strict";
 export interface JsonSchemaDiagnosticsOptions {

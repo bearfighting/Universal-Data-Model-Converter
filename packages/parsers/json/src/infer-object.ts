@@ -10,7 +10,7 @@ import {
   schemaUnionNode,
   type SchemaFieldNode,
   type SchemaNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ResolvedJsonParseOptions } from "./options.js";
 import type { JsonObject, JsonValue } from "./types.js";
 

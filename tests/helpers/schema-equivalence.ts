@@ -7,7 +7,7 @@ import {
   type SchemaFieldNode,
   type SchemaNode,
   type SchemaNodeKind,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { expect } from "vitest";
 
 export function expectValidIr(document: SchemaDocument): void {

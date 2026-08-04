@@ -5,8 +5,8 @@ import type {
   SchemaSemanticNote,
   SchemaSemanticNoteKind,
   SchemaSemanticNoteLayer,
-} from "@aio/core";
-import { createSchemaObservation as createObservation } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import { createSchemaObservation as createObservation } from "@schema-transformation-toolkit/core";
 
 export function jsonSchemaDiagnostic(options: {
   severity: SchemaDiagnosticSeverity;

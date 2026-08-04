@@ -9,8 +9,8 @@ shapes. Its primary architecture is:
 parser -> Value IR / Shape IR / Constraint IR -> generator
 ```
 
-`@aio/core` owns shared semantic models, invariants, traversal, transforms,
-normalization, and pipeline contracts. `@aio/sdk` is the public consumer
+`@schema-transformation-toolkit/core` owns shared semantic models, invariants, traversal, transforms,
+normalization, and pipeline contracts. `@schema-transformation-toolkit/sdk` is the public consumer
 boundary for downstream Web, CLI, documentation, and other product surfaces.
 
 The currently supported format families are:
@@ -90,7 +90,7 @@ package catalogs and exposed through the SDK option metadata APIs.
 
 ## Public API and Compatibility Rules
 
-- Treat `@aio/sdk` as the stable downstream integration boundary.
+- Treat `@schema-transformation-toolkit/sdk` as the stable downstream integration boundary.
 - Keep ordinary conversion flow controlled by discriminated result values,
   rather than thrown exception strings.
 - When adding public SDK fields or functions, update the runtime schemas,

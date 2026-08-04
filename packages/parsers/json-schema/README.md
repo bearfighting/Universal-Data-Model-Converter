@@ -1,9 +1,9 @@
-# @aio/parser-json-schema
+# @schema-transformation-toolkit/parser-json-schema
 
 JSON Schema parser package for the shared schema IR.
 
 This package is intentionally narrow.
-It accepts the largest practical JSON Schema subset that can be represented by the current shared IR without expanding `@aio/core`.
+It accepts the largest practical JSON Schema subset that can be represented by the current shared IR without expanding `@schema-transformation-toolkit/core`.
 
 Its `json-schema -> ir -> json-schema` story is intentionally subset-based:
 
@@ -56,7 +56,7 @@ The parser currently fails explicitly for:
 ## Minimal Usage
 
 ```ts
-import { jsonSchemaParser } from "@aio/parser-json-schema";
+import { jsonSchemaParser } from "@schema-transformation-toolkit/parser-json-schema";
 
 const parsed = jsonSchemaParser.parse(
   JSON.stringify({

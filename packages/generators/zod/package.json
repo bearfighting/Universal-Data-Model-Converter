@@ -1,9 +1,12 @@
 {
-  "name": "@aio/generator-zod",
-  "version": "0.1.1-beta.2",
-  "private": true,
+  "name": "@schema-transformation-toolkit/generator-zod",
+  "version": "0.1.1-beta.3",
+  "private": false,
   "license": "Apache-2.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -13,7 +16,7 @@
     }
   },
   "dependencies": {
-    "@aio/core": "workspace:*"
+    "@schema-transformation-toolkit/core": "workspace:*"
   },
   "scripts": {
     "build": "tsup --config ../../../tsup.config.ts",

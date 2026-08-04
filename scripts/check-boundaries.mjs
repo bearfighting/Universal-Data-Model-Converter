@@ -6,52 +6,52 @@ const repoRoot = process.cwd();
 
 const packageConfigs = [
   {
-    name: "@aio/core",
+    name: "@schema-transformation-toolkit/core",
     category: "core",
     root: path.join(repoRoot, "packages/core"),
   },
   {
-    name: "@aio/sdk",
+    name: "@schema-transformation-toolkit/sdk",
     category: "sdk",
     root: path.join(repoRoot, "packages/sdk"),
   },
   {
-    name: "@aio/parser-json",
+    name: "@schema-transformation-toolkit/parser-json",
     category: "parser",
     root: path.join(repoRoot, "packages/parsers/json"),
   },
   {
-    name: "@aio/parser-json-schema",
+    name: "@schema-transformation-toolkit/parser-json-schema",
     category: "parser",
     root: path.join(repoRoot, "packages/parsers/json-schema"),
   },
   {
-    name: "@aio/parser-openapi",
+    name: "@schema-transformation-toolkit/parser-openapi",
     category: "parser",
     root: path.join(repoRoot, "packages/parsers/openapi"),
   },
   {
-    name: "@aio/parser-typescript",
+    name: "@schema-transformation-toolkit/parser-typescript",
     category: "parser",
     root: path.join(repoRoot, "packages/parsers/typescript"),
   },
   {
-    name: "@aio/generator-json-schema",
+    name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
   },
   {
-    name: "@aio/generator-openapi",
+    name: "@schema-transformation-toolkit/generator-openapi",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/openapi"),
   },
   {
-    name: "@aio/generator-typescript",
+    name: "@schema-transformation-toolkit/generator-typescript",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/typescript"),
   },
   {
-    name: "@aio/generator-zod",
+    name: "@schema-transformation-toolkit/generator-zod",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/zod"),
   },
@@ -109,7 +109,7 @@ function checkFile(pkg, filePath) {
   );
 
   visitNode(sourceFile, (specifier, node) => {
-    if (specifier.startsWith("@aio/")) {
+    if (specifier.startsWith("@schema-transformation-toolkit/")) {
       checkWorkspaceSpecifier(pkg, filePath, specifier);
       return;
     }
@@ -250,25 +250,31 @@ function getAllowedDependencies(pkg) {
   }
 
   if (pkg.category === "parser" || pkg.category === "generator") {
-    if (pkg.name === "@aio/parser-openapi") {
-      return new Set(["@aio/core", "@aio/parser-json-schema"]);
+    if (pkg.name === "@schema-transformation-toolkit/parser-openapi") {
+      return new Set([
+        "@schema-transformation-toolkit/core",
+        "@schema-transformation-toolkit/parser-json-schema",
+      ]);
     }
-    if (pkg.name === "@aio/generator-openapi") {
-      return new Set(["@aio/core", "@aio/generator-json-schema"]);
+    if (pkg.name === "@schema-transformation-toolkit/generator-openapi") {
+      return new Set([
+        "@schema-transformation-toolkit/core",
+        "@schema-transformation-toolkit/generator-json-schema",
+      ]);
     }
-    return new Set(["@aio/core"]);
+    return new Set(["@schema-transformation-toolkit/core"]);
   }
 
   return new Set([
-    "@aio/core",
-    "@aio/parser-json",
-    "@aio/parser-json-schema",
-    "@aio/parser-openapi",
-    "@aio/parser-typescript",
-    "@aio/generator-json-schema",
-    "@aio/generator-openapi",
-    "@aio/generator-typescript",
-    "@aio/generator-zod",
+    "@schema-transformation-toolkit/core",
+    "@schema-transformation-toolkit/parser-json",
+    "@schema-transformation-toolkit/parser-json-schema",
+    "@schema-transformation-toolkit/parser-openapi",
+    "@schema-transformation-toolkit/parser-typescript",
+    "@schema-transformation-toolkit/generator-json-schema",
+    "@schema-transformation-toolkit/generator-openapi",
+    "@schema-transformation-toolkit/generator-typescript",
+    "@schema-transformation-toolkit/generator-zod",
   ]);
 }
 

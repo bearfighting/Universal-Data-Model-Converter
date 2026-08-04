@@ -1,9 +1,12 @@
 {
-  "name": "@aio/core",
-  "version": "0.1.1-beta.2",
-  "private": true,
+  "name": "@schema-transformation-toolkit/core",
+  "version": "0.1.1-beta.3",
+  "private": false,
   "license": "Apache-2.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

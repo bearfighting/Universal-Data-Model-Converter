@@ -1,9 +1,16 @@
 {
-  "name": "@aio/sdk",
-  "version": "0.1.1-beta.2",
-  "private": true,
+  "name": "@schema-transformation-toolkit/sdk",
+  "version": "0.1.1-beta.3",
+  "private": false,
   "license": "Apache-2.0",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -13,15 +20,16 @@
     }
   },
   "dependencies": {
-    "@aio/core": "workspace:*",
-    "@aio/generator-json-schema": "workspace:*",
-    "@aio/generator-openapi": "workspace:*",
-    "@aio/generator-typescript": "workspace:*",
-    "@aio/generator-zod": "workspace:*",
-    "@aio/parser-json": "workspace:*",
-    "@aio/parser-json-schema": "workspace:*",
-    "@aio/parser-openapi": "workspace:*",
-    "@aio/parser-typescript": "workspace:*",
+    "@schema-transformation-toolkit/core": "workspace:*",
+    "@schema-transformation-toolkit/generator-json-schema": "workspace:*",
+    "@schema-transformation-toolkit/generator-openapi": "workspace:*",
+    "@schema-transformation-toolkit/generator-typescript": "workspace:*",
+    "@schema-transformation-toolkit/generator-zod": "workspace:*",
+    "@schema-transformation-toolkit/parser-json": "workspace:*",
+    "@schema-transformation-toolkit/parser-json-schema": "workspace:*",
+    "@schema-transformation-toolkit/parser-openapi": "workspace:*",
+    "@schema-transformation-toolkit/parser-typescript": "workspace:*",
+    "typescript": "^5.9.3",
     "zod": "^4.4.3"
   },
   "scripts": {

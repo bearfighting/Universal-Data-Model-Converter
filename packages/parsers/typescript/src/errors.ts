@@ -1,4 +1,4 @@
-import type { SchemaDiagnostic } from "@aio/core";
+import type { SchemaDiagnostic } from "@schema-transformation-toolkit/core";
 
 export type TypeScriptInferenceErrorCode =
   | "unsupported-typescript-enum-member-initializer"

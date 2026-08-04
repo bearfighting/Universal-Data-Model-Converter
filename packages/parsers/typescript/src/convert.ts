@@ -6,7 +6,7 @@ import {
   type SchemaSemanticNote,
   tryValidateSchemaDocument,
   type SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import ts from "typescript";
 import { convertTypeScriptEnumDeclaration } from "./convert-enum.js";
 import { createUnsupportedDeclarationShapeDiagnostic } from "./declaration-shape.js";

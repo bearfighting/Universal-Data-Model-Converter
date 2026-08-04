@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { typeScriptParser } from "@aio/parser-typescript";
+import { typeScriptParser } from "@schema-transformation-toolkit/parser-typescript";
 import {
   expectDiagnosticCode,
   expectSemanticNoteCode,

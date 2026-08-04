@@ -4,7 +4,7 @@ import {
   schemaScalarNode,
   type GeneratorDescriptor,
   type ParserDescriptor,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   createConversionRegistry,
   createConverter,

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { jsonSchemaGeneratorCapabilities } from "@aio/generator-json-schema";
-import { typeScriptGeneratorCapabilities } from "@aio/generator-typescript";
-import { zodGeneratorCapabilities } from "@aio/generator-zod";
-import { jsonParserCapabilities } from "@aio/parser-json";
-import { jsonSchemaParserCapabilities } from "@aio/parser-json-schema";
-import { typeScriptParserCapabilities } from "@aio/parser-typescript";
+import { jsonSchemaGeneratorCapabilities } from "@schema-transformation-toolkit/generator-json-schema";
+import { typeScriptGeneratorCapabilities } from "@schema-transformation-toolkit/generator-typescript";
+import { zodGeneratorCapabilities } from "@schema-transformation-toolkit/generator-zod";
+import { jsonParserCapabilities } from "@schema-transformation-toolkit/parser-json";
+import { jsonSchemaParserCapabilities } from "@schema-transformation-toolkit/parser-json-schema";
+import { typeScriptParserCapabilities } from "@schema-transformation-toolkit/parser-typescript";
 import { sharedSemanticFixtures } from "../fixtures/semantics/index.js";
 import {
   coveredCapabilitiesForSubject,

@@ -2,7 +2,7 @@ import {
   analyzeImplicitEntryFromSource,
   type TypeScriptImplicitEntryAmbiguityReason,
   type TypeScriptImplicitEntryAnalysis,
-} from "@aio/parser-typescript";
+} from "@schema-transformation-toolkit/parser-typescript";
 
 export type {
   TypeScriptImplicitEntryAmbiguityReason,

@@ -4,7 +4,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { configureJsonSchemaParser } from "./options.js";
 import { convertJsonSchemaToDocument } from "./convert.js";
 import { decodeJsonSchemaText } from "./decode.js";

@@ -1,4 +1,4 @@
-# @aio/generator-zod
+# @schema-transformation-toolkit/generator-zod
 
 Zod 4 generator for the shared schema IR.
 
@@ -7,7 +7,7 @@ default TypeScript mode also emits `z.infer` types; JavaScript mode emits the
 runtime schemas only.
 
 ```ts
-import { tryGenerateZod } from "@aio/generator-zod";
+import { tryGenerateZod } from "@schema-transformation-toolkit/generator-zod";
 
 const result = tryGenerateZod(document, { outputLanguage: "typescript" });
 ```

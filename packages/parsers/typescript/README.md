@@ -1,4 +1,4 @@
-# @aio/parser-typescript
+# @schema-transformation-toolkit/parser-typescript
 
 TypeScript parser package for the shared schema IR.
 
@@ -226,7 +226,7 @@ In short:
 ## Minimal Usage
 
 ```ts
-import { typeScriptParser } from "@aio/parser-typescript";
+import { typeScriptParser } from "@schema-transformation-toolkit/parser-typescript";
 
 const parsed = typeScriptParser.parse("interface User { id: number }", {
   entry: "User",

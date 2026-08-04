@@ -6,11 +6,11 @@ import {
   schemaScalarNode,
   schemaUnknownNode,
   schemaUnionNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import {
   generateTypeScript,
   tryGenerateTypeScript,
-} from "@aio/generator-typescript";
+} from "@schema-transformation-toolkit/generator-typescript";
 import {
   sharedSemanticFixtures,
   unknownRootFixture,

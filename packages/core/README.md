@@ -1,4 +1,4 @@
-# @aio/core
+# @schema-transformation-toolkit/core
 
 Shared IR, contracts, and cross-package naming utilities.
 
@@ -22,7 +22,7 @@ If you want end-to-end examples first, start with:
 
 The current core surface is a small multi-IR contract layer rather than a single schema-only module.
 
-Today `@aio/core` exposes:
+Today `@schema-transformation-toolkit/core` exposes:
 
 - `Value IR` for parsed value documents and value-level inference handoff
 - `Shape IR` for shared serializable data-shape semantics
@@ -65,7 +65,7 @@ import {
   schemaFieldNode,
   schemaObjectNode,
   schemaScalarNode,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 
 const document = schemaDocument(
   "User",
@@ -89,14 +89,14 @@ The public factories intentionally keep construction ergonomic while still valid
 
 ## Current End-To-End Role
 
-Today `@aio/core` is the only required semantic handoff between:
+Today `@schema-transformation-toolkit/core` is the only required semantic handoff between:
 
-- `@aio/parser-json`
-- `@aio/parser-json-schema`
-- `@aio/parser-typescript`
-- `@aio/generator-json-schema`
-- `@aio/generator-typescript`
-- `@aio/sdk`
+- `@schema-transformation-toolkit/parser-json`
+- `@schema-transformation-toolkit/parser-json-schema`
+- `@schema-transformation-toolkit/parser-typescript`
+- `@schema-transformation-toolkit/generator-json-schema`
+- `@schema-transformation-toolkit/generator-typescript`
+- `@schema-transformation-toolkit/sdk`
 
 That means changes here should be treated as shared semantic changes, route-contract changes, or reporting-contract changes, not package-local implementation details.
 

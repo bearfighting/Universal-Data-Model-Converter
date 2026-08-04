@@ -1,4 +1,7 @@
-import type { GeneratorDescriptor, GeneratorExecutionContext } from "@aio/core";
+import type {
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+} from "@schema-transformation-toolkit/core";
 import { openApiGeneratorCapabilities } from "./capabilities.js";
 import { openApiGeneratorOptionCatalog } from "./option-metadata.js";
 import { tryGenerateOpenApi } from "./api.js";

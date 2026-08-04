@@ -1,4 +1,4 @@
-import type { SchemaDefinition } from "@aio/core";
+import type { SchemaDefinition } from "@schema-transformation-toolkit/core";
 
 export function definitionNames(document: {
   definitions: Array<{ name: { source: string } }>;

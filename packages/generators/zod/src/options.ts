@@ -5,7 +5,7 @@ import type {
   NamingStrategy,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type { ZodGenerateResult } from "./failure.js";
 import { createZodNamingStrategy } from "./naming.js";
 

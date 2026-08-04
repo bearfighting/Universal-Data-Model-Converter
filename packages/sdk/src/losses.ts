@@ -3,7 +3,7 @@ import type {
   ConversionCapability,
   ConversionRouteCapabilities,
   SemanticLoss,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type {
   ConversionSourceFormat,
   ConversionTargetFormat,

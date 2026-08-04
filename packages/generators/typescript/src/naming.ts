@@ -1,5 +1,5 @@
-import type { NamingStrategy } from "@aio/core";
-import { createNamingStrategy } from "@aio/core";
+import type { NamingStrategy } from "@schema-transformation-toolkit/core";
+import { createNamingStrategy } from "@schema-transformation-toolkit/core";
 
 export const TYPESCRIPT_RESERVED_WORDS = [
   "break",

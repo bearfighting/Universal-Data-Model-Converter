@@ -1,4 +1,7 @@
-import type { GeneratorDescriptor, GeneratorExecutionContext } from "@aio/core";
+import type {
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+} from "@schema-transformation-toolkit/core";
 import { jsonSchemaGeneratorCapabilities } from "./capabilities.js";
 import { jsonSchemaGeneratorOptionCatalog } from "./option-metadata.js";
 import { tryGenerateJsonSchema } from "./api.js";

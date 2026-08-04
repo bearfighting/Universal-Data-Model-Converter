@@ -2,7 +2,7 @@ import type {
   SchemaDefinition,
   SchemaDiagnostic,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import type ts from "typescript";
 
 export type TypeScriptEntryDeclaration =

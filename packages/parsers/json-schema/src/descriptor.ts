@@ -2,7 +2,7 @@ import type {
   ParseResult,
   ParserDescriptor,
   ParserExecutionContext,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 import { jsonSchemaParserCapabilities } from "./capabilities.js";
 import { jsonSchemaParserOptionCatalog } from "./option-metadata.js";
 import { tryInferJsonSchemaDocumentWithOptions } from "./api.js";

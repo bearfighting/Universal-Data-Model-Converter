@@ -1,11 +1,14 @@
-import { pushSchemaObservation, walkSchemaDocument } from "@aio/core";
+import {
+  pushSchemaObservation,
+  walkSchemaDocument,
+} from "@schema-transformation-toolkit/core";
 import type {
   SchemaDefinition,
   SchemaDiagnostic,
   SchemaDocument,
   SchemaNode,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 
 export interface TypeScriptSemanticObservations {
   diagnostics: SchemaDiagnostic[];

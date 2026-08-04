@@ -4,8 +4,8 @@ import type {
   SchemaSemanticNote,
   SchemaSemanticNoteKind,
   SchemaSemanticNoteLayer,
-} from "@aio/core";
-import { createSchemaObservation } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import { createSchemaObservation } from "@schema-transformation-toolkit/core";
 import type { TypeScriptInferenceErrorCode } from "./errors.js";
 import type { TypeScriptImplicitEntrySelectionReason } from "./implicit-entry.js";
 import type { TypeScriptSourceLocation } from "./types.js";

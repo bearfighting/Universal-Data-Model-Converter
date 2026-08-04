@@ -1,5 +1,8 @@
 import { expect } from "vitest";
-import type { SchemaDiagnostic, SchemaSemanticNote } from "@aio/core";
+import type {
+  SchemaDiagnostic,
+  SchemaSemanticNote,
+} from "@schema-transformation-toolkit/core";
 
 export function expectDiagnosticCode(
   diagnostics: SchemaDiagnostic[] | undefined,

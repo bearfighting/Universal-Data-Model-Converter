@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateJsonSchema } from "@aio/generator-json-schema";
-import { generateTypeScript } from "@aio/generator-typescript";
+import { generateJsonSchema } from "@schema-transformation-toolkit/generator-json-schema";
+import { generateTypeScript } from "@schema-transformation-toolkit/generator-typescript";
 import { minimalRealWorldCorpus } from "../fixtures/real-world/minimal-corpus.js";
 import { expectValidGeneratedJsonSchema } from "../helpers/json-schema-structure.js";
 import { parseRealWorldCorpusCase } from "../helpers/real-world-corpus.js";

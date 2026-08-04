@@ -1,4 +1,7 @@
-import type { GeneratorDescriptor, GeneratorExecutionContext } from "@aio/core";
+import type {
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+} from "@schema-transformation-toolkit/core";
 import { zodGeneratorCapabilities } from "./capabilities.js";
 import { zodGeneratorOptionCatalog } from "./option-metadata.js";
 import { tryGenerateZod } from "./api.js";

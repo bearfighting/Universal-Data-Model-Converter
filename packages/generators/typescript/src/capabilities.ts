@@ -1,4 +1,4 @@
-import type { GeneratorCapabilities } from "@aio/core";
+import type { GeneratorCapabilities } from "@schema-transformation-toolkit/core";
 
 export const typeScriptGeneratorCapabilities: GeneratorCapabilities = {
   target: "typescript",

@@ -1,4 +1,4 @@
-# API Snapshot: @aio/parser-openapi
+# API Snapshot: @schema-transformation-toolkit/parser-openapi
 
 Entry: packages/parsers/openapi/src/index.ts
 
@@ -15,7 +15,7 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 export interface OpenApiParseOptions extends ParseOptions {
   entry?: string;
 }

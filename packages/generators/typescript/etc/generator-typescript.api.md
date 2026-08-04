@@ -1,4 +1,4 @@
-# API Snapshot: @aio/generator-typescript
+# API Snapshot: @schema-transformation-toolkit/generator-typescript
 
 Entry: packages/generators/typescript/src/index.ts
 
@@ -9,7 +9,7 @@ import {
   type SemanticLoss,
   type SemanticLossAnalysisContext,
   type SchemaDocument,
-} from "@aio/core";
+} from "@schema-transformation-toolkit/core";
 export type TypeScriptLossHotspotCode =
   "integer-widening" | "wide-unknown" | "unknown-union-absorption";
 export interface TypeScriptLossHotspot {
@@ -52,7 +52,10 @@ export declare function planTypeScriptSemanticLosses(
 ## packages/generators/typescript/src/api.d.ts
 
 ```ts
-import type { SchemaDocument, SchemaGenerator } from "@aio/core";
+import type {
+  SchemaDocument,
+  SchemaGenerator,
+} from "@schema-transformation-toolkit/core";
 import type { TypeScriptGenerateResult } from "./failure.js";
 import {
   type ConfiguredTypeScriptGenerator,
@@ -89,28 +92,31 @@ export declare const typeScriptGenerator: SchemaGenerator<
   TypeScriptGenerateResult
 >;
 /** Prepared default option state for the shared TypeScript generator instance. */
-export declare const preparedTypeScriptGeneratorOptions: import("@aio/core").PreparedOptions<ResolvedTypeScriptGeneratorOptions>;
+export declare const preparedTypeScriptGeneratorOptions: import("@schema-transformation-toolkit/core").PreparedOptions<ResolvedTypeScriptGeneratorOptions>;
 export { DEFAULT_TYPESCRIPT_GENERATOR_OPTIONS };
 ```
 
 ## packages/generators/typescript/src/capabilities.d.ts
 
 ```ts
-import type { GeneratorCapabilities } from "@aio/core";
+import type { GeneratorCapabilities } from "@schema-transformation-toolkit/core";
 export declare const typeScriptGeneratorCapabilities: GeneratorCapabilities;
 ```
 
 ## packages/generators/typescript/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@aio/core";
+import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
 export declare const typeScriptGeneratorDescriptor: GeneratorDescriptor<string>;
 ```
 
 ## packages/generators/typescript/src/failure.d.ts
 
 ```ts
-import type { GenerateFailureResult, GenerateSuccessResult } from "@aio/core";
+import type {
+  GenerateFailureResult,
+  GenerateSuccessResult,
+} from "@schema-transformation-toolkit/core";
 export type TypeScriptGeneratorFailureCode =
   | "invalid-type-name"
   | "duplicate-rendered-type-name"
@@ -172,7 +178,7 @@ export type {
 ## packages/generators/typescript/src/option-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@aio/core";
+import type { OptionCatalog } from "@schema-transformation-toolkit/core";
 export declare const typeScriptGeneratorOptionCatalog: OptionCatalog;
 ```
 
@@ -184,8 +190,8 @@ import type {
   GenerateOptions,
   PreparedOptions,
   SchemaGenerator,
-} from "@aio/core";
-import type { NamingStrategy } from "@aio/core";
+} from "@schema-transformation-toolkit/core";
+import type { NamingStrategy } from "@schema-transformation-toolkit/core";
 import type { TypeScriptGenerateResult } from "./failure.js";
 export type TypeScriptRootObjectMode = "interface" | "type";
 export type TypeScriptArrayStyle = "smart" | "compact" | "generic";

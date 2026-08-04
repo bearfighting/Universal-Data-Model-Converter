@@ -6,6 +6,7 @@ export default defineConfig({
   entry: ["src/index.ts"],
   external: ["typescript"],
   format: ["esm"],
+  noExternal: [/^@schema-transformation-toolkit\//u],
   sourcemap: true,
   target: "es2022",
 });

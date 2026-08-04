@@ -1,4 +1,7 @@
-import type { GenerateFailureResult, GenerateSuccessResult } from "@aio/core";
+import type {
+  GenerateFailureResult,
+  GenerateSuccessResult,
+} from "@schema-transformation-toolkit/core";
 
 export type TypeScriptGeneratorFailureCode =
   | "invalid-type-name"

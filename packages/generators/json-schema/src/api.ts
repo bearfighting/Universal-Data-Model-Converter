@@ -1,4 +1,7 @@
-import type { SchemaDocument, SchemaGenerator } from "@aio/core";
+import type {
+  SchemaDocument,
+  SchemaGenerator,
+} from "@schema-transformation-toolkit/core";
 import { collectJsonSchemaSemanticObservations } from "./diagnostics.js";
 import { renderJsonSchemaDocument } from "./emit.js";
 import type { JsonSchemaGenerateResult } from "./failure.js";
