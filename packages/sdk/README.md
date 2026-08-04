@@ -63,6 +63,11 @@ official compiler API; Zod remains a dependency for the public contract
 schemas. Consumers do not need to install any parser or generator package
 separately.
 
+The SDK keeps the OpenAPI parser's `yaml` dependency external to its ESM
+bundle so Node and strict ESM runtimes can resolve it normally. It is declared
+as a direct SDK runtime dependency and is installed automatically with the
+package.
+
 ## Stage 1 Contract
 
 For downstream product surfaces, the intended Stage 1 contract is:

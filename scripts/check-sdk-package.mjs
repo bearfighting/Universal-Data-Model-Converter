@@ -19,6 +19,19 @@ try {
     },
   );
 
+  const sdkBundle = readFileSync(
+    path.join(repoRoot, "packages/sdk/dist/index.js"),
+    "utf8",
+  );
+  if (
+    sdkBundle.includes("Dynamic require of ") ||
+    sdkBundle.includes("var __require")
+  ) {
+    throw new Error(
+      "The SDK ESM bundle must not inline yaml's dynamic Node require compatibility code.",
+    );
+  }
+
   const packOutput = execFileSync(
     "pnpm",
     ["pack", "--pack-destination", tempRoot],
