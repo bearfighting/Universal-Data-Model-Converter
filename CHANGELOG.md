@@ -10,6 +10,28 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.2
+
+This prerelease adds a statically analyzed Zod 4 parser and expands the
+cross-format schema semantics available through the shared IR.
+
+### Features
+
+- Add `@schema-transformation-toolkit/parser-zod` for TypeScript and
+  JavaScript Zod 4 schema source.
+- Support static Zod objects, collections, unions, references, recursive
+  `z.lazy` schemas, constraints, string enums, descriptions, and defaults.
+- Add Zod parser routes to JSON Schema, TypeScript, Zod, and OpenAPI through
+  the SDK.
+
+### Compatibility and safety
+
+- Reject dynamic JavaScript, unsupported Zod constructs, invalid union arity,
+  unsafe bindings, and non-lazy reference cycles with structured diagnostics.
+- Preserve default output presence while reporting the input-presence caveat
+  that cannot be represented by the current Shape IR.
+- Render literal-only unions as JSON Schema/OpenAPI `enum` values.
+
 ## 0.2.0-beta.1
 
 This prerelease fixes the SDK's ESM distribution boundary for OpenAPI YAML
