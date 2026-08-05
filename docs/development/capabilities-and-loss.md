@@ -28,6 +28,19 @@ to Zod checks and portable annotations to metadata, but it reports unsupported
 or partially preserved target behavior instead of emitting placeholder
 validators.
 
+The Zod source parser applies the same rule statically: it accepts only
+canonical imported Zod bindings and expressions that lower truthfully into the
+shared IR. Static string enums lower to literal unions, while static
+description/default metadata lowers to portable annotations. Runtime-dependent
+factories, dynamic enum sources, non-lazy reference cycles, unsupported regex
+flags, and root-level optional presence fail explicitly rather than being
+approximated.
+
+Zod `.default()` has separate input and output semantics: the input may omit
+the field, while the parsed output contains the defaulted value. The current
+Shape IR preserves the required post-default output shape and reports the
+unpreserved input-presence distinction as a semantic note.
+
 ## Terms
 
 ### Capability

@@ -93,6 +93,7 @@ try {
               "@schema-transformation-toolkit/parser-json-schema",
               "@schema-transformation-toolkit/parser-openapi",
               "@schema-transformation-toolkit/parser-typescript",
+              "@schema-transformation-toolkit/parser-zod",
             ].map((name) => [
               name,
               `file:${path.join(repoRoot, "packages", packageDirectoryFor(name))}`,
@@ -123,7 +124,7 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "json,json-schema,openapi,typescript") {
+    if (sources.join(",") !== "json,json-schema,openapi,typescript,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
     if (targets.join(",") !== "json-schema,openapi,typescript,zod") {

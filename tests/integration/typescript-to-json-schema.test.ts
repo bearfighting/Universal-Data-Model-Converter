@@ -94,7 +94,7 @@ describe("integration: typescript -> ir -> json-schema", () => {
         title: "ResponseDocument",
         $defs: {
           Status: {
-            oneOf: [{ const: "open" }, { const: "closed" }],
+            enum: ["open", "closed"],
           },
           Audit: {
             type: "object",
@@ -234,7 +234,7 @@ describe("integration: typescript -> ir -> json-schema", () => {
         $ref: "#/$defs/Response",
         $defs: {
           Status: {
-            oneOf: [{ const: "open" }, { const: "closed" }],
+            enum: ["open", "closed"],
           },
           Response: {
             type: "object",

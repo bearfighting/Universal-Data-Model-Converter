@@ -144,7 +144,7 @@ describe("generator-json-schema", () => {
     ).toEqual({
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "Status",
-      oneOf: [{ const: "open" }, { const: true }],
+      enum: ["open", true],
     });
 
     expect(
@@ -199,7 +199,7 @@ describe("generator-json-schema", () => {
     ).toEqual({
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "Status",
-      anyOf: [{ const: "open" }, { const: true }],
+      enum: ["open", true],
     });
 
     expect(
@@ -211,7 +211,7 @@ describe("generator-json-schema", () => {
       output: {
         $schema: "https://json-schema.org/draft/2020-12/schema",
         title: "Status",
-        anyOf: [{ const: "open" }, { const: true }],
+        enum: ["open", true],
       },
     });
   });

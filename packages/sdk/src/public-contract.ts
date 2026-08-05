@@ -5,6 +5,7 @@ export const conversionSourceFormatSchema = z.enum([
   "json-schema",
   "typescript",
   "openapi",
+  "zod",
 ]);
 
 export const conversionTargetFormatSchema = z.enum([

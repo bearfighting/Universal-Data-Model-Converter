@@ -1,6 +1,7 @@
 import type {
   Constraint,
   SchemaArrayNode,
+  SchemaLiteralNode,
   SchemaDocument,
   SchemaNode,
   SchemaObjectNode,
@@ -154,11 +155,20 @@ function renderUnionNode(
   options: ResolvedJsonSchemaGeneratorOptions,
   path: string[],
 ): JsonSchemaOutput {
+  if (node.members.every(isLiteralNode)) {
+    return {
+      enum: node.members.map((member) => member.value),
+    };
+  }
   return {
     [options.unionComposition]: node.members.map((member) =>
       renderJsonSchemaNode(member, options, path),
     ),
   };
+}
+
+function isLiteralNode(node: SchemaNode): node is SchemaLiteralNode {
+  return node.kind === "literal";
 }
 
 function renderObjectNode(

@@ -16,6 +16,7 @@ import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json
 import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
 import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
 import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
+import { zodParserDescriptor } from "@schema-transformation-toolkit/parser-zod";
 import type { ConversionFormat, ConversionRegistry } from "./types.js";
 
 export type DescriptorRegistrationErrorCode =
@@ -107,6 +108,7 @@ export const defaultConversionRegistry = createConversionRegistry({
     jsonSchemaParserDescriptor,
     typeScriptParserDescriptor,
     openApiParserDescriptor,
+    zodParserDescriptor,
   ],
   generators: [
     jsonSchemaDescriptor,

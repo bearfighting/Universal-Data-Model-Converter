@@ -176,7 +176,7 @@ describe("sdk support matrix", () => {
 
   it("keeps generator-only formats out of source format discovery", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "json-schema", "typescript", "openapi"],
+      ["json", "json-schema", "typescript", "openapi", "zod"],
     );
     expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
       true,
@@ -207,7 +207,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(16);
+    expect(listConversionRoutes()).toHaveLength(20);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

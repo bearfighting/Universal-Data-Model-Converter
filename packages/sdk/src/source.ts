@@ -158,5 +158,8 @@ function parserOptionsFor(
   if (sourceFormat === "openapi") {
     return options.advanced?.parser?.openapi ?? {};
   }
+  if (sourceFormat === "zod") {
+    return options.advanced?.parser?.zod ?? {};
+  }
   return options.extension?.parser ?? {};
 }

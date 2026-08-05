@@ -25,9 +25,10 @@ import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-jso
 import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
 import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
 import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
+import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
 
 export type BuiltinSourceFormat =
-  "json" | "json-schema" | "typescript" | "openapi";
+  "json" | "json-schema" | "typescript" | "openapi" | "zod";
 export type BuiltinTargetFormat =
   "json-schema" | "typescript" | "zod" | "openapi";
 export interface BuiltinGeneratorOutputs {
@@ -67,6 +68,7 @@ export interface ConvertAdvancedOptions {
     jsonSchema?: JsonSchemaParseOptions;
     typeScript?: TypeScriptParseOptions;
     openapi?: OpenApiParseOptions;
+    zod?: ZodParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;

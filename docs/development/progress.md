@@ -13,7 +13,9 @@ It should stay short and answer:
 The repository is past architecture validation and has a stable-enough conversion kernel:
 
 - multi-layer IR with `Value IR`, `Shape IR`, `Constraint IR`, and `IrModel`
-- parser and generator packages for JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4
+- parser and generator packages for JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
+- the Zod parser now uses a split static-analysis kernel with strict import, reference-cycle, presence, constraint-path, and diagnostic boundaries
+- Zod static enums lower to literal unions, portable metadata is preserved through Constraint IR, and default input-presence caveats are reported explicitly
 - structured diagnostics, semantic notes, capability declarations, and semantic-loss reporting
 - an SDK planner that derives routes and route summaries from registries
 - an SDK report layer that now includes higher-level `capabilityRequirements` and `lossHotspots` analysis for `typescript` targets
@@ -58,6 +60,7 @@ Validated end-to-end routes today:
 - `json-schema -> shape + constraint -> openapi`
 - `typescript -> shape -> openapi`
 - `openapi -> shape + constraint -> openapi`
+- `zod -> shape + constraint -> json-schema/typescript/zod/openapi`
 
 Shared shape semantics currently cover:
 

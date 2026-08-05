@@ -251,7 +251,7 @@ describe("integration: json-schema -> ir -> json-schema", () => {
     });
   });
 
-  it("normalizes anyOf unions to the current generator default oneOf shape", () => {
+  it("normalizes literal anyOf unions to JSON Schema enum", () => {
     const parsed = jsonSchemaParser.parse(
       JSON.stringify({
         $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -269,7 +269,7 @@ describe("integration: json-schema -> ir -> json-schema", () => {
       output: {
         $schema: "https://json-schema.org/draft/2020-12/schema",
         title: "Result",
-        oneOf: [{ const: "open" }, { const: true }],
+        enum: ["open", true],
       },
     });
   });
