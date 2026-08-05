@@ -15,6 +15,9 @@ The first version is intentionally narrow:
 
 The generator currently targets JSON Schema Draft 2020-12 only.
 
+Literal-only unions always use `enum`; the `unionComposition` option applies
+to unions containing non-literal members.
+
 This package is intentionally a focused generator, not a full JSON Schema platform.
 If a behavior is not explicitly documented here, it should not be assumed.
 
@@ -30,6 +33,7 @@ The current generator supports:
 - tuple root documents
 - record root documents
 - union root documents
+- literal-only unions as JSON Schema `enum`
 - reusable definitions and `$ref`
 - fixed-field objects with typed `additionalProperties`
 - simple `nullable` fields through compact `type: ["T", "null"]` rendering

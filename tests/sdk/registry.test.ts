@@ -26,6 +26,10 @@ describe("sdk registry", () => {
       planConversion("openapi", "typescript"),
       planConversion("openapi", "zod"),
       planConversion("openapi", "openapi"),
+      planConversion("zod", "json-schema"),
+      planConversion("zod", "typescript"),
+      planConversion("zod", "zod"),
+      planConversion("zod", "openapi"),
     ]);
   });
 

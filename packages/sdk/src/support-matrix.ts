@@ -74,6 +74,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Object-only allOf compositions can be merged into shared IR; conflicting or non-object compositions remain unsupported.",
   ],
   zod: [
+    "Zod source parsing is limited to statically analyzable Zod 4 schema expressions in a single source module.",
+    "Static z.enum string arrays lower to shared literal unions; dynamic enum sources and nativeEnum remain unsupported.",
+    "Portable metadata is limited to static describe and default values; arbitrary meta objects remain unsupported.",
+    "Zod defaults preserve post-default required output shape and report input-presence caveats.",
+    "Dynamic schema factories, refine/transform effects, extend/merge, and unsupported runtime validators are rejected.",
     "Zod output targets Zod 4 and assumes the consuming project installs zod.",
     "JavaScript output provides runtime schemas only; TypeScript output additionally emits z.infer types.",
     "Object openness without explicit IR evidence uses a strict-object target policy and reports a policy note.",

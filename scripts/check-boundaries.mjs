@@ -36,6 +36,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/typescript"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-zod",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/zod"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -271,6 +276,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-json-schema",
     "@schema-transformation-toolkit/parser-openapi",
     "@schema-transformation-toolkit/parser-typescript",
+    "@schema-transformation-toolkit/parser-zod",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-openapi",
     "@schema-transformation-toolkit/generator-typescript",

@@ -20,6 +20,8 @@ export default defineConfig({
         "/packages/parsers/typescript/src/index.ts",
       "@schema-transformation-toolkit/parser-openapi":
         "/packages/parsers/openapi/src/index.ts",
+      "@schema-transformation-toolkit/parser-zod":
+        "/packages/parsers/zod/src/index.ts",
       "@schema-transformation-toolkit/sdk": "/packages/sdk/src/index.ts",
     },
   },

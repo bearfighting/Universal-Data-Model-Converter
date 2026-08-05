@@ -51,6 +51,12 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-zod",
+    root: path.join(repoRoot, "packages/parsers/zod"),
+    entry: path.join(repoRoot, "packages/parsers/zod/src/index.ts"),
+    snapshot: path.join(repoRoot, "packages/parsers/zod/etc/parser-zod.api.md"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     root: path.join(repoRoot, "packages/generators/json-schema"),
     entry: path.join(repoRoot, "packages/generators/json-schema/src/index.ts"),

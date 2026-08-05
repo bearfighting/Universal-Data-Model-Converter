@@ -20,6 +20,7 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-json`: JSON to IR parsing and inference
 - `@schema-transformation-toolkit/parser-json-schema`: JSON Schema Draft 2020-12 parser for the current shared IR subset
 - `@schema-transformation-toolkit/parser-typescript`: TypeScript schema-subset parser for the shared IR
+- `@schema-transformation-toolkit/parser-zod`: static Zod 4 schema-expression parser for the shared IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
 - `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
@@ -47,6 +48,7 @@ The currently validated flows are:
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
 - `typescript -> shape -> json-schema`
+- `zod -> shape + constraint -> json-schema/typescript/zod/openapi`
 - `json -> zod`
 - `json-schema -> zod`
 - `typescript -> zod`
