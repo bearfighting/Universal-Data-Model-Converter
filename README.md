@@ -21,10 +21,12 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-json-schema`: JSON Schema Draft 2020-12 parser for the current shared IR subset
 - `@schema-transformation-toolkit/parser-typescript`: TypeScript schema-subset parser for the shared IR
 - `@schema-transformation-toolkit/parser-zod`: static Zod 4 schema-expression parser for the shared IR
+- `@schema-transformation-toolkit/parser-yaml`: strict JSON-compatible YAML parser for Value and Shape IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
 - `@schema-transformation-toolkit/generator-json`: Value IR to normalized JSON generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
 - `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
+- `@schema-transformation-toolkit/generator-yaml`: Value IR to deterministic YAML generation
 - `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
 
 The SDK `convert(...)` API accepts `irPreference: "auto" | "value" | "shape"`
@@ -41,6 +43,7 @@ The current implementation is intentionally conservative.
 - `@schema-transformation-toolkit/generator-json-schema` supports the currently implemented IR subset
 - `@schema-transformation-toolkit/generator-typescript` supports the currently implemented IR subset
 - `@schema-transformation-toolkit/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
+- YAML support is limited to a strict JSON-compatible single-document profile; it is not a full YAML 1.2 data-model implementation
 - unsupported cases are reported through structured failures instead of silent guessing
 
 ## Current End-To-End Flows
@@ -54,6 +57,9 @@ The currently validated flows are:
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
 - `typescript -> shape -> json-schema`
+- `yaml -> value -> yaml`
+- `yaml -> value -> shape -> typescript/json-schema`
+- `json -> value -> yaml`
 - `zod -> shape + constraint -> json-schema/typescript/zod/openapi`
 - `json -> zod`
 - `json-schema -> zod`
@@ -219,6 +225,7 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 
 - [README.md](README.md): project overview, package map, and current validated flows
 - [docs/development/progress.md](docs/development/progress.md): current repository state and next highest-leverage work
+- [docs/development/ir-evolution.md](docs/development/ir-evolution.md): shared IR evolution principles and candidate improvements
 - [packages/sdk/README.md](packages/sdk/README.md): high-level pipeline entry point and report-reading quick start
 - [packages/core/README.md](packages/core/README.md): shared IR model, invariants, and cross-package semantic boundary
 - [examples/README.md](examples/README.md): quick tour of current end-to-end examples
@@ -228,10 +235,12 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [packages/parsers/json/README.md](packages/parsers/json/README.md): JSON parsing and inference
 - [packages/parsers/json-schema/README.md](packages/parsers/json-schema/README.md): supported JSON Schema parsing
 - [packages/parsers/typescript/README.md](packages/parsers/typescript/README.md): supported TypeScript schema-subset parsing
+- [packages/parsers/yaml/README.md](packages/parsers/yaml/README.md): strict JSON-compatible YAML parsing
 - [packages/generators/json-schema/README.md](packages/generators/json-schema/README.md): JSON Schema Draft 2020-12 generation
 - [packages/generators/json/README.md](packages/generators/json/README.md): normalized JSON generation from Value IR
 - [packages/generators/typescript/README.md](packages/generators/typescript/README.md): TypeScript generation
 - [packages/generators/zod/README.md](packages/generators/zod/README.md): Zod 4 TypeScript and JavaScript generation
+- [packages/generators/yaml/README.md](packages/generators/yaml/README.md): deterministic YAML generation from Value IR
 - [examples/json-to-typescript.md](examples/json-to-typescript.md): representative `json -> value -> shape -> typescript` examples
 - [examples/json-to-json-schema.md](examples/json-to-json-schema.md): representative `json -> value -> shape -> json-schema` examples
 - [examples/json-to-json.md](examples/json-to-json.md): representative `json -> value -> json` examples

@@ -10,7 +10,7 @@ format-specific integrations.
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
 Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
 
-The current target formats are JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4. Selecting
+The current target formats are JSON, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
@@ -55,8 +55,8 @@ if (!result.ok) {
 }
 ```
 
-The default registry includes JSON, JSON Schema, TypeScript, and OpenAPI
-parsers, plus JSON, JSON Schema, TypeScript, Zod, and OpenAPI generators. The SDK
+The default registry includes JSON, JSON Schema, TypeScript, OpenAPI, Zod, and YAML
+parsers, plus JSON, JSON Schema, TypeScript, Zod, OpenAPI, and YAML generators. The SDK
 bundles those implementations into its distributable runtime. TypeScript is
 installed as a runtime dependency because the TypeScript parser uses the
 official compiler API; Zod remains a dependency for the public contract
@@ -67,6 +67,11 @@ The SDK keeps the OpenAPI parser's `yaml` dependency external to its ESM
 bundle so Node and strict ESM runtimes can resolve it normally. It is declared
 as a direct SDK runtime dependency and is installed automatically with the
 package.
+
+YAML uses a strict JSON-compatible single-document profile. It rejects YAML
+tags, anchors, aliases, merge keys, duplicate keys, non-string mapping keys,
+and other YAML-specific values. YAML generation consumes Value IR only, so
+schema-only sources cannot generate concrete YAML examples.
 
 ## Stage 1 Contract
 

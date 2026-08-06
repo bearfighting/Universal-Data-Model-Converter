@@ -57,6 +57,15 @@ const packageConfigs = [
     snapshot: path.join(repoRoot, "packages/parsers/zod/etc/parser-zod.api.md"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-yaml",
+    root: path.join(repoRoot, "packages/parsers/yaml"),
+    entry: path.join(repoRoot, "packages/parsers/yaml/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/yaml/etc/parser-yaml.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     root: path.join(repoRoot, "packages/generators/json-schema"),
     entry: path.join(repoRoot, "packages/generators/json-schema/src/index.ts"),
@@ -99,6 +108,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/zod/etc/generator-zod.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-yaml",
+    root: path.join(repoRoot, "packages/generators/yaml"),
+    entry: path.join(repoRoot, "packages/generators/yaml/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/yaml/etc/generator-yaml.api.md",
     ),
   },
   {

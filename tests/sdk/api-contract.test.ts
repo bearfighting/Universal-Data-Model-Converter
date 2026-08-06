@@ -124,6 +124,77 @@ describe("sdk api contract", () => {
     });
   });
 
+  it("supports YAML value and shape routes", () => {
+    expect(sdkModule.planConversion("yaml", "typescript")).toMatchObject({
+      sourceFormat: "yaml",
+      targetFormat: "typescript",
+      irSequence: ["value", "shape"],
+    });
+    expect(sdkModule.planConversion("json", "yaml")).toMatchObject({
+      sourceFormat: "json",
+      targetFormat: "yaml",
+      irSequence: ["value"],
+    });
+    expect(() => sdkModule.planConversion("typescript", "yaml")).toThrow(
+      /Unsupported conversion route/,
+    );
+  });
+
+  it("converts YAML into generated schema text and back to YAML", () => {
+    const typescriptResult = sdkModule.convert({
+      sourceFormat: "yaml",
+      targetFormat: "typescript",
+      input: "id: 1\nname: Ada\n",
+      name: "User",
+    });
+    expect(typescriptResult.ok).toBe(true);
+    if (typescriptResult.ok) {
+      expect(typescriptResult.output).toContain("export interface User");
+    }
+
+    const yamlResult = sdkModule.convert({
+      sourceFormat: "json",
+      targetFormat: "yaml",
+      input: '{"id":1,"name":"Ada"}',
+    });
+    expect(yamlResult).toMatchObject({
+      ok: true,
+      output: "id: 1\nname: Ada\n",
+    });
+  });
+
+  it("keeps Value IR-only YAML routes independent from Shape IR inference", () => {
+    for (const targetFormat of ["yaml", "json"] as const) {
+      const result = sdkModule.convert({
+        sourceFormat: "yaml",
+        targetFormat,
+        input: 'items: [1, "a"]\n',
+      });
+
+      expect(result.ok).toBe(true);
+    }
+  });
+
+  it("returns structured parser diagnostics for invalid YAML", () => {
+    const result = sdkModule.convert({
+      sourceFormat: "yaml",
+      targetFormat: "json",
+      input: "id: [",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      phase: "parse",
+      code: "invalid-yaml",
+      diagnostics: [
+        expect.objectContaining({
+          source: "parser-yaml",
+          code: "invalid-yaml",
+        }),
+      ],
+    });
+  });
+
   it("plans the json-schema to json-schema route with constraint ir when both sides declare it", () => {
     expect(sdkModule.planConversion("json-schema", "json-schema")).toEqual({
       sourceFormat: "json-schema",

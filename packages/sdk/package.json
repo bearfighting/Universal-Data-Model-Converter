@@ -26,11 +26,13 @@
     "@schema-transformation-toolkit/generator-openapi": "workspace:*",
     "@schema-transformation-toolkit/generator-typescript": "workspace:*",
     "@schema-transformation-toolkit/generator-zod": "workspace:*",
+    "@schema-transformation-toolkit/generator-yaml": "workspace:*",
     "@schema-transformation-toolkit/parser-json": "workspace:*",
     "@schema-transformation-toolkit/parser-json-schema": "workspace:*",
     "@schema-transformation-toolkit/parser-openapi": "workspace:*",
     "@schema-transformation-toolkit/parser-typescript": "workspace:*",
     "@schema-transformation-toolkit/parser-zod": "workspace:*",
+    "@schema-transformation-toolkit/parser-yaml": "workspace:*",
     "typescript": "^5.9.3",
     "yaml": "^2.8.1",
     "zod": "^4.4.3"

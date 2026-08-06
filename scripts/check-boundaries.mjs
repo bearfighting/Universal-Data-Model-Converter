@@ -41,6 +41,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/zod"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-yaml",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/yaml"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -64,6 +69,11 @@ const packageConfigs = [
     name: "@schema-transformation-toolkit/generator-zod",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/zod"),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-yaml",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/yaml"),
   },
 ];
 
@@ -272,6 +282,12 @@ function getAllowedDependencies(pkg) {
         "@schema-transformation-toolkit/generator-json-schema",
       ]);
     }
+    if (pkg.name === "@schema-transformation-toolkit/parser-yaml") {
+      return new Set([
+        "@schema-transformation-toolkit/core",
+        "@schema-transformation-toolkit/parser-json",
+      ]);
+    }
     return new Set(["@schema-transformation-toolkit/core"]);
   }
 
@@ -282,11 +298,13 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-openapi",
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
+    "@schema-transformation-toolkit/parser-yaml",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",
+    "@schema-transformation-toolkit/generator-yaml",
   ]);
 }
 

@@ -195,5 +195,8 @@ function parserOptionsFor(
   if (sourceFormat === "zod") {
     return options.advanced?.parser?.zod ?? {};
   }
+  if (sourceFormat === "yaml") {
+    return options.advanced?.parser?.yaml ?? {};
+  }
   return options.extension?.parser ?? {};
 }

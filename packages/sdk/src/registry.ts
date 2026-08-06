@@ -15,11 +15,13 @@ import { jsonGeneratorDescriptor } from "@schema-transformation-toolkit/generato
 import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
 import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
 import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
+import { yamlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-yaml";
 import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
 import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
 import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
 import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
 import { zodParserDescriptor } from "@schema-transformation-toolkit/parser-zod";
+import { yamlParserDescriptor } from "@schema-transformation-toolkit/parser-yaml";
 import type {
   ConversionFormat,
   ConversionIrPreference,
@@ -151,12 +153,14 @@ export const defaultConversionRegistry = createConversionRegistry({
     typeScriptParserDescriptor,
     openApiParserDescriptor,
     zodParserDescriptor,
+    yamlParserDescriptor,
   ],
   generators: [
     jsonGeneratorDescriptor,
     jsonSchemaDescriptor,
     typeScriptGeneratorDescriptor,
     zodGeneratorDescriptor,
+    yamlGeneratorDescriptor,
     openApiGeneratorDescriptor,
   ],
 });

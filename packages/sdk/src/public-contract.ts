@@ -6,6 +6,7 @@ export const conversionSourceFormatSchema = z.enum([
   "typescript",
   "openapi",
   "zod",
+  "yaml",
 ]);
 
 export const conversionTargetFormatSchema = z.enum([
@@ -14,6 +15,7 @@ export const conversionTargetFormatSchema = z.enum([
   "typescript",
   "zod",
   "openapi",
+  "yaml",
 ]);
 
 export const conversionIrPreferenceSchema = z.enum(["auto", "value", "shape"]);

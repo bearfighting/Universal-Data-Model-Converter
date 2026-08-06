@@ -46,5 +46,6 @@ function generatorOptionsFor(
   if (targetFormat === "zod") return options.advanced?.generator?.zod ?? {};
   if (targetFormat === "openapi")
     return options.advanced?.generator?.openapi ?? {};
+  if (targetFormat === "yaml") return options.advanced?.generator?.yaml ?? {};
   return options.extension?.generator ?? {};
 }
