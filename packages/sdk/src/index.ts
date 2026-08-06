@@ -17,6 +17,7 @@ export {
   conversionArtifactsSchema,
   conversionCapabilityRequirementSchema,
   conversionEntrySelectionSchema,
+  conversionIrPreferenceSchema,
   conversionLossHotspotSchema,
   conversionPolicyDecisionSchema,
   conversionReportSchema,
@@ -36,6 +37,7 @@ export {
   optionValueMetadataSchema,
 } from "./public-contract.js";
 export {
+  conversionIrPreferenceMetadata,
   describeConversionOptions,
   describeGeneratorOptions,
   describeParserOptions,
@@ -69,6 +71,7 @@ export type {
   BuiltinSourceFormat,
   BuiltinTargetFormat,
   BuiltinGeneratorOutputs,
+  ConversionIrPreference,
   ConversionFormat,
   ConversionOutput,
   ConversionRegistry,

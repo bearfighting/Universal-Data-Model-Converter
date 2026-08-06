@@ -32,6 +32,7 @@ describe("SDK option metadata", () => {
       "parser:typescript",
       "parser:openapi",
       "parser:zod",
+      "generator:json",
       "generator:json-schema",
       "generator:typescript",
       "generator:zod",
@@ -118,6 +119,11 @@ describe("SDK option metadata", () => {
     expect(catalogs.parser.role).toBe("parser");
     expect(catalogs.generator.format).toBe("typescript");
     expect(catalogs.generator.role).toBe("generator");
+    expect(catalogs.irPreference).toMatchObject({
+      key: "irPreference",
+      defaultValue: "auto",
+      supported: true,
+    });
   });
 
   it("does not expose unsupported source-location preservation as supported", () => {

@@ -9,11 +9,14 @@ export const conversionSourceFormatSchema = z.enum([
 ]);
 
 export const conversionTargetFormatSchema = z.enum([
+  "json",
   "json-schema",
   "typescript",
   "zod",
   "openapi",
 ]);
+
+export const conversionIrPreferenceSchema = z.enum(["auto", "value", "shape"]);
 
 export const optionMetadataStageSchema = z.enum([
   "parse",
@@ -76,6 +79,7 @@ export const conversionOptionCatalogsSchema = z.object({
   targetFormat: conversionTargetFormatSchema,
   parser: optionCatalogSchema,
   generator: optionCatalogSchema,
+  irPreference: optionMetadataSchema,
 });
 
 export const schemaDiagnosticSchema = z.object({
@@ -174,6 +178,13 @@ export const conversionLossHotspotSchema = z.object({
 });
 
 export const conversionReportSchema = z.object({
+  irSelection: z
+    .object({
+      requested: conversionIrPreferenceSchema,
+      selected: z.enum(["value", "shape"]),
+      fallback: z.boolean(),
+    })
+    .optional(),
   diagnostics: conversionReportStageSchema(schemaDiagnosticSchema).optional(),
   losses: z.array(semanticLossSchema).optional(),
   preservedCapabilities: z.array(z.string()).optional(),

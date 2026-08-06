@@ -56,6 +56,8 @@ describe("sdk api contract", () => {
       "conversionArtifactsSchema",
       "conversionCapabilityRequirementSchema",
       "conversionEntrySelectionSchema",
+      "conversionIrPreferenceMetadata",
+      "conversionIrPreferenceSchema",
       "conversionLossHotspotSchema",
       "conversionOptionCatalogsSchema",
       "conversionPolicyDecisionSchema",
@@ -92,6 +94,15 @@ describe("sdk api contract", () => {
       "schemaDiagnosticSchema",
       "semanticLossSchema",
     ]);
+  });
+
+  it("validates the public IR preference values", () => {
+    expect(sdkModule.conversionIrPreferenceSchema.parse("auto")).toBe("auto");
+    expect(sdkModule.conversionIrPreferenceSchema.parse("value")).toBe("value");
+    expect(sdkModule.conversionIrPreferenceSchema.parse("shape")).toBe("shape");
+    expect(() =>
+      sdkModule.conversionIrPreferenceSchema.parse("invalid"),
+    ).toThrow();
   });
 
   it("plans the explicit json to typescript route", () => {
@@ -664,6 +675,11 @@ describe("sdk api contract", () => {
       "object-constraints",
     ]);
     expect(result.report).toEqual({
+      irSelection: {
+        requested: "auto",
+        selected: "shape",
+        fallback: true,
+      },
       preservedCapabilities: [
         "shape-ir",
         "constraint-ir",
@@ -732,6 +748,11 @@ describe("sdk api contract", () => {
       },
     ]);
     expect(result.report).toEqual({
+      irSelection: {
+        requested: "auto",
+        selected: "shape",
+        fallback: true,
+      },
       capabilityRequirements: [
         {
           feature: "object",

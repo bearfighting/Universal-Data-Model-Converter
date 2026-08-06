@@ -14,6 +14,13 @@ export const openApiGeneratorDescriptor: GeneratorDescriptor<OpenApiOutput> = {
   capabilities: openApiGeneratorCapabilities,
   options: openApiGeneratorOptionCatalog,
   generate(document, context: GeneratorExecutionContext) {
+    if (document.kind !== "document") {
+      return {
+        ok: false,
+        code: "invalid-generator-input",
+        message: "The OpenAPI generator requires Shape IR.",
+      };
+    }
     return tryGenerateOpenApi(document, {
       ...((context.options ?? {}) as OpenApiGeneratorOptions),
       ...(context.constraints ? { constraints: context.constraints } : {}),

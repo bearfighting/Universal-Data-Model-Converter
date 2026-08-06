@@ -10,7 +10,7 @@ format-specific integrations.
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
 Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
 
-The current target formats are JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4. Selecting
+The current target formats are JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
@@ -56,7 +56,7 @@ if (!result.ok) {
 ```
 
 The default registry includes JSON, JSON Schema, TypeScript, and OpenAPI
-parsers, plus JSON Schema, TypeScript, Zod, and OpenAPI generators. The SDK
+parsers, plus JSON, JSON Schema, TypeScript, Zod, and OpenAPI generators. The SDK
 bundles those implementations into its distributable runtime. TypeScript is
 installed as a runtime dependency because the TypeScript parser uses the
 official compiler API; Zod remains a dependency for the public contract
@@ -81,7 +81,7 @@ The most stable result fields for consumers to build on are:
 
 - failure: `code`, `message`, `phase`, `plan`, optional `diagnostics`
 - success: `output`, `plan`, optional `report`
-- report core: `semanticCaveats`, `losses`, `capabilityRequirements`, `lossHotspots`, `entrySelection`, `policyDecisions`
+- report core: `irSelection`, `semanticCaveats`, `losses`, `capabilityRequirements`, `lossHotspots`, `entrySelection`, `policyDecisions`
 - diagnostic core: `severity`, `code`, `message`, optional `path`, optional `source`
 
 The scenario-matrix tests in [../../tests/sdk/scenario-matrix.test.ts](../../tests/sdk/scenario-matrix.test.ts) exercise this contract through stable `success`, `caveat`, `unsupported`, `invalid-input`, route-planning, and `sourceRange`-bearing flows.
@@ -95,6 +95,8 @@ Consumers should not rely on:
 ## How To Read `result.report`
 
 The most important report fields are:
+
+- `irSelection`: the requested IR preference, selected entry IR, and whether `auto` fell back to Shape IR.
 
 - `semanticCaveats`: user-facing successful-but-imperfect conversion caveats
 - `losses`: declared route-level capability loss
@@ -163,6 +165,17 @@ The public helpers are:
 - `describeGeneratorOptions(format)`
 - `describeConversionOptions(sourceFormat, targetFormat)`
 - `listOptionCatalogs()`
+
+Conversion-level route selection is controlled with `irPreference` on
+`convert(...)`: it accepts `"auto"`, `"value"`, or `"shape"`. The default
+`"auto"` preference chooses Value IR when the route supports it and otherwise
+uses Shape IR. Explicit preferences never fall back to another IR layer.
+
+Route planning produces one execution plan shared by parsing and generation.
+Its selected entrance IR, parser request, pipeline stages, and generator input
+are therefore always aligned. Generator descriptors may use the explicit
+`entryIr` and `overlays` capability fields; older `consumesIr`-only descriptors
+remain supported through registry normalization.
 
 Each option includes its semantic and diagnostic effect, affected pipeline
 stages, supported or experimental status, value explanations, and structured
@@ -332,12 +345,18 @@ It is meant to power honest badges, route copy, or help text, not to expose ever
 
 Current public route planning covers:
 
+- `json -> json`
 - `json -> typescript`
 - `json -> json-schema`
 - `json-schema -> typescript`
 - `json-schema -> json-schema`
 - `typescript -> typescript`
 - `typescript -> json-schema`
+
+The `json -> json` route is a Value IR round-trip. It serializes valid JSON to
+normalized JSON text without running schema inference, so valid mixed values
+that cannot produce Shape IR can still use this route. It does not preserve
+source whitespace, escape spelling, number lexemes, or duplicate keys.
 
 Use `planConversion(...)` or `describeConversionRouteCapabilities(...)` when you want route metadata without running a conversion.
 

@@ -10,6 +10,7 @@ import {
   createConverter,
   defaultConversionRegistry,
 } from "../../packages/sdk/src/index.js";
+import { jsonParserDescriptor } from "../../packages/parsers/json/src/index.js";
 import { expectDescriptorRegistrationFailure } from "../helpers/descriptor-contract.js";
 
 const extensionGenerator: GeneratorDescriptor = {
@@ -27,6 +28,13 @@ const extensionGenerator: GeneratorDescriptor = {
     options: [],
   },
   generate(document) {
+    if (document.kind !== "document") {
+      return {
+        ok: false,
+        code: "invalid-generator-input",
+        message: "Expected Shape IR.",
+      };
+    }
     return { ok: true, output: `fixture:${document.name.source}` };
   },
 };
@@ -100,10 +108,14 @@ describe("sdk extensible registry", () => {
           capabilities: {
             ...extensionParser.capabilities,
             format: "invalid-parser",
-            producesIr: ["value"],
+            producesIr: [],
+          },
+          options: {
+            ...extensionParser.options,
+            format: "invalid-parser",
           },
         }),
-      "descriptor-missing-shape-ir",
+      "descriptor-missing-ir",
     );
     expectDescriptorRegistrationFailure(
       () =>
@@ -113,10 +125,10 @@ describe("sdk extensible registry", () => {
           capabilities: {
             ...extensionGenerator.capabilities,
             target: "invalid-generator",
-            consumesIr: ["value"],
+            consumesIr: [],
           },
         }),
-      "descriptor-missing-shape-ir",
+      "descriptor-missing-ir",
     );
     expectDescriptorRegistrationFailure(
       () =>
@@ -131,6 +143,23 @@ describe("sdk extensible registry", () => {
         }),
       "descriptor-options-mismatch",
     );
+    expectDescriptorRegistrationFailure(
+      () =>
+        registry.registerGenerator({
+          ...extensionGenerator,
+          format: "capability-mismatch",
+          capabilities: {
+            ...extensionGenerator.capabilities,
+            target: "capability-mismatch",
+            entryIr: ["value"],
+          },
+          options: {
+            ...extensionGenerator.options,
+            format: "capability-mismatch",
+          },
+        }),
+      "descriptor-capability-mismatch",
+    );
   });
 
   it("keeps the default registry isolated from custom registries", () => {
@@ -140,5 +169,52 @@ describe("sdk extensible registry", () => {
     expect(defaultConversionRegistry.listGenerators()).not.toContain(
       extensionGenerator,
     );
+  });
+
+  it("prefers Value IR for a generator that supports both IR layers", () => {
+    const dualGenerator: GeneratorDescriptor = {
+      ...extensionGenerator,
+      format: "dual-target",
+      capabilities: {
+        ...extensionGenerator.capabilities,
+        target: "dual-target",
+        consumesIr: ["value", "shape"],
+      },
+      options: { ...extensionGenerator.options, format: "dual-target" },
+      generate(document) {
+        return {
+          ok: true,
+          output: document.kind === "value-document" ? "value" : "shape",
+        };
+      },
+    };
+    const registry = createConversionRegistry({
+      parsers: [jsonParserDescriptor],
+      generators: [dualGenerator],
+    });
+    const converter = createConverter(registry);
+
+    expect(
+      converter.convert({
+        sourceFormat: "json",
+        targetFormat: "dual-target",
+        input: '[1,"a"]',
+      }),
+    ).toMatchObject({
+      ok: true,
+      output: "value",
+      plan: { irSequence: ["value"] },
+    });
+    expect(
+      converter.planConversion("json", "dual-target", "shape").irSequence,
+    ).toEqual(["value", "shape"]);
+    expect(
+      converter.convert({
+        sourceFormat: "json",
+        targetFormat: "dual-target",
+        input: '{"id":1}',
+        irPreference: "shape",
+      }),
+    ).toMatchObject({ ok: true, output: "shape" });
   });
 });

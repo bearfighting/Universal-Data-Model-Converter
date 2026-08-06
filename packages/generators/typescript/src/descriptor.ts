@@ -24,6 +24,13 @@ export const typeScriptGeneratorDescriptor: GeneratorDescriptor<string> = {
     planSemanticLosses: planTypeScriptSemanticLosses,
   },
   generate(document, context: GeneratorExecutionContext) {
+    if (document.kind !== "document") {
+      return {
+        ok: false,
+        code: "invalid-generator-input",
+        message: "The TypeScript generator requires Shape IR.",
+      };
+    }
     return tryGenerateTypeScript(
       document,
       (context.options ?? {}) as TypeScriptGeneratorOptions,

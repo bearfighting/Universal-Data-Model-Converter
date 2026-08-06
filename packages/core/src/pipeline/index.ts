@@ -1,5 +1,8 @@
 export type {
   ConversionCapabilityRequirement,
+  EntryIrKind,
+  ConversionIrPreference,
+  ConversionIrSelection,
   ConversionEntrySelection,
   ConversionLossHotspot,
   ConversionPolicyDecision,
@@ -7,6 +10,7 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
   ConversionRoute,

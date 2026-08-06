@@ -35,12 +35,18 @@ describe("sdk support matrix", () => {
     });
   });
 
-  it("describes json as a source-only consumer surface", () => {
+  it("describes json as a Value IR source and target surface", () => {
     expect(describeFormatSupport("json")).toEqual({
       format: "json",
       parser: {
         producesIr: ["value", "shape"],
         capabilities: ["value-ir", "shape-ir"],
+      },
+      generator: {
+        consumesIr: ["value"],
+        entryIr: ["value"],
+        overlays: [],
+        capabilities: ["value-ir"],
       },
       sharedShapeKinds: [
         "scalar",
@@ -81,6 +87,8 @@ describe("sdk support matrix", () => {
       },
       generator: {
         consumesIr: ["shape", "constraint"],
+        entryIr: ["shape"],
+        overlays: ["constraint"],
         capabilities: [
           "shape-ir",
           "constraint-ir",
@@ -129,6 +137,8 @@ describe("sdk support matrix", () => {
       },
       generator: {
         consumesIr: ["shape"],
+        entryIr: ["shape"],
+        overlays: [],
         capabilities: ["shape-ir"],
       },
       sharedShapeKinds: [
@@ -182,7 +192,7 @@ describe("sdk support matrix", () => {
       true,
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json-schema", "typescript", "openapi", "zod"],
+      ["json", "json-schema", "typescript", "openapi", "zod"],
     );
   });
 
@@ -197,6 +207,8 @@ describe("sdk support matrix", () => {
       },
       generator: {
         consumesIr: ["shape"],
+        entryIr: ["shape"],
+        overlays: [],
         capabilities: ["shape-ir"],
       },
     });
@@ -207,7 +219,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(20);
+    expect(listConversionRoutes()).toHaveLength(21);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

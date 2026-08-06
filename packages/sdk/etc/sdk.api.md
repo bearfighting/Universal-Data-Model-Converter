@@ -25,6 +25,7 @@ export type {
   BuiltinSourceFormat,
   BuiltinTargetFormat,
   BuiltinGeneratorOutputs,
+  ConversionIrPreference,
   ConversionFormat,
   ConversionOutput,
   ConversionRegistry,
@@ -36,6 +37,7 @@ import type {
   ConvertOptions,
   ConvertResult,
   ConversionFormat,
+  ConversionIrPreference,
   ConversionOutput,
 } from "./types.js";
 export {
@@ -54,7 +56,11 @@ export interface ConversionConverter<
     },
   ): ConvertResult<ConversionOutput<TTarget, TExtensions>>;
   listConversionRoutes(): ReturnType<typeof listConversionRoutes>;
-  planConversion: typeof planConversion;
+  planConversion: (
+    sourceFormat: ConversionFormat,
+    targetFormat: ConversionFormat,
+    irPreference?: ConversionIrPreference,
+  ) => ReturnType<typeof planConversion>;
   describeConversionRouteCapabilities: typeof describeConversionRouteCapabilities;
 }
 export declare function createConverter<
@@ -90,6 +96,7 @@ export {
   conversionArtifactsSchema,
   conversionCapabilityRequirementSchema,
   conversionEntrySelectionSchema,
+  conversionIrPreferenceSchema,
   conversionLossHotspotSchema,
   conversionPolicyDecisionSchema,
   conversionReportSchema,
@@ -109,6 +116,7 @@ export {
   optionValueMetadataSchema,
 } from "./public-contract.js";
 export {
+  conversionIrPreferenceMetadata,
   describeConversionOptions,
   describeGeneratorOptions,
   describeParserOptions,
@@ -142,6 +150,7 @@ export type {
   BuiltinSourceFormat,
   BuiltinTargetFormat,
   BuiltinGeneratorOutputs,
+  ConversionIrPreference,
   ConversionFormat,
   ConversionOutput,
   ConversionRegistry,
@@ -175,7 +184,10 @@ export declare function inspectTypeScriptImplicitEntry(
 ## packages/sdk/src/options-metadata.d.ts
 
 ```ts
-import type { OptionCatalog } from "@schema-transformation-toolkit/core";
+import type {
+  OptionCatalog,
+  OptionMetadata,
+} from "@schema-transformation-toolkit/core";
 import type {
   ConversionRegistry,
   ConversionSourceFormat,
@@ -186,7 +198,9 @@ export interface ConversionOptionCatalogs {
   targetFormat: ConversionTargetFormat;
   parser: OptionCatalog;
   generator: OptionCatalog;
+  irPreference: OptionMetadata;
 }
+export declare const conversionIrPreferenceMetadata: OptionMetadata;
 export declare function describeParserOptions(
   format: ConversionSourceFormat,
   registry?: ConversionRegistry,
@@ -213,14 +227,20 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
   typescript: "typescript";
-  zod: "zod";
   json: "json";
+  zod: "zod";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
   typescript: "typescript";
+  json: "json";
   zod: "zod";
+}>;
+export declare const conversionIrPreferenceSchema: z.ZodEnum<{
+  value: "value";
+  shape: "shape";
+  auto: "auto";
 }>;
 export declare const optionMetadataStageSchema: z.ZodEnum<{
   parse: "parse";
@@ -432,13 +452,14 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       "json-schema": "json-schema";
       openapi: "openapi";
       typescript: "typescript";
-      zod: "zod";
       json: "json";
+      zod: "zod";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
       openapi: "openapi";
       typescript: "typescript";
+      json: "json";
       zod: "zod";
     }>;
     parser: z.ZodObject<
@@ -607,6 +628,77 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       },
       z.core.$strip
     >;
+    irPreference: z.ZodObject<
+      {
+        key: z.ZodString;
+        label: z.ZodString;
+        description: z.ZodString;
+        category: z.ZodEnum<{
+          diagnostics: "diagnostics";
+          inference: "inference";
+          selection: "selection";
+          formatting: "formatting";
+          output: "output";
+          semantics: "semantics";
+          extension: "extension";
+        }>;
+        defaultValue: z.ZodUnknown;
+        valueDescriptions: z.ZodOptional<
+          z.ZodArray<
+            z.ZodObject<
+              {
+                value: z.ZodUnknown;
+                label: z.ZodString;
+                description: z.ZodString;
+                semanticEffect: z.ZodOptional<z.ZodString>;
+                diagnosticEffect: z.ZodOptional<z.ZodString>;
+                example: z.ZodOptional<
+                  z.ZodObject<
+                    {
+                      title: z.ZodString;
+                      input: z.ZodOptional<z.ZodString>;
+                      options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                      output: z.ZodOptional<z.ZodString>;
+                      semanticChange: z.ZodOptional<z.ZodString>;
+                      diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                      explanation: z.ZodString;
+                    },
+                    z.core.$strip
+                  >
+                >;
+              },
+              z.core.$strip
+            >
+          >
+        >;
+        affectedStages: z.ZodArray<
+          z.ZodEnum<{
+            parse: "parse";
+            transform: "transform";
+            generate: "generate";
+          }>
+        >;
+        semanticEffect: z.ZodString;
+        diagnosticEffect: z.ZodString;
+        examples: z.ZodArray<
+          z.ZodObject<
+            {
+              title: z.ZodString;
+              input: z.ZodOptional<z.ZodString>;
+              options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+              output: z.ZodOptional<z.ZodString>;
+              semanticChange: z.ZodOptional<z.ZodString>;
+              diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+              explanation: z.ZodString;
+            },
+            z.core.$strip
+          >
+        >;
+        supported: z.ZodBoolean;
+        experimental: z.ZodOptional<z.ZodBoolean>;
+      },
+      z.core.$strip
+    >;
   },
   z.core.$strip
 >;
@@ -760,6 +852,23 @@ export declare const conversionLossHotspotSchema: z.ZodObject<
 >;
 export declare const conversionReportSchema: z.ZodObject<
   {
+    irSelection: z.ZodOptional<
+      z.ZodObject<
+        {
+          requested: z.ZodEnum<{
+            value: "value";
+            shape: "shape";
+            auto: "auto";
+          }>;
+          selected: z.ZodEnum<{
+            value: "value";
+            shape: "shape";
+          }>;
+          fallback: z.ZodBoolean;
+        },
+        z.core.$strip
+      >
+    >;
     diagnostics: z.ZodOptional<
       z.ZodObject<
         {
@@ -1096,6 +1205,23 @@ export declare const convertSuccessResultSchema: z.ZodObject<
     report: z.ZodOptional<
       z.ZodObject<
         {
+          irSelection: z.ZodOptional<
+            z.ZodObject<
+              {
+                requested: z.ZodEnum<{
+                  value: "value";
+                  shape: "shape";
+                  auto: "auto";
+                }>;
+                selected: z.ZodEnum<{
+                  value: "value";
+                  shape: "shape";
+                }>;
+                fallback: z.ZodBoolean;
+              },
+              z.core.$strip
+            >
+          >;
           diagnostics: z.ZodOptional<
             z.ZodObject<
               {
@@ -1584,6 +1710,23 @@ export declare const publicConvertResultSchema: z.ZodDiscriminatedUnion<
         report: z.ZodOptional<
           z.ZodObject<
             {
+              irSelection: z.ZodOptional<
+                z.ZodObject<
+                  {
+                    requested: z.ZodEnum<{
+                      value: "value";
+                      shape: "shape";
+                      auto: "auto";
+                    }>;
+                    selected: z.ZodEnum<{
+                      value: "value";
+                      shape: "shape";
+                    }>;
+                    fallback: z.ZodBoolean;
+                  },
+                  z.core.$strip
+                >
+              >;
               diagnostics: z.ZodOptional<
                 z.ZodObject<
                   {
@@ -2031,24 +2174,42 @@ export declare const publicConvertResultSchema: z.ZodDiscriminatedUnion<
 import type {
   ConversionRoute,
   ConversionRouteCapabilities,
+  EntryIrKind,
   GeneratorCapabilities,
   GeneratorDescriptor,
   IrKind,
+  OverlayIrKind,
   ParserCapabilities,
   ParserDescriptor,
   PipelineStage,
 } from "@schema-transformation-toolkit/core";
-import type { ConversionFormat, ConversionRegistry } from "./types.js";
+import type {
+  ConversionFormat,
+  ConversionIrPreference,
+  ConversionRegistry,
+} from "./types.js";
 export type DescriptorRegistrationErrorCode =
   | "descriptor-invalid-version"
   | "descriptor-format-mismatch"
   | "descriptor-options-mismatch"
   | "descriptor-missing-shape-ir"
+  | "descriptor-missing-ir"
   | "descriptor-missing-handler"
+  | "descriptor-capability-mismatch"
   | "descriptor-duplicate-format";
+export type ConversionRouteErrorCode =
+  "unsupported-route" | "unsupported-ir-preference";
+export declare class ConversionRouteError extends Error {
+  readonly code: ConversionRouteErrorCode;
+  constructor(code: ConversionRouteErrorCode, message: string);
+}
 export declare class DescriptorRegistrationError extends Error {
   readonly code: DescriptorRegistrationErrorCode;
   constructor(code: DescriptorRegistrationErrorCode, message: string);
+}
+export interface NormalizedGeneratorCapabilities {
+  entryIr: EntryIrKind[];
+  overlays: OverlayIrKind[];
 }
 export declare function createConversionRegistry(options?: {
   parsers?: ParserDescriptor[];
@@ -2061,8 +2222,27 @@ export declare function listConversionRoutes(
 export declare function planConversion(
   sourceFormat: ConversionFormat,
   targetFormat: ConversionFormat,
-  registry?: ConversionRegistry,
+  registryOrPreference?: ConversionRegistry | ConversionIrPreference,
+  providedRegistry?: ConversionRegistry,
 ): ConversionRoute;
+export interface ConversionExecutionPlan {
+  route: ConversionRoute;
+  selectedIr: Exclude<ConversionIrPreference, "auto">;
+  requestedIr: ConversionIrPreference;
+  fallback: boolean;
+  requiresShapeInference: boolean;
+  requiresConstraintInference: boolean;
+  generatorInputIr: Exclude<ConversionIrPreference, "auto">;
+  parserRequestedIr: readonly IrKind[];
+}
+/** @deprecated Use ConversionExecutionPlan. */
+export type ConversionRouteDecision = ConversionExecutionPlan;
+export declare function resolveConversionRouteDecision(
+  sourceFormat: ConversionFormat,
+  targetFormat: ConversionFormat,
+  irPreference?: ConversionIrPreference,
+  registry?: ConversionRegistry,
+): ConversionExecutionPlan;
 export declare function describeConversionRouteCapabilities(
   sourceFormat: ConversionFormat,
   targetFormat: ConversionFormat,
@@ -2089,6 +2269,10 @@ export declare function resolveGeneratorDescriptor<TOutput = unknown>(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
 ): GeneratorDescriptor<TOutput>;
+export declare function resolveNormalizedGeneratorCapabilities(
+  targetFormat: ConversionFormat,
+  registry?: ConversionRegistry,
+): NormalizedGeneratorCapabilities;
 ```
 
 ## packages/sdk/src/support-matrix.d.ts
@@ -2107,6 +2291,8 @@ export interface ParserSupportSummary {
 }
 export interface GeneratorSupportSummary {
   consumesIr: GeneratorCapabilities["consumesIr"];
+  entryIr: NonNullable<GeneratorCapabilities["entryIr"]>;
+  overlays: NonNullable<GeneratorCapabilities["overlays"]>;
   capabilities: ConversionCapability[];
 }
 export interface FormatSupportSummary {
@@ -2141,6 +2327,7 @@ export declare function listTargetFormatSupports(
 import type {
   ConversionCapability,
   ConversionReport,
+  ConversionIrPreference as CoreConversionIrPreference,
   ConstraintDocument,
   SchemaDiagnostic,
   SchemaDocument,
@@ -2155,6 +2342,7 @@ import type {
   JsonSchemaGeneratorOptions,
   JsonSchemaOutput,
 } from "@schema-transformation-toolkit/generator-json-schema";
+import type { JsonOutput } from "@schema-transformation-toolkit/generator-json";
 import type {
   OpenApiGeneratorOptions,
   OpenApiOutput,
@@ -2166,11 +2354,13 @@ import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/pars
 import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
 import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
+export type ConversionIrPreference = CoreConversionIrPreference;
 export type BuiltinSourceFormat =
   "json" | "json-schema" | "typescript" | "openapi" | "zod";
 export type BuiltinTargetFormat =
-  "json-schema" | "typescript" | "zod" | "openapi";
+  "json" | "json-schema" | "typescript" | "zod" | "openapi";
 export interface BuiltinGeneratorOutputs {
+  json: JsonOutput;
   "json-schema": JsonSchemaOutput;
   typescript: string;
   zod: string;
@@ -2197,6 +2387,8 @@ export interface ConversionRegistry {
   registerGenerator(descriptor: GeneratorDescriptor): void;
   listParsers(): ParserDescriptor[];
   listGenerators(): GeneratorDescriptor[];
+  parser?(format: string): ParserDescriptor;
+  generator?(format: string): GeneratorDescriptor;
 }
 export interface ConvertAdvancedOptions {
   parser?: {
@@ -2218,6 +2410,7 @@ export interface ConvertOptions {
   targetFormat: ConversionTargetFormat;
   input: string;
   name?: string;
+  irPreference?: ConversionIrPreference;
   includeArtifacts?: boolean;
   advanced?: ConvertAdvancedOptions;
   extension?: ExtensionConversionOptions;
@@ -2228,7 +2421,7 @@ export interface ConversionArtifacts {
   constraints?: ConstraintDocument;
 }
 export interface ConvertSuccessResult<
-  TOutput = string | JsonSchemaOutput | OpenApiOutput,
+  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
 > {
   ok: true;
   output: TOutput;
@@ -2248,8 +2441,9 @@ export interface ConvertFailureResult {
   plan: ConversionRoute;
   diagnostics?: SchemaDiagnostic[];
 }
-export type ConvertResult<TOutput = string | JsonSchemaOutput | OpenApiOutput> =
-  ConvertSuccessResult<TOutput> | ConvertFailureResult;
+export type ConvertResult<
+  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
+> = ConvertSuccessResult<TOutput> | ConvertFailureResult;
 ```
 
 ## packages/sdk/src/ui-diagnostics.d.ts

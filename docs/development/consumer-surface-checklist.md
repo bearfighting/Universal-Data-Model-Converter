@@ -257,7 +257,7 @@ The Stage 1 machine-readable capability-summary contract should now be read as:
   - `notableLimitations`
   - `experimentalAreas`
 - within `parser` and `generator`, consumers may rely on:
-  - `producesIr` or `consumesIr`
+  - `producesIr`, `consumesIr`, and normalized generator `entryIr`/`overlays`
   - `capabilities`
 - consumers may treat these helpers as the Stage 1 source of truth for:
   - source-format pickers

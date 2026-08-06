@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   schemaDocument,
   schemaScalarNode,
+  valueArrayNode,
+  valueScalarNode,
+  valueDocument,
 } from "@schema-transformation-toolkit/core";
 import { jsonParserDescriptor } from "../../packages/parsers/json/src/index.js";
 import { jsonSchemaParserDescriptor } from "../../packages/parsers/json-schema/src/index.js";
 import { typeScriptParserDescriptor } from "../../packages/parsers/typescript/src/index.js";
 import { jsonSchemaGeneratorDescriptor } from "../../packages/generators/json-schema/src/index.js";
+import { jsonGeneratorDescriptor } from "../../packages/generators/json/src/index.js";
 import { typeScriptGeneratorDescriptor } from "../../packages/generators/typescript/src/index.js";
 import { zodGeneratorDescriptor } from "../../packages/generators/zod/src/index.js";
 import {
@@ -44,6 +48,14 @@ describe("format descriptor contracts", () => {
     );
     expectGeneratorDescriptorContract(jsonSchemaGeneratorDescriptor, [
       { document },
+    ]);
+    expectGeneratorDescriptorContract(jsonGeneratorDescriptor, [
+      {
+        document: valueDocument(
+          "JsonContract",
+          valueArrayNode([valueScalarNode(1), valueScalarNode("a")]),
+        ),
+      },
     ]);
     expectGeneratorDescriptorContract(typeScriptGeneratorDescriptor, [
       { document },
@@ -191,6 +203,47 @@ describe("format descriptor contracts", () => {
     expect(result).toMatchObject({
       ok: false,
       code: "parser-invalid-shape",
+      phase: "parse",
+    });
+  });
+
+  it("rejects Shape IR returned without a declared Shape capability", () => {
+    const mismatchedParser = {
+      ...jsonParserDescriptor,
+      format: "mismatched-shape-source",
+      capabilities: {
+        ...jsonParserDescriptor.capabilities,
+        format: "mismatched-shape-source",
+        producesIr: ["value"] as ["value"],
+      },
+      options: {
+        ...jsonParserDescriptor.options,
+        format: "mismatched-shape-source",
+      },
+      parse() {
+        return {
+          ok: true as const,
+          document: schemaDocument("Mismatch", schemaScalarNode("string")),
+          value: valueDocument("Mismatch", valueScalarNode("value")),
+        };
+      },
+    };
+    const converter = createConverter(
+      createConversionRegistry({
+        parsers: [mismatchedParser],
+        generators: [jsonGeneratorDescriptor],
+      }),
+    );
+
+    expect(
+      converter.convert({
+        sourceFormat: "mismatched-shape-source",
+        targetFormat: "json",
+        input: "ignored",
+      }),
+    ).toMatchObject({
+      ok: false,
+      code: "parser-capability-mismatch",
       phase: "parse",
     });
   });

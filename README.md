@@ -22,9 +22,14 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-typescript`: TypeScript schema-subset parser for the shared IR
 - `@schema-transformation-toolkit/parser-zod`: static Zod 4 schema-expression parser for the shared IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
+- `@schema-transformation-toolkit/generator-json`: Value IR to normalized JSON generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
 - `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
 - `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
+
+The SDK `convert(...)` API accepts `irPreference: "auto" | "value" | "shape"`
+to control the intermediate representation route. `"auto"` prefers Value IR
+when available; explicit preferences fail instead of falling back.
 
 ## Current Status
 
@@ -44,6 +49,7 @@ The currently validated flows are:
 
 - `json -> value -> shape -> typescript`
 - `json -> value -> shape -> json-schema`
+- `json -> value -> json`
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
@@ -223,10 +229,12 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [packages/parsers/json-schema/README.md](packages/parsers/json-schema/README.md): supported JSON Schema parsing
 - [packages/parsers/typescript/README.md](packages/parsers/typescript/README.md): supported TypeScript schema-subset parsing
 - [packages/generators/json-schema/README.md](packages/generators/json-schema/README.md): JSON Schema Draft 2020-12 generation
+- [packages/generators/json/README.md](packages/generators/json/README.md): normalized JSON generation from Value IR
 - [packages/generators/typescript/README.md](packages/generators/typescript/README.md): TypeScript generation
 - [packages/generators/zod/README.md](packages/generators/zod/README.md): Zod 4 TypeScript and JavaScript generation
 - [examples/json-to-typescript.md](examples/json-to-typescript.md): representative `json -> value -> shape -> typescript` examples
 - [examples/json-to-json-schema.md](examples/json-to-json-schema.md): representative `json -> value -> shape -> json-schema` examples
+- [examples/json-to-json.md](examples/json-to-json.md): representative `json -> value -> json` examples
 - [examples/json-schema-to-typescript.md](examples/json-schema-to-typescript.md): representative `json-schema -> shape -> typescript` examples
 - [examples/json-schema-to-json-schema.md](examples/json-schema-to-json-schema.md): representative `json-schema -> shape + constraint -> json-schema` examples
 - [examples/typescript-to-json-schema.md](examples/typescript-to-json-schema.md): representative `typescript -> schema ir -> json-schema` examples

@@ -4,6 +4,7 @@ import {
   type GeneratorDescriptor,
   type ParserDescriptor,
   type SchemaDocument,
+  type ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import {
   DescriptorRegistrationError,
@@ -18,7 +19,7 @@ export interface ParserContractCase {
 }
 
 export interface GeneratorContractCase {
-  document: SchemaDocument;
+  document: SchemaDocument | ValueDocument;
   expectSuccess?: boolean;
 }
 
@@ -42,7 +43,7 @@ export function expectValidGeneratorDescriptor(
   expect(descriptor.descriptorVersion).toBe("0.1");
   expect(descriptor.format.length).toBeGreaterThan(0);
   expect(descriptor.capabilities.target).toBe(descriptor.format);
-  expect(descriptor.capabilities.consumesIr).toContain("shape");
+  expect(descriptor.capabilities.consumesIr.length).toBeGreaterThan(0);
   expect(descriptor.options.format).toBe(descriptor.format);
   expect(descriptor.options.role).toBe("generator");
   expect(descriptor.generate).toEqual(expect.any(Function));
@@ -62,6 +63,8 @@ export function expectParserDescriptorContract(
     const expectedSuccess = testCase.expectSuccess ?? true;
     expect(result.ok).toBe(expectedSuccess);
     if (result.ok) {
+      expect(result.document).toBeDefined();
+      if (!result.document) continue;
       validateSchemaDocument(result.document);
       if (result.value) {
         expect(descriptor.capabilities.producesIr).toContain("value");

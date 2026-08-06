@@ -5,6 +5,7 @@ import type {
   SchemaSemanticNote,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
+import type { IrKind } from "@schema-transformation-toolkit/core";
 import { validateSchemaDocument } from "@schema-transformation-toolkit/core";
 import { resolveParserDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
@@ -19,7 +20,7 @@ import type {
 export interface ParseSourceSuccessResult {
   ok: true;
   value?: ValueDocument;
-  shape: SchemaDocument;
+  shape?: SchemaDocument;
   constraints?: ConstraintDocument;
   diagnostics: SchemaDiagnostic[];
   semanticNotes: SchemaSemanticNote[];
@@ -34,6 +35,7 @@ export function parseSource(
   name: string,
   options: ConvertOptions,
   registry: ConversionRegistry = defaultConversionRegistry,
+  requestedIr?: readonly IrKind[],
 ): ParseSourceResult {
   const descriptor = resolveParserDescriptor(sourceFormat, registry);
   let parseResult;
@@ -41,6 +43,7 @@ export function parseSource(
     parseResult = descriptor.parse(input, {
       name,
       targetFormat,
+      ...(requestedIr ? { requestedIr } : {}),
       options: parserOptionsFor(sourceFormat, options),
     });
   } catch {
@@ -70,17 +73,30 @@ export function parseSource(
     };
   }
 
-  try {
-    validateSchemaDocument(parseResult.document);
-  } catch {
+  if (parseResult.document) {
+    try {
+      validateSchemaDocument(parseResult.document);
+    } catch {
+      return createParserFailure(
+        sourceFormat,
+        targetFormat,
+        "parser-invalid-shape",
+        "The source parser produced an invalid Shape IR document.",
+      );
+    }
+  }
+
+  if (
+    parseResult.document &&
+    !descriptor.capabilities.producesIr.includes("shape")
+  ) {
     return createParserFailure(
       sourceFormat,
       targetFormat,
-      "parser-invalid-shape",
-      "The source parser produced an invalid Shape IR document.",
+      "parser-capability-mismatch",
+      "The source parser produced Shape IR without declaring it.",
     );
   }
-
   if (
     parseResult.value &&
     !descriptor.capabilities.producesIr.includes("value")
@@ -104,11 +120,29 @@ export function parseSource(
     );
   }
 
+  if (!parseResult.document && !parseResult.value) {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-produced-no-ir",
+      "The source parser produced neither Value IR nor Shape IR.",
+    );
+  }
+
+  if (requestedIr?.includes("shape") && !parseResult.document) {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-missing-shape",
+      "The source parser produced Value IR but the target requires Shape IR.",
+    );
+  }
+
   return {
     ok: true,
-    shape: parseResult.document,
     diagnostics: parseResult.diagnostics ?? [],
     semanticNotes: parseResult.semanticNotes ?? [],
+    ...(parseResult.document ? { shape: parseResult.document } : {}),
     ...(parseResult.value ? { value: parseResult.value } : {}),
     ...(parseResult.constraints
       ? { constraints: parseResult.constraints }

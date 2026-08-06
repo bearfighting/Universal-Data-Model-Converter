@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  ConversionRouteError,
+  defaultConversionRegistry,
   describeConversionRouteCapabilities,
   listConversionRoutes,
   planConversion,
+  resolveConversionRouteDecision,
   routeStages,
   routeUsesIr,
 } from "../../packages/sdk/src/registry.js";
+import type { ConversionRegistry } from "../../packages/sdk/src/types.js";
 
 describe("sdk registry", () => {
   it("lists every supported source and target combination", () => {
     expect(listConversionRoutes()).toEqual([
+      planConversion("json", "json"),
       planConversion("json", "json-schema"),
       planConversion("json", "typescript"),
       planConversion("json", "zod"),
@@ -41,7 +46,95 @@ describe("sdk registry", () => {
     expect(routeStages(route)).toEqual(route.stages);
   });
 
+  it("plans a Value IR-only json to json route", () => {
+    expect(planConversion("json", "json")).toEqual({
+      sourceFormat: "json",
+      targetFormat: "json",
+      irSequence: ["value"],
+      stages: [
+        { kind: "parse-source", from: "json", to: "json-value", ir: "value" },
+        {
+          kind: "lower-to-value",
+          from: "json-value",
+          to: "value",
+          ir: "value",
+        },
+        { kind: "generate-target", from: "value", to: "json", ir: "value" },
+      ],
+    });
+  });
+
+  it("returns the same route decision consumed by conversion", () => {
+    expect(resolveConversionRouteDecision("json", "json")).toMatchObject({
+      selectedIr: "value",
+      requestedIr: "auto",
+      fallback: false,
+      requiresShapeInference: false,
+      requiresConstraintInference: false,
+      generatorInputIr: "value",
+      route: { irSequence: ["value"] },
+    });
+
+    expect(
+      resolveConversionRouteDecision("json-schema", "json-schema"),
+    ).toMatchObject({
+      selectedIr: "shape",
+      fallback: true,
+      requiresShapeInference: false,
+      requiresConstraintInference: true,
+      generatorInputIr: "shape",
+      route: { irSequence: ["shape", "constraint"] },
+    });
+  });
+
+  it("honors explicit IR preferences when planning routes", () => {
+    expect(planConversion("json", "json", "value").irSequence).toEqual([
+      "value",
+    ]);
+    expect(planConversion("json", "typescript", "shape").irSequence).toEqual([
+      "value",
+      "shape",
+    ]);
+    expect(() => planConversion("json", "json", "shape")).toThrow(
+      'IR preference "shape"',
+    );
+    expect(() => planConversion("json", "typescript", "value")).toThrow(
+      'IR preference "value"',
+    );
+  });
+
+  it("keeps unsupported routes distinct from unavailable preferences", () => {
+    expect(() => planConversion("json", "json", "shape")).toThrow(
+      expect.objectContaining<Partial<ConversionRouteError>>({
+        code: "unsupported-ir-preference",
+      }),
+    );
+    expect(() => planConversion("missing", "json", "value")).toThrow(
+      expect.objectContaining<Partial<ConversionRouteError>>({
+        code: "unsupported-route",
+      }),
+    );
+  });
+
+  it("supports legacy registries without direct descriptor lookup", () => {
+    const legacyRegistry: ConversionRegistry = {
+      registerParser: () => undefined,
+      registerGenerator: () => undefined,
+      listParsers: () => defaultConversionRegistry.listParsers(),
+      listGenerators: () => defaultConversionRegistry.listGenerators(),
+    };
+
+    expect(planConversion("json", "json", legacyRegistry).irSequence).toEqual([
+      "value",
+    ]);
+  });
+
   it("reports constraint support only when both parser and generator declare it", () => {
+    expect(planConversion("json-schema", "json-schema").irSequence).toEqual([
+      "shape",
+      "constraint",
+    ]);
+
     expect(
       describeConversionRouteCapabilities("json-schema", "json-schema"),
     ).toMatchObject({

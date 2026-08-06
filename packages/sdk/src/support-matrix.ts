@@ -15,6 +15,8 @@ export interface ParserSupportSummary {
 
 export interface GeneratorSupportSummary {
   consumesIr: GeneratorCapabilities["consumesIr"];
+  entryIr: NonNullable<GeneratorCapabilities["entryIr"]>;
+  overlays: NonNullable<GeneratorCapabilities["overlays"]>;
   capabilities: ConversionCapability[];
 }
 
@@ -166,6 +168,18 @@ function toGeneratorSupportSummary(
 ): GeneratorSupportSummary {
   return {
     consumesIr: [...generatorCapabilities.consumesIr],
+    entryIr: [
+      ...(generatorCapabilities.entryIr ??
+        generatorCapabilities.consumesIr.filter(
+          (ir): ir is "value" | "shape" => ir !== "constraint",
+        )),
+    ],
+    overlays: [
+      ...(generatorCapabilities.overlays ??
+        generatorCapabilities.consumesIr.filter(
+          (ir): ir is "constraint" => ir === "constraint",
+        )),
+    ],
     capabilities: [...generatorCapabilities.supportsCapabilities],
   };
 }

@@ -53,6 +53,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/generators/json:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/generators/openapi:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -121,6 +127,9 @@ importers:
       "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../core
+      "@schema-transformation-toolkit/generator-json":
+        specifier: workspace:*
+        version: link:../generators/json
       "@schema-transformation-toolkit/generator-json-schema":
         specifier: workspace:*
         version: link:../generators/json-schema

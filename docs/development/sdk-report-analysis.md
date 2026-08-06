@@ -2,6 +2,8 @@
 
 This note explains how to read the higher-level analysis fields in `sdk` conversion reports:
 
+- `report.irSelection`: the route resolver's actual Value/Shape choice. `requested` is the caller preference, `selected` is the generator input IR, and `fallback` is true only when `auto` selected Shape because Value was unavailable.
+
 - `report.capabilityRequirements`
 - `report.lossHotspots`
 

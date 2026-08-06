@@ -1,4 +1,7 @@
-import type { OptionCatalog } from "@schema-transformation-toolkit/core";
+import type {
+  OptionCatalog,
+  OptionMetadata,
+} from "@schema-transformation-toolkit/core";
 import {
   resolveGeneratorDescriptor,
   resolveParserDescriptor,
@@ -15,7 +18,53 @@ export interface ConversionOptionCatalogs {
   targetFormat: ConversionTargetFormat;
   parser: OptionCatalog;
   generator: OptionCatalog;
+  irPreference: OptionMetadata;
 }
+
+export const conversionIrPreferenceMetadata: OptionMetadata = {
+  key: "irPreference",
+  label: "Intermediate representation preference",
+  description:
+    "Selects whether the conversion should prefer Value IR, Shape IR, or the automatic route choice.",
+  category: "selection",
+  defaultValue: "auto",
+  valueDescriptions: [
+    {
+      value: "auto",
+      label: "Automatic",
+      description:
+        "Prefer Value IR when the route supports it, otherwise use Shape IR.",
+    },
+    {
+      value: "value",
+      label: "Value IR",
+      description:
+        "Require a Value IR route and fail if the route cannot consume it.",
+    },
+    {
+      value: "shape",
+      label: "Shape IR",
+      description:
+        "Require a Shape IR route and fail if the route cannot consume it.",
+    },
+  ],
+  affectedStages: ["parse", "transform", "generate"],
+  semanticEffect:
+    "Controls the selected intermediate representation without changing the target format.",
+  diagnosticEffect:
+    "Unavailable forced preferences produce an unsupported-ir-preference failure.",
+  examples: [
+    {
+      title: "Force Value IR for a JSON round-trip",
+      input: '[1,"a"]',
+      options: { irPreference: "value" },
+      output: '[1,"a"]',
+      explanation:
+        "The route skips schema inference and serializes the Value IR directly.",
+    },
+  ],
+  supported: true,
+};
 
 export function describeParserOptions(
   format: ConversionSourceFormat,
@@ -41,6 +90,7 @@ export function describeConversionOptions(
     targetFormat,
     parser: describeParserOptions(sourceFormat, registry),
     generator: describeGeneratorOptions(targetFormat, registry),
+    irPreference: { ...conversionIrPreferenceMetadata },
   };
 }
 

@@ -16,6 +16,13 @@ export const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<JsonSchemaOutput
     capabilities: jsonSchemaGeneratorCapabilities,
     options: jsonSchemaGeneratorOptionCatalog,
     generate(document, context: GeneratorExecutionContext) {
+      if (document.kind !== "document") {
+        return {
+          ok: false,
+          code: "invalid-generator-input",
+          message: "The JSON Schema generator requires Shape IR.",
+        };
+      }
       return tryGenerateJsonSchema(document, {
         ...((context.options ?? {}) as JsonSchemaGeneratorOptions),
         ...(context.constraints ? { constraints: context.constraints } : {}),

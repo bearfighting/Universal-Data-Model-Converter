@@ -3,6 +3,15 @@ import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
 
 export type IrKind = "value" | "shape" | "constraint";
+export type EntryIrKind = Exclude<IrKind, "constraint">;
+export type OverlayIrKind = Extract<IrKind, "constraint">;
+export type ConversionIrPreference = "auto" | "value" | "shape";
+
+export interface ConversionIrSelection {
+  requested: ConversionIrPreference;
+  selected: Exclude<ConversionIrPreference, "auto">;
+  fallback: boolean;
+}
 export type ConversionCapability =
   | "value-ir"
   | "shape-ir"
@@ -87,6 +96,8 @@ export interface ParserCapabilities {
 export interface GeneratorCapabilities {
   target: string;
   consumesIr: IrKind[];
+  entryIr?: EntryIrKind[];
+  overlays?: OverlayIrKind[];
   supportsCapabilities: ConversionCapability[];
 }
 
@@ -107,6 +118,7 @@ export interface GeneratorAnalysisHooks {
 }
 
 export interface ConversionReport {
+  irSelection?: ConversionIrSelection;
   diagnostics?: ConversionReportStage<SchemaDiagnostic>;
   losses?: SemanticLoss[];
   preservedCapabilities?: ConversionCapability[];

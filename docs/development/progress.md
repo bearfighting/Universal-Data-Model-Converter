@@ -49,6 +49,7 @@ Validated end-to-end routes today:
 
 - `json -> value -> shape -> typescript`
 - `json -> value -> shape -> json-schema`
+- `json -> value -> json`
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
@@ -159,11 +160,11 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 ## Verification
 
-The latest full local verification pass completed on August 3, 2026 and included:
+The latest full local verification pass completed on August 6, 2026 and included:
 
-- `pnpm test`
+- `./node_modules/.bin/vitest run` (the local `pnpm` wrapper was unavailable because it could not open its database)
 
-That pass was green with `52` test files and `661` passing tests.
+That pass was green with `61` test files and `750` passing tests.
 
 A prior broader verification pass completed on July 22, 2026 and included:
 

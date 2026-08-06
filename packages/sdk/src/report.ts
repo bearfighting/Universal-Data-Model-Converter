@@ -6,6 +6,7 @@ import type {
   ConversionSemanticCaveat,
   ConstraintDocument,
   ConversionCapability,
+  ConversionIrSelection,
   ConversionReport,
   SchemaDiagnostic,
   SchemaDocument,
@@ -35,6 +36,7 @@ export function buildConversionReport(
   generateSemanticNotes: SchemaSemanticNote[],
   capabilityRequirements: ConversionCapabilityRequirement[] = [],
   lossHotspots: ConversionLossHotspot[] = [],
+  irSelection?: ConversionIrSelection,
 ): ConversionReport | undefined {
   const allDiagnostics = [...parseDiagnostics, ...generateDiagnostics];
   const allSemanticNotes = [...parseSemanticNotes, ...generateSemanticNotes];
@@ -57,12 +59,14 @@ export function buildConversionReport(
     capabilityRequirements.length === 0 &&
     lossHotspots.length === 0 &&
     policyDecisions.length === 0 &&
-    !entrySelection
+    !entrySelection &&
+    !irSelection
   ) {
     return undefined;
   }
 
   return {
+    ...(irSelection ? { irSelection } : {}),
     ...(allDiagnostics.length > 0
       ? {
           diagnostics: {

@@ -66,6 +66,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/generator-json",
+    root: path.join(repoRoot, "packages/generators/json"),
+    entry: path.join(repoRoot, "packages/generators/json/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/json/etc/generator-json.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-openapi",
     root: path.join(repoRoot, "packages/generators/openapi"),
     entry: path.join(repoRoot, "packages/generators/openapi/src/index.ts"),
