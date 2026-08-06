@@ -20,6 +20,8 @@ import {
   routeUsesIr,
   defaultConversionRegistry,
   resolveGeneratorDescriptor,
+  resolveConversionRouteDecision,
+  ConversionRouteError,
 } from "./registry.js";
 import type { ConversionRegistry } from "./types.js";
 import {
@@ -38,6 +40,7 @@ export type {
   BuiltinSourceFormat,
   BuiltinTargetFormat,
   BuiltinGeneratorOutputs,
+  ConversionIrPreference,
   ConversionFormat,
   ConversionOutput,
   ConversionRegistry,
@@ -49,6 +52,7 @@ import type {
   ConvertOptions,
   ConvertResult,
   ConversionFormat,
+  ConversionIrPreference,
   ConversionOutput,
 } from "./types.js";
 
@@ -67,7 +71,11 @@ export interface ConversionConverter<
     options: ConvertOptions & { targetFormat: TTarget },
   ): ConvertResult<ConversionOutput<TTarget, TExtensions>>;
   listConversionRoutes(): ReturnType<typeof listConversionRoutes>;
-  planConversion: typeof planConversion;
+  planConversion: (
+    sourceFormat: ConversionFormat,
+    targetFormat: ConversionFormat,
+    irPreference?: ConversionIrPreference,
+  ) => ReturnType<typeof planConversion>;
   describeConversionRouteCapabilities: typeof describeConversionRouteCapabilities;
 }
 
@@ -79,8 +87,8 @@ export function createConverter<
       options: ConvertOptions & { targetFormat: TTarget },
     ) => convert<ConversionOutput<TTarget, TExtensions>>(options, registry),
     listConversionRoutes: () => listConversionRoutes(registry),
-    planConversion: (sourceFormat, targetFormat) =>
-      planConversion(sourceFormat, targetFormat, registry),
+    planConversion: (sourceFormat, targetFormat, irPreference = "auto") =>
+      planConversion(sourceFormat, targetFormat, irPreference, registry),
     describeConversionRouteCapabilities: (sourceFormat, targetFormat) =>
       describeConversionRouteCapabilities(sourceFormat, targetFormat, registry),
   };
@@ -90,11 +98,36 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   options: ConvertOptions,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): ConvertResult<TOutput> {
-  const plan = planConversion(
-    options.sourceFormat,
-    options.targetFormat,
-    registry,
-  );
+  let plan: ReturnType<typeof planConversion>;
+  let routeDecision: ReturnType<typeof resolveConversionRouteDecision>;
+  try {
+    routeDecision = resolveConversionRouteDecision(
+      options.sourceFormat,
+      options.targetFormat,
+      options.irPreference ?? "auto",
+      registry,
+    );
+    plan = routeDecision.route;
+  } catch (error) {
+    if (
+      error instanceof ConversionRouteError &&
+      error.code === "unsupported-ir-preference"
+    ) {
+      return {
+        ok: false,
+        code: "unsupported-ir-preference",
+        message: `The requested IR preference "${options.irPreference}" is not available for ${options.sourceFormat} -> ${options.targetFormat}.`,
+        phase: "parse",
+        plan: {
+          sourceFormat: options.sourceFormat,
+          targetFormat: options.targetFormat,
+          irSequence: [],
+          stages: [],
+        },
+      };
+    }
+    throw error;
+  }
   const name = options.name ?? defaultDocumentName(options.sourceFormat);
   const diagnostics: SchemaDiagnostic[] = [];
   const parseDiagnostics: SchemaDiagnostic[] = [];
@@ -116,6 +149,7 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     name,
     options,
     registry,
+    routeDecision.parserRequestedIr,
   );
 
   if (!parseResult.ok) {
@@ -133,8 +167,53 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   semanticNotes.push(...parseResult.semanticNotes);
   parseSemanticNotes.push(...parseResult.semanticNotes);
 
+  if (!shapeArtifact && !valueArtifact) {
+    return {
+      ok: false,
+      code: "parser-produced-no-ir",
+      message: "The source parser produced neither Value IR nor Shape IR.",
+      phase: "parse",
+      plan,
+      diagnostics: [
+        {
+          severity: "error",
+          code: "parser-produced-no-ir",
+          message: "The source parser produced neither Value IR nor Shape IR.",
+          source: `parser-${options.sourceFormat}`,
+        },
+      ],
+    };
+  }
+
+  const targetDescriptor = resolveGeneratorDescriptor(
+    options.targetFormat,
+    registry,
+  );
+  const generationInput =
+    routeDecision.generatorInputIr === "shape" ? shapeArtifact : valueArtifact;
+
+  if (!generationInput) {
+    return {
+      ok: false,
+      code: "missing-generator-input",
+      message:
+        "The target generator requires an IR artifact the parser did not produce.",
+      phase: "generate",
+      plan,
+      diagnostics: [
+        {
+          severity: "error",
+          code: "missing-generator-input",
+          message:
+            "The target generator requires an IR artifact the parser did not produce.",
+          source: `generator-${options.targetFormat}`,
+        },
+      ],
+    };
+  }
+
   const generationResult = generateTarget<TOutput>(
-    shapeArtifact,
+    generationInput,
     options.targetFormat,
     options,
     constraintsArtifact,
@@ -173,40 +252,39 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   );
 
   try {
-    const generatorDescriptor = resolveGeneratorDescriptor(
-      options.targetFormat,
-      registry,
-    );
-    const analysisContext = {
-      sourceFormat: options.sourceFormat,
-      targetFormat: options.targetFormat,
-      routeCapabilities,
-      document: shapeArtifact,
-      ...(constraintsArtifact ? { constraints: constraintsArtifact } : {}),
-    };
+    const generatorDescriptor = targetDescriptor;
+    if (shapeArtifact) {
+      const analysisContext = {
+        sourceFormat: options.sourceFormat,
+        targetFormat: options.targetFormat,
+        routeCapabilities,
+        document: shapeArtifact,
+        ...(constraintsArtifact ? { constraints: constraintsArtifact } : {}),
+      };
 
-    losses.push(
-      ...(generatorDescriptor.analysis?.planSemanticLosses
-        ? generatorDescriptor.analysis.planSemanticLosses(analysisContext)
-        : planSemanticLosses(
-            routeCapabilities,
-            constraintsArtifact,
-            options.targetFormat,
-            options.sourceFormat,
-          )),
-    );
+      losses.push(
+        ...(generatorDescriptor.analysis?.planSemanticLosses
+          ? generatorDescriptor.analysis.planSemanticLosses(analysisContext)
+          : planSemanticLosses(
+              routeCapabilities,
+              constraintsArtifact,
+              options.targetFormat,
+              options.sourceFormat,
+            )),
+      );
 
-    if (generatorDescriptor.analysis?.collectCapabilityRequirements) {
-      capabilityRequirements.push(
-        ...generatorDescriptor.analysis.collectCapabilityRequirements(
-          shapeArtifact,
-        ),
-      );
-    }
-    if (generatorDescriptor.analysis?.collectLossHotspots) {
-      lossHotspots.push(
-        ...generatorDescriptor.analysis.collectLossHotspots(shapeArtifact),
-      );
+      if (generatorDescriptor.analysis?.collectCapabilityRequirements) {
+        capabilityRequirements.push(
+          ...generatorDescriptor.analysis.collectCapabilityRequirements(
+            shapeArtifact,
+          ),
+        );
+      }
+      if (generatorDescriptor.analysis?.collectLossHotspots) {
+        lossHotspots.push(
+          ...generatorDescriptor.analysis.collectLossHotspots(shapeArtifact),
+        );
+      }
     }
   } catch {
     return {
@@ -244,6 +322,11 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     generateSemanticNotes,
     capabilityRequirements,
     lossHotspots,
+    {
+      requested: routeDecision.requestedIr,
+      selected: routeDecision.selectedIr,
+      fallback: routeDecision.fallback,
+    },
   );
 
   return {

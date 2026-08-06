@@ -6,6 +6,7 @@ import type {
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { OptionCatalog } from "../option-metadata.js";
 import type { ValueDocument } from "../value/types.js";
+import type { IrKind } from "../pipeline/contracts.js";
 
 export interface ParseOptions {
   name?: string;
@@ -25,14 +26,23 @@ export interface ConfiguredParser<
   prepared: PreparedOptions<TResolved>;
 }
 
-export interface ParseSuccessResult {
-  ok: true;
-  document: SchemaDocument;
-  value?: ValueDocument;
-  constraints?: ConstraintDocument;
-  diagnostics?: SchemaDiagnostic[];
-  semanticNotes?: SchemaSemanticNote[];
-}
+export type ParseSuccessResult =
+  | {
+      ok: true;
+      document: SchemaDocument;
+      value?: ValueDocument;
+      constraints?: ConstraintDocument;
+      diagnostics?: SchemaDiagnostic[];
+      semanticNotes?: SchemaSemanticNote[];
+    }
+  | {
+      ok: true;
+      value: ValueDocument;
+      document?: never;
+      constraints?: never;
+      diagnostics?: SchemaDiagnostic[];
+      semanticNotes?: SchemaSemanticNote[];
+    };
 
 export interface ParseFailureResult<TCode extends string = string> {
   ok: false;
@@ -96,6 +106,7 @@ export interface SchemaGenerator<
 export interface ParserExecutionContext {
   name: string;
   targetFormat?: string;
+  requestedIr?: readonly IrKind[];
   options?: unknown;
 }
 
@@ -124,7 +135,7 @@ export interface GeneratorDescriptor<TOutput = unknown> {
   options: OptionCatalog;
   analysis?: import("../pipeline/contracts.js").GeneratorAnalysisHooks;
   generate(
-    document: SchemaDocument,
+    document: SchemaDocument | ValueDocument,
     context: GeneratorExecutionContext,
   ): GenerateResult<TOutput>;
 }

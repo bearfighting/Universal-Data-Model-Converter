@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "@schema-transformation-toolkit/generator-json": "workspace:*",
     "@schema-transformation-toolkit/core": "workspace:*",
     "@schema-transformation-toolkit/generator-json-schema": "workspace:*",
     "@schema-transformation-toolkit/generator-openapi": "workspace:*",

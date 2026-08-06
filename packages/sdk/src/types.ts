@@ -1,6 +1,7 @@
 import type {
   ConversionCapability,
   ConversionReport,
+  ConversionIrPreference as CoreConversionIrPreference,
   ConstraintDocument,
   SchemaDiagnostic,
   SchemaDocument,
@@ -15,6 +16,7 @@ import type {
   JsonSchemaGeneratorOptions,
   JsonSchemaOutput,
 } from "@schema-transformation-toolkit/generator-json-schema";
+import type { JsonOutput } from "@schema-transformation-toolkit/generator-json";
 import type {
   OpenApiGeneratorOptions,
   OpenApiOutput,
@@ -27,11 +29,14 @@ import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/pars
 import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
 
+export type ConversionIrPreference = CoreConversionIrPreference;
+
 export type BuiltinSourceFormat =
   "json" | "json-schema" | "typescript" | "openapi" | "zod";
 export type BuiltinTargetFormat =
-  "json-schema" | "typescript" | "zod" | "openapi";
+  "json" | "json-schema" | "typescript" | "zod" | "openapi";
 export interface BuiltinGeneratorOutputs {
+  json: JsonOutput;
   "json-schema": JsonSchemaOutput;
   typescript: string;
   zod: string;
@@ -60,6 +65,8 @@ export interface ConversionRegistry {
   registerGenerator(descriptor: GeneratorDescriptor): void;
   listParsers(): ParserDescriptor[];
   listGenerators(): GeneratorDescriptor[];
+  parser?(format: string): ParserDescriptor;
+  generator?(format: string): GeneratorDescriptor;
 }
 
 export interface ConvertAdvancedOptions {
@@ -83,6 +90,7 @@ export interface ConvertOptions {
   targetFormat: ConversionTargetFormat;
   input: string;
   name?: string;
+  irPreference?: ConversionIrPreference;
   includeArtifacts?: boolean;
   advanced?: ConvertAdvancedOptions;
   extension?: ExtensionConversionOptions;
@@ -95,7 +103,7 @@ export interface ConversionArtifacts {
 }
 
 export interface ConvertSuccessResult<
-  TOutput = string | JsonSchemaOutput | OpenApiOutput,
+  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
 > {
   ok: true;
   output: TOutput;
@@ -117,5 +125,6 @@ export interface ConvertFailureResult {
   diagnostics?: SchemaDiagnostic[];
 }
 
-export type ConvertResult<TOutput = string | JsonSchemaOutput | OpenApiOutput> =
-  ConvertSuccessResult<TOutput> | ConvertFailureResult;
+export type ConvertResult<
+  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
+> = ConvertSuccessResult<TOutput> | ConvertFailureResult;

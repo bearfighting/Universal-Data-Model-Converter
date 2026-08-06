@@ -54,6 +54,7 @@ describe("integration: openapi -> ir -> openapi", () => {
       options: { entry: "User" },
     });
     expectOk(firstParsed, "Expected the first OpenAPI parse to succeed.");
+    if (!firstParsed.document) throw new Error("Expected a Shape IR document.");
 
     const firstGenerated = openApiGenerator.generate(
       firstParsed.document,
@@ -78,6 +79,8 @@ describe("integration: openapi -> ir -> openapi", () => {
       },
     );
     expectOk(secondParsed, "Expected the generated OpenAPI to reparse.");
+    if (!secondParsed.document)
+      throw new Error("Expected a Shape IR document.");
 
     expect(secondParsed.document).toEqual(firstParsed.document);
     expect(secondParsed.constraints).toEqual(firstParsed.constraints);

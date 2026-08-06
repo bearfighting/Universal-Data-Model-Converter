@@ -30,6 +30,17 @@ export const jsonParserDescriptor: ParserDescriptor = {
       return valueResult;
     }
 
+    if (
+      context.requestedIr &&
+      !context.requestedIr.includes("shape") &&
+      context.requestedIr.includes("value")
+    ) {
+      return {
+        ok: true,
+        value: valueResult.document,
+      };
+    }
+
     const shapeResult = tryInferJsonDocumentFromValueDocumentWithOptions(
       valueResult.document,
       options,

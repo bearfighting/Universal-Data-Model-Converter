@@ -85,6 +85,7 @@ try {
           overrides: Object.fromEntries(
             [
               "@schema-transformation-toolkit/core",
+              "@schema-transformation-toolkit/generator-json",
               "@schema-transformation-toolkit/generator-json-schema",
               "@schema-transformation-toolkit/generator-openapi",
               "@schema-transformation-toolkit/generator-typescript",
@@ -127,7 +128,7 @@ try {
     if (sources.join(",") !== "json,json-schema,openapi,typescript,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "json-schema,openapi,typescript,zod") {
+    if (targets.join(",") !== "json,json-schema,openapi,typescript,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 

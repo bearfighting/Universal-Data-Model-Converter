@@ -614,6 +614,7 @@ describe("OpenAPI parser", () => {
     });
 
     expectOk(result, "Expected descriptor parsing to succeed.");
+    if (!result.document) throw new Error("Expected a Shape IR document.");
     expect(result.document.name.source).toBe("RenamedUser");
   });
 });

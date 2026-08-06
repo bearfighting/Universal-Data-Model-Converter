@@ -19,6 +19,7 @@ If you are starting from the higher-level pipeline API instead of individual par
 ## Start Here
 
 - [json-to-typescript.md](json-to-typescript.md): the most familiar current flow and a good first pass through the shared IR semantics
+- [json-to-json.md](json-to-json.md): the direct Value IR round-trip, including valid JSON that cannot be inferred as Shape IR
 - [json-schema-to-typescript.md](json-schema-to-typescript.md): the newest parser-to-generator flow and the best entry point for the current JSON Schema subset
 - [json-to-zod.md](json-to-zod.md): JSON inference to a Zod 4 TypeScript or JavaScript module
 - [json-schema-to-zod.md](json-schema-to-zod.md): JSON Schema constraints mapped to Zod 4
@@ -32,6 +33,7 @@ If you are starting from the higher-level pipeline API instead of individual par
 
 - [json-to-typescript.md](json-to-typescript.md): examples starting from JSON samples
 - [json-to-json-schema.md](json-to-json-schema.md): examples starting from JSON samples
+- [json-to-json.md](json-to-json.md): examples starting from JSON samples and ending in normalized JSON
 - [json-schema-to-typescript.md](json-schema-to-typescript.md): examples starting from the current supported JSON Schema subset
 - [json-schema-to-json-schema.md](json-schema-to-json-schema.md): examples starting from the current supported JSON Schema subset
 - [typescript-to-json-schema.md](typescript-to-json-schema.md): examples starting from supported TypeScript schema declarations
@@ -41,6 +43,7 @@ If you are starting from the higher-level pipeline API instead of individual par
 ## By Output Target
 
 - [json-to-typescript.md](json-to-typescript.md): examples ending in TypeScript declarations
+- [json-to-json.md](json-to-json.md): examples ending in normalized JSON text
 - [json-schema-to-typescript.md](json-schema-to-typescript.md): examples ending in TypeScript declarations
 - [json-to-json-schema.md](json-to-json-schema.md): examples ending in JSON Schema Draft 2020-12
 - [json-schema-to-json-schema.md](json-schema-to-json-schema.md): examples ending in JSON Schema Draft 2020-12

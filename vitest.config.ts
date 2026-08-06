@@ -6,6 +6,8 @@ export default defineConfig({
       "@schema-transformation-toolkit/core": "/packages/core/src/index.ts",
       "@schema-transformation-toolkit/generator-json-schema":
         "/packages/generators/json-schema/src/index.ts",
+      "@schema-transformation-toolkit/generator-json":
+        "/packages/generators/json/src/index.ts",
       "@schema-transformation-toolkit/generator-openapi":
         "/packages/generators/openapi/src/index.ts",
       "@schema-transformation-toolkit/generator-typescript":

@@ -20,6 +20,74 @@ if (!successExample || !caveatExample) {
 }
 
 describe("sdk product scenario matrix", () => {
+  it("covers a Value IR-only JSON round-trip", () => {
+    const result = convert({
+      sourceFormat: "json",
+      targetFormat: "json",
+      input: '[1,"a"]',
+      name: "MixedValue",
+      includeArtifacts: true,
+    });
+
+    expect(() => publicConvertResultSchema.parse(result)).not.toThrow();
+    expect(result).toMatchObject({
+      ok: true,
+      output: '[1,"a"]',
+      plan: { irSequence: ["value"] },
+      report: {
+        irSelection: { requested: "auto", selected: "value", fallback: false },
+      },
+      artifacts: { value: { kind: "value-document" } },
+      preservedCapabilities: ["value-ir"],
+    });
+  });
+
+  it("supports explicit IR preference and rejects unavailable paths", () => {
+    const shapeResult = convert({
+      sourceFormat: "json",
+      targetFormat: "typescript",
+      input: '{"id":1}',
+      irPreference: "shape",
+    });
+    expect(shapeResult.ok).toBe(true);
+    if (shapeResult.ok) {
+      expect(shapeResult.plan.irSequence).toEqual(["value", "shape"]);
+    }
+
+    const valueResult = convert({
+      sourceFormat: "json",
+      targetFormat: "typescript",
+      input: '{"id":1}',
+      irPreference: "value",
+    });
+    expect(valueResult).toMatchObject({
+      ok: false,
+      code: "unsupported-ir-preference",
+    });
+
+    const invalidShapePreference = convert({
+      sourceFormat: "json",
+      targetFormat: "json",
+      input: '[1,"a"]',
+      irPreference: "shape",
+    });
+    expect(invalidShapePreference).toMatchObject({
+      ok: false,
+      code: "unsupported-ir-preference",
+    });
+  });
+
+  it("does not mask an unsupported format route as an IR preference failure", () => {
+    expect(() =>
+      convert({
+        sourceFormat: "missing",
+        targetFormat: "json",
+        input: "{}",
+        irPreference: "value",
+      }),
+    ).toThrow(/Unsupported source format/);
+  });
+
   it("covers a stable success conversion flow", () => {
     const result = convert({
       sourceFormat: successExample.sourceFormat,

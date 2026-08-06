@@ -2,6 +2,28 @@ import { describe, expect, it } from "vitest";
 import { parseSource } from "../../packages/sdk/src/source.js";
 
 describe("sdk source parsing", () => {
+  it("parses valid JSON into Value IR without requiring Shape IR", () => {
+    const result = parseSource(
+      '[1,"a"]',
+      "json",
+      "json",
+      "MixedValue",
+      {
+        sourceFormat: "json",
+        targetFormat: "json",
+        input: '[1,"a"]',
+        name: "MixedValue",
+      },
+      undefined,
+      ["value"],
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value?.kind).toBe("value-document");
+    expect(result.shape).toBeUndefined();
+  });
+
   it("parses json into value and shape artifacts", () => {
     const result = parseSource(
       '{"id":1,"name":"Ada"}',
@@ -23,6 +45,7 @@ describe("sdk source parsing", () => {
     }
 
     expect(result.value?.kind).toBe("value-document");
+    if (!result.shape) throw new Error("Expected a Shape IR artifact.");
     expect(result.shape.name.source).toBe("User");
     expect(result.constraints).toBeUndefined();
     expect(result.semanticNotes).toEqual([]);
@@ -56,6 +79,7 @@ describe("sdk source parsing", () => {
     }
 
     expect(result.value).toBeUndefined();
+    if (!result.shape) throw new Error("Expected a Shape IR artifact.");
     expect(result.shape.name.source).toBe("ClosedUser");
     expect(result.constraints?.entries).toHaveLength(1);
     expect(result.semanticNotes).not.toEqual([]);

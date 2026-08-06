@@ -50,6 +50,12 @@ That current surface is enough for the supported end-to-end paths:
 
 - `json -> value -> shape -> typescript`
 - `json -> value -> shape -> json-schema`
+- `json -> value -> json`
+
+Routes may select between Value IR and Shape IR explicitly. The SDK defaults to
+an automatic selection that prefers Value IR when the target supports it;
+Constraint IR remains a Shape IR overlay.
+
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`

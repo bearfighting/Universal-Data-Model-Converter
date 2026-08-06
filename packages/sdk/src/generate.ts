@@ -1,6 +1,7 @@
 import type {
   ConstraintDocument,
   SchemaDocument,
+  ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import { resolveGeneratorDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
@@ -13,7 +14,7 @@ import type {
 export type GeneratedOutput = string | Record<string, unknown> | boolean;
 
 export function generateTarget<TOutput = unknown>(
-  document: SchemaDocument,
+  document: SchemaDocument | ValueDocument,
   targetFormat: ConversionTargetFormat,
   options: ConvertOptions,
   constraints: ConstraintDocument | undefined,

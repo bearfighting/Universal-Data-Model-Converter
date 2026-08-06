@@ -14,6 +14,13 @@ export const zodGeneratorDescriptor: GeneratorDescriptor<string> = {
   capabilities: zodGeneratorCapabilities,
   options: zodGeneratorOptionCatalog,
   generate(document, context: GeneratorExecutionContext) {
+    if (document.kind !== "document") {
+      return {
+        ok: false,
+        code: "invalid-generator-input",
+        message: "The Zod generator requires Shape IR.",
+      };
+    }
     return tryGenerateZod(document, {
       ...((context.options ?? {}) as ZodGeneratorOptions),
       ...(context.constraints ? { constraints: context.constraints } : {}),

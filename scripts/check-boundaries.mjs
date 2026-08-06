@@ -46,6 +46,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/generators/json-schema"),
   },
   {
+    name: "@schema-transformation-toolkit/generator-json",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/json"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-openapi",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/openapi"),
@@ -278,6 +283,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
     "@schema-transformation-toolkit/generator-json-schema",
+    "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",

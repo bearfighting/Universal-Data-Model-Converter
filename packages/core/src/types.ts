@@ -57,6 +57,9 @@ export type { IrModel } from "./model/index.js";
 
 export type {
   ConversionCapabilityRequirement,
+  EntryIrKind,
+  ConversionIrPreference,
+  ConversionIrSelection,
   ConversionEntrySelection,
   ConversionLossHotspot,
   ConversionPolicyDecision,
@@ -64,6 +67,7 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  OverlayIrKind,
   ParserCapabilities,
   ConversionRoute,
   ConversionRouteCapabilities,
