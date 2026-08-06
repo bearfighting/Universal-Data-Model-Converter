@@ -241,6 +241,14 @@ import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
 export type IrKind = "value" | "shape" | "constraint";
+export type EntryIrKind = Exclude<IrKind, "constraint">;
+export type OverlayIrKind = Extract<IrKind, "constraint">;
+export type ConversionIrPreference = "auto" | "value" | "shape";
+export interface ConversionIrSelection {
+  requested: ConversionIrPreference;
+  selected: Exclude<ConversionIrPreference, "auto">;
+  fallback: boolean;
+}
 export type ConversionCapability =
   | "value-ir"
   | "shape-ir"
@@ -316,6 +324,8 @@ export interface ParserCapabilities {
 export interface GeneratorCapabilities {
   target: string;
   consumesIr: IrKind[];
+  entryIr?: EntryIrKind[];
+  overlays?: OverlayIrKind[];
   supportsCapabilities: ConversionCapability[];
 }
 export interface SemanticLossAnalysisContext {
@@ -333,6 +343,7 @@ export interface GeneratorAnalysisHooks {
   planSemanticLosses?(context: SemanticLossAnalysisContext): SemanticLoss[];
 }
 export interface ConversionReport {
+  irSelection?: ConversionIrSelection;
   diagnostics?: ConversionReportStage<SchemaDiagnostic>;
   losses?: SemanticLoss[];
   preservedCapabilities?: ConversionCapability[];
@@ -377,6 +388,9 @@ export interface ConversionRouteCapabilities {
 ```ts
 export type {
   ConversionCapabilityRequirement,
+  EntryIrKind,
+  ConversionIrPreference,
+  ConversionIrSelection,
   ConversionEntrySelection,
   ConversionLossHotspot,
   ConversionPolicyDecision,
@@ -384,6 +398,7 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
   ConversionRoute,
@@ -415,6 +430,7 @@ import type {
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { OptionCatalog } from "../option-metadata.js";
 import type { ValueDocument } from "../value/types.js";
+import type { IrKind } from "../pipeline/contracts.js";
 export interface ParseOptions {
   name?: string;
 }
@@ -430,14 +446,23 @@ export interface ConfiguredParser<
   parser: TParser;
   prepared: PreparedOptions<TResolved>;
 }
-export interface ParseSuccessResult {
-  ok: true;
-  document: SchemaDocument;
-  value?: ValueDocument;
-  constraints?: ConstraintDocument;
-  diagnostics?: SchemaDiagnostic[];
-  semanticNotes?: SchemaSemanticNote[];
-}
+export type ParseSuccessResult =
+  | {
+      ok: true;
+      document: SchemaDocument;
+      value?: ValueDocument;
+      constraints?: ConstraintDocument;
+      diagnostics?: SchemaDiagnostic[];
+      semanticNotes?: SchemaSemanticNote[];
+    }
+  | {
+      ok: true;
+      value: ValueDocument;
+      document?: never;
+      constraints?: never;
+      diagnostics?: SchemaDiagnostic[];
+      semanticNotes?: SchemaSemanticNote[];
+    };
 export interface ParseFailureResult<TCode extends string = string> {
   ok: false;
   code: TCode;
@@ -491,6 +516,7 @@ export interface SchemaGenerator<
 export interface ParserExecutionContext {
   name: string;
   targetFormat?: string;
+  requestedIr?: readonly IrKind[];
   options?: unknown;
 }
 export interface GeneratorExecutionContext {
@@ -515,7 +541,7 @@ export interface GeneratorDescriptor<TOutput = unknown> {
   options: OptionCatalog;
   analysis?: import("../pipeline/contracts.js").GeneratorAnalysisHooks;
   generate(
-    document: SchemaDocument,
+    document: SchemaDocument | ValueDocument,
     context: GeneratorExecutionContext,
   ): GenerateResult<TOutput>;
 }

@@ -16,6 +16,15 @@ The repository already has an explicit multi-IR shell:
 The split is no longer theoretical.
 It is already part of runtime artifacts and route planning.
 
+Route planning treats Value and Shape as alternative entrance IRs. Constraint IR
+is an overlay available only on Shape routes; a Value route never infers Shape
+or Constraint IR implicitly.
+
+Generator capability declarations distinguish the route entrance from overlays:
+`entryIr` declares whether a generator accepts Value or Shape IR, while
+`overlays` declares additional documents such as Constraint IR. The legacy
+`consumesIr` array remains supported and is normalized into these two fields.
+
 ## Layer Meaning
 
 ### Value IR
