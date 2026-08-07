@@ -14,6 +14,8 @@ export default defineConfig({
         "/packages/generators/openapi/src/index.ts",
       "@schema-transformation-toolkit/generator-typescript":
         "/packages/generators/typescript/src/index.ts",
+      "@schema-transformation-toolkit/generator-yaml":
+        "/packages/generators/yaml/src/index.ts",
       "@schema-transformation-toolkit/generator-zod":
         "/packages/generators/zod/src/index.ts",
       "@schema-transformation-toolkit/parser-json":
@@ -26,6 +28,8 @@ export default defineConfig({
         "/packages/parsers/openapi/src/index.ts",
       "@schema-transformation-toolkit/parser-zod":
         "/packages/parsers/zod/src/index.ts",
+      "@schema-transformation-toolkit/parser-yaml":
+        "/packages/parsers/yaml/src/index.ts",
       "@schema-transformation-toolkit/sdk": "/packages/sdk/src/index.ts",
     },
   },
