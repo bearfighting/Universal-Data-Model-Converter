@@ -10,6 +10,32 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.5
+
+This prerelease adds strict CSV value conversion and records the current
+architecture assessment for downstream SDK integration.
+
+### Features
+
+- Add `@schema-transformation-toolkit/parser-csv` for strict header-based CSV
+  input.
+- Add `@schema-transformation-toolkit/generator-csv` for flat Value IR object
+  arrays.
+- Add CSV routes and option metadata to the SDK, including CSV conversion to
+  JSON, YAML, TypeScript, JSON Schema, Zod, and OpenAPI where Shape IR is
+  supported.
+- Preserve string cell semantics, quoted fields, escaped quotes, embedded
+  newlines, BOM handling, and deterministic LF output.
+
+### Compatibility and safety
+
+- Reject empty, duplicate, or inconsistent CSV headers and row widths with
+  structured diagnostics.
+- Reject nested CSV generator values and report number/boolean textification
+  through semantic notes.
+- Add CSV package boundaries, API snapshots, integration coverage, and
+  architecture guidance for future SDK stabilization.
+
 ## 0.2.0-beta.4
 
 This prerelease adds the strict JSON-compatible YAML parser and generator
