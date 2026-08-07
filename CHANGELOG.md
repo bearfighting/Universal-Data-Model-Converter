@@ -10,6 +10,22 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.4
+
+This prerelease adds the strict JSON-compatible YAML parser and generator
+pipeline and hardens its workspace and package boundaries.
+
+### Features and fixes
+
+- Add YAML Value IR and Shape IR conversion routes through the SDK.
+- Refactor YAML parsing into profile validation, Value IR lowering, and shape
+  inference stages.
+- Reject duplicate Value IR fields instead of silently overwriting them during
+  generation.
+- Share Value IR conversion and validation helpers across JSON and YAML
+  implementations.
+- Fix clean-workspace TypeScript and API snapshot resolution for YAML packages.
+
 ## 0.2.0-beta.2
 
 This prerelease adds a statically analyzed Zod 4 parser and expands the
