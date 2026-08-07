@@ -1,7 +1,4 @@
-import type {
-  GeneratorDescriptor,
-  ValueDocument,
-} from "@schema-transformation-toolkit/core";
+import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
 import { tryGenerateYaml } from "./api.js";
 import { yamlGeneratorCapabilities } from "./capabilities.js";
 import { yamlGeneratorOptionCatalog } from "./option-metadata.js";
@@ -28,6 +25,6 @@ export const yamlGeneratorDescriptor: GeneratorDescriptor<string> = {
         ],
       };
     }
-    return tryGenerateYaml(document as ValueDocument);
+    return tryGenerateYaml(document);
   },
 };

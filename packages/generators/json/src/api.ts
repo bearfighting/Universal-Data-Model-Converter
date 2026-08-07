@@ -1,8 +1,9 @@
-import type {
-  ValueDocument,
-  ValueNode,
-} from "@schema-transformation-toolkit/core";
+import type { ValueDocument } from "@schema-transformation-toolkit/core";
 import type { GenerateResult } from "@schema-transformation-toolkit/core";
+import {
+  tryValidateValueDocument,
+  valueNodeToJsonCompatible,
+} from "@schema-transformation-toolkit/core/internal";
 
 export type JsonOutput = string;
 
@@ -19,25 +20,22 @@ export function generateJson(document: ValueDocument): JsonOutput {
 export function tryGenerateJson(
   document: ValueDocument,
 ): GenerateResult<JsonOutput> {
-  return {
-    ok: true,
-    output: JSON.stringify(valueNodeToJsonValue(document.root)),
-  };
-}
-
-function valueNodeToJsonValue(node: ValueNode): unknown {
-  if (
-    node.kind === "string" ||
-    node.kind === "number" ||
-    node.kind === "boolean"
-  ) {
-    return node.value;
+  const validation = tryValidateValueDocument(document);
+  if (!validation.ok) {
+    const firstDiagnostic = validation.diagnostics[0];
+    return {
+      ok: false,
+      code: firstDiagnostic?.code ?? "invalid-generator-input",
+      message: firstDiagnostic?.message ?? "The Value IR is invalid.",
+      diagnostics: validation.diagnostics.map((diagnostic) => ({
+        ...diagnostic,
+        source: "generator-json",
+      })),
+    };
   }
 
-  if (node.kind === "null") return null;
-  if (node.kind === "array") return node.items.map(valueNodeToJsonValue);
-
-  return Object.fromEntries(
-    node.fields.map((field) => [field.name, valueNodeToJsonValue(field.value)]),
-  );
+  return {
+    ok: true,
+    output: JSON.stringify(valueNodeToJsonCompatible(document.root)),
+  };
 }

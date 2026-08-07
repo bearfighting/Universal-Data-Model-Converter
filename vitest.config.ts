@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
+      "@schema-transformation-toolkit/core/internal":
+        "/packages/core/src/internal.ts",
       "@schema-transformation-toolkit/core": "/packages/core/src/index.ts",
       "@schema-transformation-toolkit/generator-json-schema":
         "/packages/generators/json-schema/src/index.ts",

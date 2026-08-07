@@ -45,6 +45,30 @@ describe("YAML parser", () => {
     }
   });
 
+  it.each([
+    ["null", "null\n", "null"],
+    ["array", "- 1\n- 2\n", "array"],
+    ["scalar", "Ada\n", "string"],
+  ])("lowers a %s root directly to Value IR", (_label, input, kind) => {
+    const result = tryParseYamlValueDocument(input);
+
+    expect(result).toMatchObject({ ok: true });
+    if (result.ok) expect(result.document.root.kind).toBe(kind);
+  });
+
+  it("does not select Value-only parsing for a non-value IR request", () => {
+    const result = yamlParserDescriptor.parse("id: 1\n", {
+      name: "User",
+      requestedIr: ["constraint"],
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      document: { kind: "document" },
+      value: { kind: "value-document" },
+    });
+  });
+
   it("honors a value-only descriptor request", () => {
     const result = yamlParserDescriptor.parse('items: [1, "a"]\n', {
       name: "Mixed",

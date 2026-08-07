@@ -3,16 +3,12 @@ import type {
   SchemaDiagnostic,
   SchemaDocument,
   ValueDocument,
-  ValueNode,
 } from "@schema-transformation-toolkit/core";
+import { schemaDocument } from "@schema-transformation-toolkit/core";
 import {
-  schemaDocument,
-  valueArrayNode,
-  valueDocument,
-  valueObjectField,
-  valueObjectNode,
-  valueScalarNode,
-} from "@schema-transformation-toolkit/core";
+  valueDocumentFromJsonCompatible,
+  valueNodeToJsonCompatible,
+} from "@schema-transformation-toolkit/core/internal";
 import { decodeJsonText } from "./decode.js";
 import { isJsonInferenceError } from "./errors.js";
 import { inferSchemaNodeFromJsonValue } from "./schema/infer.js";
@@ -22,7 +18,6 @@ import {
   type JsonParseOptions,
   type ResolvedJsonParseOptions,
 } from "./schema/options.js";
-import type { JsonValue } from "./types.js";
 
 export interface JsonValueDocumentSuccessResult {
   ok: true;
@@ -184,10 +179,7 @@ function parseJsonValueDocumentWithResolvedOptions(
   input: string,
   options: ResolvedJsonParseOptions,
 ): ValueDocument {
-  return valueDocument(
-    options.name,
-    jsonValueToValueNode(decodeJsonText(input)),
-  );
+  return valueDocumentFromJsonCompatible(options.name, decodeJsonText(input));
 }
 
 function inferJsonDocumentFromValueDocumentWithResolvedOptions(
@@ -198,52 +190,9 @@ function inferJsonDocumentFromValueDocumentWithResolvedOptions(
   return schemaDocument(
     options.name,
     inferSchemaNodeFromJsonValue(
-      valueNodeToJsonValue(document.root),
+      valueNodeToJsonCompatible(document.root),
       options,
       diagnostics,
     ),
-  );
-}
-
-function jsonValueToValueNode(value: JsonValue): ValueNode {
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return valueScalarNode(value);
-  }
-
-  if (Array.isArray(value)) {
-    return valueArrayNode(value.map((item) => jsonValueToValueNode(item)));
-  }
-
-  return valueObjectNode(
-    Object.entries(value).map(([name, fieldValue]) =>
-      valueObjectField(name, jsonValueToValueNode(fieldValue)),
-    ),
-  );
-}
-
-function valueNodeToJsonValue(node: ValueNode): JsonValue {
-  if (
-    node.kind === "string" ||
-    node.kind === "number" ||
-    node.kind === "boolean"
-  ) {
-    return node.value;
-  }
-
-  if (node.kind === "null") {
-    return null;
-  }
-
-  if (node.kind === "array") {
-    return node.items.map((item) => valueNodeToJsonValue(item));
-  }
-
-  return Object.fromEntries(
-    node.fields.map((field) => [field.name, valueNodeToJsonValue(field.value)]),
   );
 }

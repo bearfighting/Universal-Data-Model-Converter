@@ -6,11 +6,9 @@ Entry: packages/parsers/yaml/src/index.ts
 
 ```ts
 import type {
-  ConstraintDocument,
   ParseFailureResult,
   SchemaDiagnostic,
   SchemaDocument,
-  SchemaSemanticNote,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import type { YamlParseOptions } from "./options.js";
@@ -19,8 +17,6 @@ export interface YamlParseSuccessResult {
   value: ValueDocument;
   document: SchemaDocument;
   diagnostics?: SchemaDiagnostic[];
-  semanticNotes?: SchemaSemanticNote[];
-  constraints?: ConstraintDocument;
 }
 export type YamlParseFailureResult = ParseFailureResult<string>;
 export type YamlParseResult = YamlParseSuccessResult | YamlParseFailureResult;

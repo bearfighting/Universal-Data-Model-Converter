@@ -1,17 +1,15 @@
 import type {
   GenerateResult,
   ValueDocument,
-  ValueNode,
 } from "@schema-transformation-toolkit/core";
+import {
+  tryValidateValueDocument,
+  valueNodeToJsonCompatible,
+} from "@schema-transformation-toolkit/core/internal";
 import { stringify } from "yaml";
+import { yamlProfile } from "./profile.js";
 
 export type YamlOutput = string;
-
-const yamlStringifyOptions = {
-  schema: "core",
-  version: "1.2",
-  aliasDuplicateObjects: false,
-} as const;
 
 export function generateYaml(document: ValueDocument): YamlOutput {
   const result = tryGenerateYaml(document);
@@ -26,20 +24,26 @@ export function generateYaml(document: ValueDocument): YamlOutput {
 export function tryGenerateYaml(
   document: ValueDocument,
 ): GenerateResult<YamlOutput> {
-  const unsupported = findUnsupportedValue(document.root);
-  if (unsupported) {
+  const validation = tryValidateValueDocument(document);
+  if (!validation.ok) {
+    const firstDiagnostic = validation.diagnostics[0];
+    const code =
+      firstDiagnostic?.code === "invalid-value-number"
+        ? "yaml-non-json-value"
+        : (firstDiagnostic?.code ?? "invalid-generator-input");
+    const message = firstDiagnostic?.message ?? "The Value IR is invalid.";
     return {
       ok: false,
-      code: "yaml-non-json-value",
-      message: unsupported,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "yaml-non-json-value",
-          message: unsupported,
-          source: "generator-yaml",
-        },
-      ],
+      code,
+      message,
+      diagnostics: validation.diagnostics.map((diagnostic) => ({
+        ...diagnostic,
+        source: "generator-yaml",
+        code:
+          diagnostic.code === "invalid-value-number"
+            ? "yaml-non-json-value"
+            : diagnostic.code,
+      })),
     };
   }
 
@@ -47,8 +51,8 @@ export function tryGenerateYaml(
     return {
       ok: true,
       output: stringify(
-        valueNodeToJavaScript(document.root),
-        yamlStringifyOptions,
+        valueNodeToJsonCompatible(document.root),
+        yamlProfile.stringify,
       ),
     };
   } catch (error) {
@@ -67,42 +71,6 @@ export function tryGenerateYaml(
       ],
     };
   }
-}
-
-function findUnsupportedValue(node: ValueNode): string | undefined {
-  if (node.kind === "number" && !Number.isFinite(node.value)) {
-    return "The YAML generator only supports finite JSON-compatible numbers.";
-  }
-  if (node.kind === "array") {
-    for (const item of node.items) {
-      const failure = findUnsupportedValue(item);
-      if (failure) return failure;
-    }
-  }
-  if (node.kind === "object") {
-    for (const field of node.fields) {
-      const failure = findUnsupportedValue(field.value);
-      if (failure) return failure;
-    }
-  }
-  return undefined;
-}
-
-function valueNodeToJavaScript(node: ValueNode): unknown {
-  if (
-    node.kind === "string" ||
-    node.kind === "number" ||
-    node.kind === "boolean"
-  )
-    return node.value;
-  if (node.kind === "null") return null;
-  if (node.kind === "array") return node.items.map(valueNodeToJavaScript);
-  return Object.fromEntries(
-    node.fields.map((field) => [
-      field.name,
-      valueNodeToJavaScript(field.value),
-    ]),
-  );
 }
 
 function errorMessage(error: unknown): string {

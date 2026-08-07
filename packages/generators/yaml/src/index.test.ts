@@ -102,4 +102,27 @@ describe("YAML generator", () => {
       diagnostics: [expect.objectContaining({ source: "generator-yaml" })],
     });
   });
+
+  it("rejects duplicate Value IR field names instead of overwriting them", () => {
+    const result = tryGenerateYaml(
+      valueDocument(
+        "Duplicate",
+        valueObjectNode([
+          valueObjectField("name", valueScalarNode("first")),
+          valueObjectField("name", valueScalarNode("second")),
+        ]),
+      ),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "duplicate-value-field-name",
+      diagnostics: [
+        expect.objectContaining({
+          source: "generator-yaml",
+          code: "duplicate-value-field-name",
+        }),
+      ],
+    });
+  });
 });

@@ -19,7 +19,11 @@ export const yamlParserDescriptor: ParserDescriptor = {
       ...((context.options ?? {}) as YamlParseOptions),
       name: context.name,
     };
-    if (context.requestedIr && !context.requestedIr.includes("shape")) {
+    if (
+      context.requestedIr &&
+      !context.requestedIr.includes("shape") &&
+      context.requestedIr.includes("value")
+    ) {
       const result = tryParseYamlValueDocument(input, options);
       if (!result.ok) return result;
       return {
