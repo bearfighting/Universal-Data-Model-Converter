@@ -95,6 +95,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "CSV cells are parsed as strings; automatic type inference, null tokens, nested values, and multiple tables are unsupported.",
     "CSV generation consumes Value IR only; empty arrays require explicit columns.",
   ],
+  toml: [
+    "TOML support is limited to values representable by the shared Value IR and the TOML v1 profile.",
+    "TOML date/time values, non-finite numbers, and unsafe integers are unsupported rather than converted to strings.",
+    "TOML generation consumes object-root Value IR only; schema-only sources cannot generate TOML.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -112,6 +117,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "headerless input",
     "explicit cell type inference",
   ],
+  toml: ["date/time conversion", "broader TOML 1.1 features"],
 };
 
 export function describeFormatSupport(
@@ -128,7 +134,10 @@ export function describeFormatSupport(
       : {}),
     sharedShapeKinds: [...SHARED_SHAPE_KINDS],
     constraintFamilies:
-      format === "json" || format === "yaml" || format === "csv"
+      format === "json" ||
+      format === "yaml" ||
+      format === "csv" ||
+      format === "toml"
         ? []
         : [...CONSTRAINT_FAMILIES],
     notableLimitations: [...(FORMAT_LIMITATIONS[format] ?? [])],

@@ -9,13 +9,15 @@ import {
   routeStages,
   routeUsesIr,
 } from "../../packages/sdk/src/registry.js";
+import { BUILTIN_FORMAT_CATALOG } from "../../packages/sdk/src/builtin-formats.js";
 import type { ConversionRegistry } from "../../packages/sdk/src/types.js";
 
 describe("sdk registry", () => {
   it("lists every supported source and target combination", () => {
-    expect(listConversionRoutes()).toEqual([
+    const expectedRoutes = [
       planConversion("json", "json"),
       planConversion("json", "csv"),
+      planConversion("json", "toml"),
       planConversion("json", "json-schema"),
       planConversion("json", "typescript"),
       planConversion("json", "zod"),
@@ -28,6 +30,13 @@ describe("sdk registry", () => {
       planConversion("csv", "zod"),
       planConversion("csv", "yaml"),
       planConversion("csv", "openapi"),
+      planConversion("toml", "json"),
+      planConversion("toml", "toml"),
+      planConversion("toml", "json-schema"),
+      planConversion("toml", "typescript"),
+      planConversion("toml", "zod"),
+      planConversion("toml", "yaml"),
+      planConversion("toml", "openapi"),
       planConversion("json-schema", "json-schema"),
       planConversion("json-schema", "typescript"),
       planConversion("json-schema", "zod"),
@@ -46,12 +55,14 @@ describe("sdk registry", () => {
       planConversion("zod", "openapi"),
       planConversion("yaml", "json"),
       planConversion("yaml", "csv"),
+      planConversion("yaml", "toml"),
       planConversion("yaml", "json-schema"),
       planConversion("yaml", "typescript"),
       planConversion("yaml", "zod"),
       planConversion("yaml", "yaml"),
       planConversion("yaml", "openapi"),
-    ]);
+    ];
+    expect(listConversionRoutes()).toEqual(expectedRoutes);
   });
 
   it("tracks IR usage and stage exposure from planned routes", () => {
@@ -130,6 +141,34 @@ describe("sdk registry", () => {
         code: "unsupported-route",
       }),
     );
+    expect(() => planConversion("csv", "toml")).toThrow(
+      expect.objectContaining<Partial<ConversionRouteError>>({
+        code: "unsupported-route",
+      }),
+    );
+    expect(() => planConversion("toml", "csv")).toThrow(
+      expect.objectContaining<Partial<ConversionRouteError>>({
+        code: "unsupported-route",
+      }),
+    );
+  });
+
+  it("keeps the builtin catalog aligned with registered descriptors", () => {
+    const parserFormats = new Set(
+      defaultConversionRegistry
+        .listParsers()
+        .map((descriptor) => descriptor.format),
+    );
+    const generatorFormats = new Set(
+      defaultConversionRegistry
+        .listGenerators()
+        .map((descriptor) => descriptor.format),
+    );
+
+    for (const [format, roles] of Object.entries(BUILTIN_FORMAT_CATALOG)) {
+      expect(parserFormats.has(format)).toBe(roles.source);
+      expect(generatorFormats.has(format)).toBe(roles.target);
+    }
   });
 
   it("supports legacy registries without direct descriptor lookup", () => {
@@ -155,6 +194,7 @@ describe("sdk registry", () => {
       describeConversionRouteCapabilities("json-schema", "json-schema"),
     ).toMatchObject({
       supportsShapeIr: true,
+      supportsValueIr: false,
       supportsConstraintIr: true,
       preservedCapabilities: [
         "shape-ir",
@@ -170,6 +210,7 @@ describe("sdk registry", () => {
     expect(
       describeConversionRouteCapabilities("json-schema", "typescript"),
     ).toMatchObject({
+      supportsValueIr: false,
       supportsShapeIr: true,
       supportsConstraintIr: false,
       preservedCapabilities: ["shape-ir"],

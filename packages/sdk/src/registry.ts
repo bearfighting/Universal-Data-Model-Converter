@@ -9,16 +9,19 @@ import type {
   ParserCapabilities,
   ParserDescriptor,
   PipelineStage,
+  ValueRootKind,
 } from "@schema-transformation-toolkit/core";
 import { typeScriptGeneratorDescriptor } from "@schema-transformation-toolkit/generator-typescript";
 import { jsonGeneratorDescriptor } from "@schema-transformation-toolkit/generator-json";
 import { csvGeneratorDescriptor } from "@schema-transformation-toolkit/generator-csv";
+import { tomlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-toml";
 import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
 import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
 import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
 import { yamlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-yaml";
 import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
 import { csvParserDescriptor } from "@schema-transformation-toolkit/parser-csv";
+import { tomlParserDescriptor } from "@schema-transformation-toolkit/parser-toml";
 import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
 import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
 import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
@@ -66,6 +69,7 @@ export class DescriptorRegistrationError extends Error {
 export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
   overlays: OverlayIrKind[];
+  valueRootKinds?: ValueRootKind[];
 }
 
 const normalizedCapabilities = new WeakMap<
@@ -152,6 +156,7 @@ export const defaultConversionRegistry = createConversionRegistry({
   parsers: [
     jsonParserDescriptor,
     csvParserDescriptor,
+    tomlParserDescriptor,
     jsonSchemaParserDescriptor,
     typeScriptParserDescriptor,
     openApiParserDescriptor,
@@ -161,6 +166,7 @@ export const defaultConversionRegistry = createConversionRegistry({
   generators: [
     jsonGeneratorDescriptor,
     csvGeneratorDescriptor,
+    tomlGeneratorDescriptor,
     jsonSchemaDescriptor,
     typeScriptGeneratorDescriptor,
     zodGeneratorDescriptor,
@@ -272,7 +278,10 @@ export function describeConversionRouteCapabilities(
   );
 
   return {
-    supportsValueIr: parserCapabilities.producesIr.includes("value"),
+    supportsValueIr:
+      parserCapabilities.producesIr.includes("value") &&
+      normalizedGenerator.entryIr.includes("value") &&
+      compatibleValueRootKinds(parserCapabilities, normalizedGenerator),
     supportsShapeIr:
       parserCapabilities.producesIr.includes("shape") &&
       normalizedGenerator.entryIr.includes("shape"),
@@ -364,7 +373,8 @@ function resolveConversionRoute(
 ): ConversionExecutionPlan {
   const canUseValue =
     parserCapabilities.producesIr.includes("value") &&
-    normalizedGenerator.entryIr.includes("value");
+    normalizedGenerator.entryIr.includes("value") &&
+    compatibleValueRootKinds(parserCapabilities, normalizedGenerator);
   const canUseShape =
     parserCapabilities.producesIr.includes("shape") &&
     normalizedGenerator.entryIr.includes("shape");
@@ -529,7 +539,23 @@ function normalizeGeneratorCapabilities(
     );
   }
 
-  return { entryIr: [...entryIr], overlays: [...overlays] };
+  return {
+    entryIr: [...entryIr],
+    overlays: [...overlays],
+    ...(capabilities.valueRootKinds
+      ? { valueRootKinds: [...capabilities.valueRootKinds] }
+      : {}),
+  };
+}
+
+function compatibleValueRootKinds(
+  parserCapabilities: ParserCapabilities,
+  generatorCapabilities: NormalizedGeneratorCapabilities,
+): boolean {
+  const parserRoots = parserCapabilities.valueRootKinds;
+  const generatorRoots = generatorCapabilities.valueRootKinds;
+  if (!parserRoots || !generatorRoots) return true;
+  return parserRoots.some((root) => generatorRoots.includes(root));
 }
 
 function sameIrKinds(

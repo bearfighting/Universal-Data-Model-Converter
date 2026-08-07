@@ -72,6 +72,15 @@ const packageConfigs = [
     snapshot: path.join(repoRoot, "packages/parsers/csv/etc/parser-csv.api.md"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-toml",
+    root: path.join(repoRoot, "packages/parsers/toml"),
+    entry: path.join(repoRoot, "packages/parsers/toml/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/toml/etc/parser-toml.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     root: path.join(repoRoot, "packages/generators/json-schema"),
     entry: path.join(repoRoot, "packages/generators/json-schema/src/index.ts"),
@@ -132,6 +141,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/csv/etc/generator-csv.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-toml",
+    root: path.join(repoRoot, "packages/generators/toml"),
+    entry: path.join(repoRoot, "packages/generators/toml/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/toml/etc/generator-toml.api.md",
     ),
   },
   {

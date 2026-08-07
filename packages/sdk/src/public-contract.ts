@@ -1,24 +1,12 @@
 import { z } from "zod";
+import {
+  BUILTIN_SOURCE_FORMATS,
+  BUILTIN_TARGET_FORMATS,
+} from "./builtin-formats.js";
 
-export const conversionSourceFormatSchema = z.enum([
-  "json",
-  "json-schema",
-  "typescript",
-  "openapi",
-  "zod",
-  "yaml",
-  "csv",
-]);
+export const conversionSourceFormatSchema = z.enum(BUILTIN_SOURCE_FORMATS);
 
-export const conversionTargetFormatSchema = z.enum([
-  "json",
-  "json-schema",
-  "typescript",
-  "zod",
-  "openapi",
-  "yaml",
-  "csv",
-]);
+export const conversionTargetFormatSchema = z.enum(BUILTIN_TARGET_FORMATS);
 
 export const conversionIrPreferenceSchema = z.enum(["auto", "value", "shape"]);
 

@@ -13,7 +13,7 @@ It should stay short and answer:
 The repository is past architecture validation and has a stable-enough conversion kernel:
 
 - multi-layer IR with `Value IR`, `Shape IR`, `Constraint IR`, and `IrModel`
-- parser and generator packages for JSON, strict JSON-compatible YAML, strict header-based CSV, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
+- parser and generator packages for JSON, strict JSON-compatible YAML, strict header-based CSV, strict TOML v1, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
 - the Zod parser now uses a split static-analysis kernel with strict import, reference-cycle, presence, constraint-path, and diagnostic boundaries
 - Zod static enums lower to literal unions, portable metadata is preserved through Constraint IR, and default input-presence caveats are reported explicitly
 - structured diagnostics, semantic notes, capability declarations, and semantic-loss reporting
@@ -56,6 +56,9 @@ Validated end-to-end routes today:
 - `csv -> value -> json/yaml/csv`
 - `json/yaml -> value -> csv`
 - `csv -> value -> shape -> typescript/json-schema`
+- `toml -> value -> shape -> typescript/json-schema`
+- `toml -> value -> json/yaml/typescript/json-schema/zod/openapi/toml`
+- `json/yaml -> value -> toml` when the parsed Value root is an object
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
@@ -104,11 +107,17 @@ Recommended order for the next repository slice:
 2. keep traversal, transform, normalization, and reporting stable while downstream consumer surfaces start depending on `@schema-transformation-toolkit/sdk`
 3. treat release notes, richer diagnostic-location guidance, and Worker-oriented integration notes as urgent follow-up work, but not reasons to block the first downstream Web iteration
 4. keep the public SDK contract and UI-friendly diagnostic model small and stable
-5. continue expanding shared IR only when pressure appears across multiple formats, not because one source format wants a local convenience
+5. complete the planned format-layer convergence review across JSON, YAML, CSV, and TOML before adding another parser/generator family
 
 The first additional target families are now implemented as `@schema-transformation-toolkit/generator-zod`
 and `@schema-transformation-toolkit/generator-openapi`. OpenAPI generation is intentionally limited to
 canonical 3.1 schema documents; full API document generation remains deferred.
+
+TOML is now implemented as the first additional strict Value format after CSV.
+Its generator intentionally requires an object root. Statically incompatible
+array/object routes such as CSV to TOML are rejected during planning, while
+dynamically unconstrained JSON/YAML routes validate the concrete root during
+generation rather than applying an implicit wrapper.
 
 This page is intentionally only a short status summary.
 Use [consumer-surface-checklist.md](consumer-surface-checklist.md) as the single detailed readiness checklist instead of duplicating its task breakdown here.
@@ -171,9 +180,17 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 The latest full local verification pass completed on August 7, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (the local `pnpm` wrapper was unavailable because it could not open its database)
+- `./node_modules/.bin/vitest run` (70 test files, 830 passing tests)
+- `./node_modules/.bin/tsc --noEmit`
+- `./node_modules/.bin/eslint .`
+- `./node_modules/.bin/prettier --check .`
+- `node scripts/check-boundaries.mjs`
+- `node scripts/check-api-snapshots.mjs`
+- direct `tsup` builds for the TOML parser, TOML generator, and SDK
 
-That pass was green with `66` test files and `809` passing tests.
+The workspace `pnpm build` wrapper still cannot run in this environment because
+pnpm cannot open its database; the equivalent affected package builds passed
+directly through `tsup`.
 
 A prior broader verification pass completed on July 22, 2026 and included:
 

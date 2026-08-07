@@ -10,7 +10,7 @@ format-specific integrations.
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
 Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
 
-The current target formats are JSON, CSV, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
+The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
@@ -55,8 +55,8 @@ if (!result.ok) {
 }
 ```
 
-The default registry includes JSON, CSV, JSON Schema, TypeScript, OpenAPI, Zod, and YAML
-parsers, plus JSON, CSV, JSON Schema, TypeScript, Zod, OpenAPI, and YAML generators. The SDK
+The default registry includes JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI, Zod, and YAML
+parsers, plus JSON, CSV, TOML, JSON Schema, TypeScript, Zod, OpenAPI, and YAML generators. The SDK
 bundles those implementations into its distributable runtime. TypeScript is
 installed as a runtime dependency because the TypeScript parser uses the
 official compiler API; Zod remains a dependency for the public contract
@@ -77,6 +77,10 @@ CSV uses a strict comma-separated, header-based profile. It lowers every cell
 to a string and generates from flat Value IR object arrays; empty arrays need
 the `advanced.generator.csv.columns` option, while nested values and nulls are
 rejected.
+
+TOML uses a strict TOML v1 Value profile. Date/time values, non-finite numbers,
+and unsafe integers are rejected. TOML generation consumes object-root Value IR;
+comments and source formatting are not preserved.
 
 ## Stage 1 Contract
 

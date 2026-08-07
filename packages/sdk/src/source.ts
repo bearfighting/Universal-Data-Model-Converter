@@ -201,5 +201,8 @@ function parserOptionsFor(
   if (sourceFormat === "csv") {
     return options.advanced?.parser?.csv ?? {};
   }
+  if (sourceFormat === "toml") {
+    return options.advanced?.parser?.toml ?? {};
+  }
   return options.extension?.parser ?? {};
 }

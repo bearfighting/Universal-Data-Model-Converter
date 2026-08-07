@@ -2,6 +2,52 @@
 
 Entry: packages/sdk/src/index.ts
 
+## packages/sdk/src/builtin-formats.d.ts
+
+```ts
+export declare const BUILTIN_FORMAT_CATALOG: {
+  readonly json: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly csv: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly "json-schema": {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly typescript: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly openapi: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly zod: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly yaml: {
+    readonly source: true;
+    readonly target: true;
+  };
+  readonly toml: {
+    readonly source: true;
+    readonly target: true;
+  };
+};
+type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;
+type NonEmptyFormatList = readonly [BuiltinFormat, ...BuiltinFormat[]];
+export declare const BUILTIN_SOURCE_FORMATS: NonEmptyFormatList;
+export declare const BUILTIN_TARGET_FORMATS: NonEmptyFormatList;
+export type BuiltinSourceFormat = (typeof BUILTIN_SOURCE_FORMATS)[number];
+export type BuiltinTargetFormat = (typeof BUILTIN_TARGET_FORMATS)[number];
+export {};
+```
+
 ## packages/sdk/src/convert.d.ts
 
 ```ts
@@ -229,6 +275,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   typescript: "typescript";
   json: "json";
   csv: "csv";
+  toml: "toml";
   zod: "zod";
   yaml: "yaml";
 }>;
@@ -238,6 +285,7 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   typescript: "typescript";
   json: "json";
   csv: "csv";
+  toml: "toml";
   zod: "zod";
   yaml: "yaml";
 }>;
@@ -458,6 +506,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       typescript: "typescript";
       json: "json";
       csv: "csv";
+      toml: "toml";
       zod: "zod";
       yaml: "yaml";
     }>;
@@ -467,6 +516,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       typescript: "typescript";
       json: "json";
       csv: "csv";
+      toml: "toml";
       zod: "zod";
       yaml: "yaml";
     }>;
@@ -2190,6 +2240,7 @@ import type {
   ParserCapabilities,
   ParserDescriptor,
   PipelineStage,
+  ValueRootKind,
 } from "@schema-transformation-toolkit/core";
 import type {
   ConversionFormat,
@@ -2218,6 +2269,7 @@ export declare class DescriptorRegistrationError extends Error {
 export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
   overlays: OverlayIrKind[];
+  valueRootKinds?: ValueRootKind[];
 }
 export declare function createConversionRegistry(options?: {
   parsers?: ParserDescriptor[];
@@ -2367,11 +2419,20 @@ import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
 import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
 import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
+import type {
+  TomlGeneratorOptions,
+  TomlOutput,
+} from "@schema-transformation-toolkit/generator-toml";
+import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
+import type {
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+} from "./builtin-formats.js";
+export type {
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+} from "./builtin-formats.js";
 export type ConversionIrPreference = CoreConversionIrPreference;
-export type BuiltinSourceFormat =
-  "json" | "json-schema" | "typescript" | "openapi" | "zod" | "yaml" | "csv";
-export type BuiltinTargetFormat =
-  "json" | "json-schema" | "typescript" | "zod" | "openapi" | "yaml" | "csv";
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
   "json-schema": JsonSchemaOutput;
@@ -2380,6 +2441,7 @@ export interface BuiltinGeneratorOutputs {
   openapi: OpenApiOutput;
   yaml: YamlOutput;
   csv: CsvOutput;
+  toml: TomlOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -2414,6 +2476,7 @@ export interface ConvertAdvancedOptions {
     zod?: ZodParseOptions;
     yaml?: YamlParseOptions;
     csv?: CsvParseOptions;
+    toml?: TomlParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
@@ -2422,6 +2485,7 @@ export interface ConvertAdvancedOptions {
     openapi?: OpenApiGeneratorOptions;
     yaml?: Record<string, never>;
     csv?: CsvGeneratorOptions;
+    toml?: TomlGeneratorOptions;
   };
 }
 export interface ConvertOptions {

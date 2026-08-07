@@ -22,7 +22,7 @@ function lowerYamlNode(node: Node | null | undefined): JsonCompatibleValue {
     return node.items.map((item) => lowerYamlNode(item as Node | null));
   }
   if (isMap(node)) {
-    const value: Record<string, JsonCompatibleValue> = {};
+    const value: Record<string, JsonCompatibleValue> = Object.create(null);
     for (const pair of node.items) {
       const key = pair.key as Node | null;
       value[String(isScalar(key) ? key.value : "")] = lowerYamlNode(

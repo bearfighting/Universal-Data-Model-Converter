@@ -13,6 +13,7 @@ export type {
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
+  ValueRootKind,
   ConversionRoute,
   ConversionRouteCapabilities,
   IrKind,
