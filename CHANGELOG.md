@@ -8,11 +8,24 @@ when a release is prepared.
 
 ## Unreleased
 
+No unreleased changes.
+
+## 0.2.0-beta.6
+
+This prerelease adds the TOML Value format and hardens Value IR route
+compatibility across JSON, YAML, CSV, and TOML.
+
+### Features and fixes
+
 - Add strict TOML Value IR parser and object-root generator packages.
 - Add TOML SDK routes, capability summaries, option metadata, diagnostics, and
   public API snapshots.
 - Harden shared Value IR validation against malformed documents, duplicate
   fields, invalid node kinds, and non-finite numbers.
+- Preserve prototype-sensitive field names such as `__proto__` during Value
+  conversion and generation.
+- Add Value root-shape capabilities so statically incompatible routes are
+  rejected during planning without implicit wrapping.
 
 ## 0.2.0-beta.5
 
