@@ -33,13 +33,23 @@ import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
 import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
 import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
+import type {
+  TomlGeneratorOptions,
+  TomlOutput,
+} from "@schema-transformation-toolkit/generator-toml";
+import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
+import type {
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+} from "./builtin-formats.js";
+
+export type {
+  BuiltinSourceFormat,
+  BuiltinTargetFormat,
+} from "./builtin-formats.js";
 
 export type ConversionIrPreference = CoreConversionIrPreference;
 
-export type BuiltinSourceFormat =
-  "json" | "json-schema" | "typescript" | "openapi" | "zod" | "yaml" | "csv";
-export type BuiltinTargetFormat =
-  "json" | "json-schema" | "typescript" | "zod" | "openapi" | "yaml" | "csv";
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
   "json-schema": JsonSchemaOutput;
@@ -48,6 +58,7 @@ export interface BuiltinGeneratorOutputs {
   openapi: OpenApiOutput;
   yaml: YamlOutput;
   csv: CsvOutput;
+  toml: TomlOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -85,6 +96,7 @@ export interface ConvertAdvancedOptions {
     zod?: ZodParseOptions;
     yaml?: YamlParseOptions;
     csv?: CsvParseOptions;
+    toml?: TomlParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
@@ -93,6 +105,7 @@ export interface ConvertAdvancedOptions {
     openapi?: OpenApiGeneratorOptions;
     yaml?: Record<string, never>;
     csv?: CsvGeneratorOptions;
+    toml?: TomlGeneratorOptions;
   };
 }
 

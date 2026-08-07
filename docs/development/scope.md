@@ -35,6 +35,11 @@ array of flat objects with string values and generates only from flat Value IR
 object arrays. Type inference, headerless input, nested cells, multiple
 tables, and CSV-specific metadata remain outside the current boundary.
 
+TOML is supported through a strict TOML v1 Value profile. It preserves strings,
+booleans, finite numbers, arrays, and nested objects, while rejecting date/time
+values, non-finite numbers, and unsafe integers. TOML generation requires an
+object-root Value IR document; comments and source formatting are not preserved.
+
 ## Defer Or Reject
 
 These should be treated cautiously or left unsupported unless they can be reduced to stable serializable-shape semantics:

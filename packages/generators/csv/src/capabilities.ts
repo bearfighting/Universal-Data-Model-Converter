@@ -5,4 +5,5 @@ export const csvGeneratorCapabilities: GeneratorCapabilities = {
   consumesIr: ["value"],
   entryIr: ["value"],
   supportsCapabilities: ["value-ir"],
+  valueRootKinds: ["array"],
 };

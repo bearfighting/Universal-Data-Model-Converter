@@ -195,6 +195,7 @@ describe("sdk support matrix", () => {
     expect(listFormatSupports().map((summary) => summary.format)).toEqual([
       "json",
       "csv",
+      "toml",
       "json-schema",
       "typescript",
       "openapi",
@@ -205,13 +206,31 @@ describe("sdk support matrix", () => {
 
   it("keeps generator-only formats out of source format discovery", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "csv", "json-schema", "typescript", "openapi", "zod", "yaml"],
+      [
+        "json",
+        "csv",
+        "toml",
+        "json-schema",
+        "typescript",
+        "openapi",
+        "zod",
+        "yaml",
+      ],
     );
     expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
       true,
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "csv", "json-schema", "typescript", "openapi", "zod", "yaml"],
+      [
+        "json",
+        "csv",
+        "toml",
+        "json-schema",
+        "typescript",
+        "openapi",
+        "zod",
+        "yaml",
+      ],
     );
   });
 
@@ -238,7 +257,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(37);
+    expect(listConversionRoutes()).toHaveLength(46);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

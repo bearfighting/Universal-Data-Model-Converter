@@ -40,6 +40,7 @@ Good fit:
 
 - JSON
 - YAML
+- CSV
 - TOML
 
 ### Shape IR

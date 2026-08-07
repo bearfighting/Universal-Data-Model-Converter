@@ -22,11 +22,13 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-typescript`: TypeScript schema-subset parser for the shared IR
 - `@schema-transformation-toolkit/parser-zod`: static Zod 4 schema-expression parser for the shared IR
 - `@schema-transformation-toolkit/parser-yaml`: strict JSON-compatible YAML parser for Value and Shape IR
+- `@schema-transformation-toolkit/parser-toml`: strict TOML v1 parser for Value and Shape IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
 - `@schema-transformation-toolkit/generator-json`: Value IR to normalized JSON generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
 - `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
 - `@schema-transformation-toolkit/generator-yaml`: Value IR to deterministic YAML generation
+- `@schema-transformation-toolkit/generator-toml`: object-root Value IR to deterministic TOML generation
 - `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
 
 The SDK `convert(...)` API accepts `irPreference: "auto" | "value" | "shape"`
@@ -44,6 +46,7 @@ The current implementation is intentionally conservative.
 - `@schema-transformation-toolkit/generator-typescript` supports the currently implemented IR subset
 - `@schema-transformation-toolkit/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
 - YAML support is limited to a strict JSON-compatible single-document profile; it is not a full YAML 1.2 data-model implementation
+- TOML support is limited to a strict TOML v1 Value profile; date/time values, non-finite numbers, and unsafe integers are rejected
 - unsupported cases are reported through structured failures instead of silent guessing
 
 ## Current End-To-End Flows
@@ -58,6 +61,7 @@ The currently validated flows are:
 - `typescript -> shape -> typescript`
 - `typescript -> shape -> json-schema`
 - `yaml -> value -> yaml`
+- `toml -> value -> toml`
 - `yaml -> value -> shape -> typescript/json-schema`
 - `json -> value -> yaml`
 - `zod -> shape + constraint -> json-schema/typescript/zod/openapi`
@@ -236,11 +240,13 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 - [packages/parsers/json-schema/README.md](packages/parsers/json-schema/README.md): supported JSON Schema parsing
 - [packages/parsers/typescript/README.md](packages/parsers/typescript/README.md): supported TypeScript schema-subset parsing
 - [packages/parsers/yaml/README.md](packages/parsers/yaml/README.md): strict JSON-compatible YAML parsing
+- [packages/parsers/toml/README.md](packages/parsers/toml/README.md): strict TOML Value parsing
 - [packages/generators/json-schema/README.md](packages/generators/json-schema/README.md): JSON Schema Draft 2020-12 generation
 - [packages/generators/json/README.md](packages/generators/json/README.md): normalized JSON generation from Value IR
 - [packages/generators/typescript/README.md](packages/generators/typescript/README.md): TypeScript generation
 - [packages/generators/zod/README.md](packages/generators/zod/README.md): Zod 4 TypeScript and JavaScript generation
 - [packages/generators/yaml/README.md](packages/generators/yaml/README.md): deterministic YAML generation from Value IR
+- [packages/generators/toml/README.md](packages/generators/toml/README.md): deterministic TOML generation from object-root Value IR
 - [examples/json-to-typescript.md](examples/json-to-typescript.md): representative `json -> value -> shape -> typescript` examples
 - [examples/json-to-json-schema.md](examples/json-to-json-schema.md): representative `json -> value -> shape -> json-schema` examples
 - [examples/json-to-json.md](examples/json-to-json.md): representative `json -> value -> json` examples

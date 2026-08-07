@@ -241,6 +241,7 @@ import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
 export type IrKind = "value" | "shape" | "constraint";
+export type ValueRootKind = "scalar" | "object" | "array";
 export type EntryIrKind = Exclude<IrKind, "constraint">;
 export type OverlayIrKind = Extract<IrKind, "constraint">;
 export type ConversionIrPreference = "auto" | "value" | "shape";
@@ -320,6 +321,7 @@ export interface ParserCapabilities {
   format: string;
   producesIr: IrKind[];
   capabilities: ConversionCapability[];
+  valueRootKinds?: ValueRootKind[];
 }
 export interface GeneratorCapabilities {
   target: string;
@@ -327,6 +329,7 @@ export interface GeneratorCapabilities {
   entryIr?: EntryIrKind[];
   overlays?: OverlayIrKind[];
   supportsCapabilities: ConversionCapability[];
+  valueRootKinds?: ValueRootKind[];
 }
 export interface SemanticLossAnalysisContext {
   sourceFormat: string;
@@ -401,6 +404,7 @@ export type {
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
+  ValueRootKind,
   ConversionRoute,
   ConversionRouteCapabilities,
   IrKind,

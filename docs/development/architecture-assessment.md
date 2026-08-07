@@ -15,8 +15,11 @@ The repository has a sound architectural direction:
   than format-specific route code.
 - The SDK is an orchestration boundary rather than the semantic home of every
   format.
-- YAML and CSV now lower through shared core value helpers instead of calling
+- YAML, CSV, and TOML now lower through shared core value helpers instead of calling
   another format parser.
+- TOML now declares Value root-shape capabilities, so array-root CSV to
+  object-root TOML routes are rejected during planning rather than exposed as
+  executable routes.
 - Tests cover the current routes, package contracts, diagnostics, and public
   API snapshots broadly.
 
@@ -24,42 +27,45 @@ The project is suitable for continued beta development and early downstream
 integration. It should not yet promise a fully stable SDK contract without
 addressing the runtime validation and capability-reporting issues below.
 
+The TOML slice completed the runtime-validation part of this assessment and
+added root-shape compatibility to Value route planning. Incompatible array and
+object routes now fail before parsing or generation, without implicit wrapping.
+
 ## Current Maturity
 
-| Area                        | Assessment                     | Comment                                                                                       |
-| --------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
-| IR boundaries               | Strong                         | The Value/Shape/Constraint split is explicit and documented.                                  |
-| Parser/generator separation | Strong                         | Format packages mostly depend on core, not on each other.                                     |
-| Route planning              | Good, with one semantic defect | Descriptor-driven planning works, but `supportsValueIr` is asymmetric.                        |
-| Public SDK surface          | Beta-stable                    | The main entry points are clear, but several contracts are duplicated manually.               |
-| Runtime input validation    | Needs work                     | Malformed Value IR can still escape validation or throw unexpectedly.                         |
-| Diagnostics                 | Good foundation                | Structured diagnostics exist, but code and location contracts are not fully typed or uniform. |
-| Maintainability             | Good but concentrated          | `registry.ts`, `convert.ts`, and core traversal/transform modules are hotspots.               |
+| Area                        | Assessment            | Comment                                                                                       |
+| --------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| IR boundaries               | Strong                | The Value/Shape/Constraint split is explicit and documented.                                  |
+| Parser/generator separation | Strong                | Format packages mostly depend on core, not on each other.                                     |
+| Route planning              | Stronger              | Descriptor-driven planning now includes Value root-shape compatibility.                       |
+| Public SDK surface          | Beta-stable           | The main entry points are clear, but several contracts are duplicated manually.               |
+| Runtime input validation    | Improved              | Shared validation and TOML descriptor guards reject malformed runtime input structurally.     |
+| Diagnostics                 | Good foundation       | Structured diagnostics exist, but code and location contracts are not fully typed or uniform. |
+| Maintainability             | Good but concentrated | `registry.ts`, `convert.ts`, and core traversal/transform modules are hotspots.               |
 
 ## Priority Risks
 
-### P1 — Value IR validation is not a complete runtime boundary
+### P1 — Value IR validation is not a complete runtime boundary (mostly resolved)
 
 The shared implementation in
 [`packages/core/src/value/internal.ts`](../../packages/core/src/value/internal.ts)
-checks the expected TypeScript-shaped cases, but it does not fully validate
-runtime data:
+now validates the principal runtime cases:
 
-- unknown `node.kind` values are not explicitly rejected;
-- malformed documents can fail at `document.name.trim()`;
-- malformed nodes can reach `valueNodeToJsonCompatible()`;
-- conversion helpers may throw instead of returning a structured failure.
+- unknown `node.kind` values;
+- malformed documents and missing roots;
+- malformed scalar, array, object, and field nodes;
+- duplicate object field names and non-finite numbers.
 
 This matters because generator APIs are exposed to JavaScript consumers and
 custom integrations, not only to TypeScript callers. A malformed Value IR
 should consistently become an `invalid-generator-input`-style result.
 
-Recommended direction:
+Remaining direction:
 
-1. Add runtime guards for the document, root, node kind, scalar payloads, array
-   items, object fields, and field names.
-2. Add explicit diagnostics such as `invalid-value-kind` and
-   `invalid-value-document`.
+1. Make recursive conversion helpers return structured failures at every
+   public boundary rather than relying on callers to validate first.
+2. Keep explicit diagnostics such as `invalid-value-kind` and
+   `invalid-value-document` aligned across all generators.
 3. Make recursive conversion helpers exhaustive after validation, or return a
    structured failure rather than assuming a valid discriminated union.
 4. Add malformed-runtime-input tests that call the public `try*` APIs through
@@ -81,23 +87,17 @@ If throwing from `convert()` is retained, it must be documented as a stable
 exception contract and covered separately from parse/generate failures. The
 current mixed behavior is harder for SDK consumers to handle safely.
 
-### P1 — Route capability field semantics are inconsistent
+### P1 — Route capability field semantics are now aligned
 
 In [`packages/sdk/src/registry.ts`](../../packages/sdk/src/registry.ts),
 `supportsShapeIr` and `supportsConstraintIr` describe the intersection of
-source and target capabilities, while `supportsValueIr` only checks the parser.
+source and target capabilities, while `supportsValueIr` now checks parser Value
+output, generator Value entry, and compatible Value root shapes.
 
-Consequently, a route such as `json -> typescript` can report Value IR support
-even though the TypeScript generator consumes Shape IR only. Value IR is an
-intermediate route stage, not a target-supported entrance IR in that route.
-
-The contract should choose one meaning and use it consistently:
-
-- rename the field to `parserProducesValueIr`, or
-- make `supportsValueIr` require both parser output and generator entry support.
-
-This should be fixed before downstream UI or route filtering relies on the
-capability summary.
+Routes such as `json -> typescript` now report `supportsValueIr: false`, while
+Value-only routes report it only when the target can consume Value IR. Optional
+root-shape metadata also prevents statically incompatible array/object routes
+from being advertised.
 
 ## Public Interface Stability
 
@@ -179,10 +179,10 @@ Adding one format currently requires editing multiple independent locations:
 This is manageable for the current number of formats but is the clearest
 metadata drift risk.
 
-Recommended direction: introduce an SDK-internal builtin format catalog for
-runtime discovery and dispatch. Keep format-specific descriptions and options
-in their own packages, but derive registry and common format enumeration from
-one catalog where practical.
+The SDK-internal builtin format catalog now provides the common format
+enumeration. Keep format-specific descriptions and options in their own
+packages, and continue deriving registry and common discovery metadata from
+that catalog where practical.
 
 ### `registry.ts` is a maintenance hotspot
 
@@ -205,6 +205,33 @@ registry/
   capability-summary.ts
   builtin-registry.ts
 ```
+
+### Value IR compatibility must own root-shape route validity
+
+The CSV/TOML boundary exposed an important layering rule. CSV produces an
+array-root Value document, while TOML generation accepts an object-root Value
+document. The inverse has the opposite mismatch. This is not a special
+`csv -> toml` or `toml -> csv` rule and must not be hardcoded by format name in
+the SDK.
+
+The shared contract should be:
+
+```text
+parser Value capability
+  -> Value IR root-shape contract
+  -> generator Value entry constraint
+  -> shared IR compatibility check
+  -> SDK route planning
+```
+
+Parser and generator descriptors may declare supported Value root kinds, but
+the compatibility algorithm belongs to the shared IR/pipeline layer. The SDK
+should only consume that result. Statically disjoint routes must fail during
+planning; dynamically unconstrained formats such as JSON and YAML may remain
+plannable and let the generator validate the concrete Value root at runtime.
+
+Do not introduce implicit wrapping, array-to-table coercion, or a CSV-specific
+Table IR to make incompatible roots appear convertible.
 
 ### Descriptor boilerplate
 
@@ -246,14 +273,13 @@ The existing semantic boundaries are more valuable than maximum abstraction.
 
 ## Recommended Work Order
 
-1. Complete Value IR runtime validation and malformed-input tests.
+1. Move Value root-shape compatibility calculation from SDK registry code into
+   the shared core pipeline contract while preserving descriptor compatibility.
 2. Settle the `convert()` unsupported-route failure contract.
-3. Correct and test route capability semantics.
-4. Decide the canonical `Schema` versus `Shape` vocabulary.
-5. Add a builtin format catalog to reduce SDK metadata drift.
-6. Split the registry internally while preserving its public exports.
-7. Add small descriptor helpers and package-local error-code unions.
-8. Improve public artifact validation only when a real consumer requires it.
+3. Decide the canonical `Schema` versus `Shape` vocabulary.
+4. Split the registry internally while preserving its public exports.
+5. Add small descriptor helpers and package-local error-code unions.
+6. Improve public artifact validation only when a real consumer requires it.
 
 ## Verification Baseline
 

@@ -8,7 +8,11 @@ when a release is prepared.
 
 ## Unreleased
 
-No unreleased changes.
+- Add strict TOML Value IR parser and object-root generator packages.
+- Add TOML SDK routes, capability summaries, option metadata, diagnostics, and
+  public API snapshots.
+- Harden shared Value IR validation against malformed documents, duplicate
+  fields, invalid node kinds, and non-finite numbers.
 
 ## 0.2.0-beta.5
 

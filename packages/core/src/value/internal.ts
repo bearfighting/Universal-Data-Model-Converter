@@ -42,24 +42,25 @@ export function valueDocumentFromJsonCompatible(
 export function valueNodeToJsonCompatible(
   node: ValueNode,
 ): JsonCompatibleValue {
-  if (
-    node.kind === "string" ||
-    node.kind === "number" ||
-    node.kind === "boolean"
-  ) {
-    return node.value;
+  switch (node.kind) {
+    case "string":
+    case "number":
+    case "boolean":
+      return node.value;
+    case "null":
+      return null;
+    case "array":
+      return node.items.map(valueNodeToJsonCompatible);
+    case "object": {
+      const value: Record<string, JsonCompatibleValue> = Object.create(null);
+      for (const field of node.fields) {
+        value[field.name] = valueNodeToJsonCompatible(field.value);
+      }
+      return value;
+    }
+    default:
+      return assertNeverValueNode(node);
   }
-
-  if (node.kind === "null") return null;
-  if (node.kind === "array") {
-    return node.items.map(valueNodeToJsonCompatible);
-  }
-
-  const value: Record<string, JsonCompatibleValue> = {};
-  for (const field of node.fields) {
-    value[field.name] = valueNodeToJsonCompatible(field.value);
-  }
-  return value;
 }
 
 export function tryValidateValueDocument(
@@ -67,16 +68,17 @@ export function tryValidateValueDocument(
 ): ValueValidationResult | ValueValidationFailureResult {
   const diagnostics: SchemaDiagnostic[] = [];
 
-  if (document.kind !== "value-document") {
+  if (!isRecord(document) || document.kind !== "value-document") {
     diagnostics.push(
       valueDiagnostic(
         "invalid-value-document",
         'Value IR must use kind \\"value-document\\".',
       ),
     );
+    return { ok: false, diagnostics };
   }
 
-  if (document.name.trim().length === 0) {
+  if (typeof document.name !== "string" || document.name.trim().length === 0) {
     diagnostics.push(
       valueDiagnostic(
         "invalid-value-document",
@@ -85,7 +87,16 @@ export function tryValidateValueDocument(
     );
   }
 
-  validateValueNode(document.root, [], diagnostics);
+  if (!("root" in document)) {
+    diagnostics.push(
+      valueDiagnostic(
+        "invalid-value-root",
+        "Value IR documents must define a root node.",
+      ),
+    );
+  } else {
+    validateValueNode(document.root, [], diagnostics);
+  }
 
   return diagnostics.length === 0 ? { ok: true } : { ok: false, diagnostics };
 }
@@ -134,44 +145,158 @@ function valueNodeFromJsonCompatible(value: JsonCompatibleValue): ValueNode {
 }
 
 function validateValueNode(
-  node: ValueNode,
+  node: unknown,
   path: string[],
   diagnostics: SchemaDiagnostic[],
 ): void {
-  if (node.kind === "number" && !Number.isFinite(node.value)) {
+  if (!isRecord(node) || typeof node.kind !== "string") {
     diagnostics.push(
       valueDiagnostic(
-        "invalid-value-number",
-        "Value IR numbers must be finite.",
+        "invalid-value-kind",
+        "Value IR nodes must declare a valid kind.",
         path,
       ),
     );
     return;
   }
 
-  if (node.kind === "array") {
-    node.items.forEach((item, index) =>
-      validateValueNode(item, [...path, String(index)], diagnostics),
-    );
-    return;
-  }
-
-  if (node.kind === "object") {
-    const names = new Set<string>();
-    for (const field of node.fields) {
-      if (names.has(field.name)) {
+  switch (node.kind) {
+    case "string":
+      validateScalarPayload(
+        node,
+        "string",
+        typeof node.value === "string",
+        path,
+        diagnostics,
+      );
+      return;
+    case "number":
+      validateScalarPayload(
+        node,
+        "number",
+        typeof node.value === "number",
+        path,
+        diagnostics,
+      );
+      if (typeof node.value === "number" && !Number.isFinite(node.value)) {
         diagnostics.push(
           valueDiagnostic(
-            "duplicate-value-field-name",
-            `Value IR objects cannot contain duplicate field name "${field.name}".`,
-            [...path, field.name],
+            "invalid-value-number",
+            "Value IR numbers must be finite.",
+            path,
           ),
         );
       }
-      names.add(field.name);
-      validateValueNode(field.value, [...path, field.name], diagnostics);
+      return;
+    case "boolean":
+      validateScalarPayload(
+        node,
+        "boolean",
+        typeof node.value === "boolean",
+        path,
+        diagnostics,
+      );
+      return;
+    case "null":
+      validateScalarPayload(
+        node,
+        "null",
+        node.value === null,
+        path,
+        diagnostics,
+      );
+      return;
+    case "array":
+      if (!Array.isArray(node.items)) {
+        diagnostics.push(
+          valueDiagnostic(
+            "invalid-value-array",
+            "Value IR arrays must contain an items array.",
+            path,
+          ),
+        );
+        return;
+      }
+      node.items.forEach((item, index) =>
+        validateValueNode(item, [...path, String(index)], diagnostics),
+      );
+      return;
+    case "object": {
+      if (!Array.isArray(node.fields)) {
+        diagnostics.push(
+          valueDiagnostic(
+            "invalid-value-object",
+            "Value IR objects must contain a fields array.",
+            path,
+          ),
+        );
+        return;
+      }
+      const names = new Set<string>();
+      for (const [index, field] of node.fields.entries()) {
+        if (
+          !isRecord(field) ||
+          typeof field.name !== "string" ||
+          !("value" in field)
+        ) {
+          diagnostics.push(
+            valueDiagnostic(
+              "invalid-value-field",
+              "Value IR object fields must contain a string name and a value.",
+              [...path, String(index)],
+            ),
+          );
+          continue;
+        }
+        if (names.has(field.name)) {
+          diagnostics.push(
+            valueDiagnostic(
+              "duplicate-value-field-name",
+              `Value IR objects cannot contain duplicate field name "${field.name}".`,
+              [...path, field.name],
+            ),
+          );
+        }
+        names.add(field.name);
+        validateValueNode(field.value, [...path, field.name], diagnostics);
+      }
+      return;
     }
+    default:
+      diagnostics.push(
+        valueDiagnostic(
+          "invalid-value-kind",
+          `Unsupported Value IR node kind "${node.kind}".`,
+          path,
+        ),
+      );
   }
+}
+
+function validateScalarPayload(
+  node: Record<string, unknown>,
+  kind: string,
+  valid: boolean,
+  path: string[],
+  diagnostics: SchemaDiagnostic[],
+): void {
+  if (!valid) {
+    diagnostics.push(
+      valueDiagnostic(
+        "invalid-value-scalar",
+        `Value IR ${kind} nodes must contain a valid scalar value.`,
+        path,
+      ),
+    );
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function assertNeverValueNode(node: Record<string, unknown>): never {
+  throw new Error(`Unsupported Value IR node kind: ${String(node)}`);
 }
 
 function inferSchemaNode(node: ValueNode): SchemaNode {
