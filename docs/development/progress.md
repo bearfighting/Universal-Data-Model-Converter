@@ -13,7 +13,7 @@ It should stay short and answer:
 The repository is past architecture validation and has a stable-enough conversion kernel:
 
 - multi-layer IR with `Value IR`, `Shape IR`, `Constraint IR`, and `IrModel`
-- parser and generator packages for JSON, strict JSON-compatible YAML, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
+- parser and generator packages for JSON, strict JSON-compatible YAML, strict header-based CSV, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
 - the Zod parser now uses a split static-analysis kernel with strict import, reference-cycle, presence, constraint-path, and diagnostic boundaries
 - Zod static enums lower to literal unions, portable metadata is preserved through Constraint IR, and default input-presence caveats are reported explicitly
 - structured diagnostics, semantic notes, capability declarations, and semantic-loss reporting
@@ -53,6 +53,9 @@ Validated end-to-end routes today:
 - `yaml -> value -> yaml`
 - `yaml -> value -> shape -> typescript/json-schema`
 - `json -> value -> yaml`
+- `csv -> value -> json/yaml/csv`
+- `json/yaml -> value -> csv`
+- `csv -> value -> shape -> typescript/json-schema`
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
@@ -109,6 +112,9 @@ canonical 3.1 schema documents; full API document generation remains deferred.
 
 This page is intentionally only a short status summary.
 Use [consumer-surface-checklist.md](consumer-surface-checklist.md) as the single detailed readiness checklist instead of duplicating its task breakdown here.
+See [architecture-assessment.md](architecture-assessment.md) for the current
+project-level review of interface stability, coupling, duplication, and
+refactoring priorities.
 
 ## What Is Deferred
 
@@ -163,11 +169,11 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 ## Verification
 
-The latest full local verification pass completed on August 6, 2026 and included:
+The latest full local verification pass completed on August 7, 2026 and included:
 
 - `./node_modules/.bin/vitest run` (the local `pnpm` wrapper was unavailable because it could not open its database)
 
-That pass was green with `61` test files and `750` passing tests.
+That pass was green with `66` test files and `809` passing tests.
 
 A prior broader verification pass completed on July 22, 2026 and included:
 
@@ -190,6 +196,7 @@ For active implementation work:
 
 - read [test_plan.md](test_plan.md) for the current testing strategy
 - read [consumer-surface-checklist.md](consumer-surface-checklist.md) before deciding whether more core work should block downstream product integration
+- read [architecture-assessment.md](architecture-assessment.md) before making project-wide interface or structural refactors
 - read [release-process.md](release-process.md) when cutting a GitHub-tagged engine release without npm publication
 - read [web-integration-notes.md](web-integration-notes.md) when wiring the first downstream Web surface onto `@schema-transformation-toolkit/sdk`
 - read [schema-traversal.md](schema-traversal.md) before changing shared IR traversal, transform, or normalization behavior

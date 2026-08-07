@@ -198,5 +198,8 @@ function parserOptionsFor(
   if (sourceFormat === "yaml") {
     return options.advanced?.parser?.yaml ?? {};
   }
+  if (sourceFormat === "csv") {
+    return options.advanced?.parser?.csv ?? {};
+  }
   return options.extension?.parser ?? {};
 }

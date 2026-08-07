@@ -12,11 +12,13 @@ import type {
 } from "@schema-transformation-toolkit/core";
 import { typeScriptGeneratorDescriptor } from "@schema-transformation-toolkit/generator-typescript";
 import { jsonGeneratorDescriptor } from "@schema-transformation-toolkit/generator-json";
+import { csvGeneratorDescriptor } from "@schema-transformation-toolkit/generator-csv";
 import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
 import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
 import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
 import { yamlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-yaml";
 import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
+import { csvParserDescriptor } from "@schema-transformation-toolkit/parser-csv";
 import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
 import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
 import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
@@ -149,6 +151,7 @@ export function createConversionRegistry(
 export const defaultConversionRegistry = createConversionRegistry({
   parsers: [
     jsonParserDescriptor,
+    csvParserDescriptor,
     jsonSchemaParserDescriptor,
     typeScriptParserDescriptor,
     openApiParserDescriptor,
@@ -157,6 +160,7 @@ export const defaultConversionRegistry = createConversionRegistry({
   ],
   generators: [
     jsonGeneratorDescriptor,
+    csvGeneratorDescriptor,
     jsonSchemaDescriptor,
     typeScriptGeneratorDescriptor,
     zodGeneratorDescriptor,

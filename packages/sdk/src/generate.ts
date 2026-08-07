@@ -47,5 +47,6 @@ function generatorOptionsFor(
   if (targetFormat === "openapi")
     return options.advanced?.generator?.openapi ?? {};
   if (targetFormat === "yaml") return options.advanced?.generator?.yaml ?? {};
+  if (targetFormat === "csv") return options.advanced?.generator?.csv ?? {};
   return options.extension?.generator ?? {};
 }
