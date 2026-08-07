@@ -100,6 +100,29 @@
 - capability registration should declare which input or output format a component handles and which IR layer it consumes or produces
 - application-level conversion entry points should rely on that registration model to validate and route conversion chains
 
+### Parser/IR/Generator Dependency Direction
+
+- parsers depend on shared IR contracts and lower input into declared IR documents
+- generators depend on shared IR contracts and render from declared IR input contracts
+- parser and generator packages must not call one another directly
+- SDK depends only on the runtime interfaces, options, and results exposed by the parser, IR/pipeline, and generator layers
+- SDK must not encode format-pair route rules or format-specific semantic policy
+
+### Two-Stage Conversion Execution
+
+- the stable execution boundary is `parse -> IR` followed by `IR -> generate`
+- Value-to-Shape inference, constraint derivation, and other IR changes are explicit transformer stages
+- static parser/generator compatibility is decided from declared IR contracts
+- runtime validation is decided from the concrete IR document produced by the input
+- a route is not valid merely because both components mention the same broad IR kind
+
+### Build-Generated Registration
+
+- the core registry registers and resolves descriptors but does not import built-in components
+- a deterministic build preprocess generates the built-in registry from explicit workspace component metadata
+- third-party parser, transformer, and generator packages may provide the same descriptor/plugin manifest and use the same registration API
+- runtime package scanning is not part of the registry contract
+
 ## How To Add A Decision
 
 Record a decision here when it affects:

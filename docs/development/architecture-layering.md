@@ -4,6 +4,8 @@ This document defines the repository's long-term architecture boundary for forma
 
 Use [ir-boundaries.md](ir-boundaries.md) for semantic meaning of each IR layer.
 Use [ir-contract.md](ir-contract.md) for the current shared schema contract.
+Use [pipeline-refactor-checklist.md](pipeline-refactor-checklist.md) to execute
+and validate the staged architecture refactor.
 
 ## Format Families
 
@@ -55,32 +57,91 @@ The goal is clarity of public surface, not file-count uniformity.
 
 ## SDK Boundary
 
-The SDK should remain a thin orchestration layer.
-It should not become a second semantic home for format-specific logic.
+The SDK is a consumer-facing facade over the generic parser/IR/generator
+pipeline. It should not become a second semantic home for format-specific
+logic or assume which built-in formats exist.
+
+The dependency direction should be:
+
+```text
+format components -> core IR contracts
+generated registry -> component descriptors
+generic pipeline  -> registry + core IR compatibility
+SDK               -> generic pipeline interfaces + public options/results
+```
+
+The SDK may normalize requests, invoke the pipeline, and assemble the public
+result envelope. It must not implement format-to-format rules, root-shape
+special cases, parser/generator dispatch switches, or built-in route tables.
 
 The preferred internal split is:
 
 - `types.ts`: public SDK option and result contracts
-- `registry.ts`: parser and generator registration plus route summaries
-- `source.ts`: source parsing and artifact production
-- `generate.ts`: target generation dispatch
-- `losses.ts`: route-level semantic-loss planning
-- `report.ts`: report assembly
-- `convert.ts`: orchestration only
+- `pipeline.ts`: invocation of the generic parse/transform/generate pipeline
+- `registry-client.ts`: consumption of the registry interface, not built-in registration
+- `report.ts`: result and diagnostic aggregation
+- `convert.ts`: public orchestration only
+
+The current `source.ts`, `generate.ts`, `losses.ts`, and built-in imports in
+`registry.ts` should be migrated or split behind these boundaries without
+changing the Stage 1 public facade in one step.
 
 If logic can live outside `convert.ts`, it should.
 
+Core owns the generic execution boundary for each role:
+
+```text
+executeParser(descriptor, input, context)
+executeTransformer(descriptor, irBundle, context)
+executeGenerator(descriptor, irBundle, context)
+```
+
+These executors validate IR bundles, enforce declared IR kinds, preserve
+supplementary artifacts, and convert descriptor exceptions into structured
+failures. Format packages remain responsible for format-specific validation
+and output semantics.
+
 ## Registry Responsibilities
 
-The registry should stay small and do four jobs:
+The registry core should stay small and do four jobs:
 
-1. declare what each parser, generator, and future transformer consumes or produces
-2. prevent invalid chains across IR layers
-3. resolve a truthful route from source format to target format
-4. provide one integration surface for SDK, CLI, and future service layers
+1. register parser, transformer, and generator descriptors
+2. validate descriptor contracts and uniqueness
+3. resolve descriptors by their declared identities
+4. provide one integration surface for pipeline, SDK, CLI, and future service layers
 
-The important modeling rule is not the exact type shape.
-It is to keep parser, generator, and transformer roles explicit and IR dependencies visible.
+The registry core must not import or assume any built-in parser or generator.
+Built-in registration belongs to a generated registry module produced during
+the build. Third-party components should use the same descriptor and registry
+interfaces through an explicit plugin/build manifest.
+
+The important modeling rule is to keep parser, transformer, and generator roles
+explicit and IR dependencies visible without encoding format-pair knowledge.
+
+## Two-Stage Processing Boundary
+
+The stable processing API should expose two independent operations:
+
+```text
+parse(input, parser, options) -> ParseResult<IRDocument>
+generate(irDocument, generator, options) -> GenerateResult<Output>
+```
+
+Inference and other IR changes are explicit transformer stages between them:
+
+```text
+parser -> IR -> transformer/inference -> IR -> generator
+```
+
+A parser owns input syntax and lowering to its declared IR contract. A
+generator owns rendering from its declared IR input contract. Neither format
+package calls another format package.
+
+The generic IR compatibility layer decides whether a parser output contract can
+connect to a generator input contract. It must use declared IR kinds and value
+contracts such as root shape, not source/target format names. Static
+incompatibility fails during planning; dynamic input constraints remain
+runtime IR validation.
 
 ## Runtime Planning Rule
 
@@ -100,17 +161,15 @@ At minimum, the planner should track:
 
 ## Current Repository Rule
 
-The repository already has a registry-backed planner and explicit `irSequence` metadata.
-The current next step is not a new planning system.
-
-It is to:
-
-- keep the registry as the source of truth
-- let docs describe rules rather than duplicate route tables
-- let tests verify behavior rather than restate planner logic
+The repository already has descriptor metadata and route planning, but the
+current implementation still couples the SDK registry to built-in imports and
+route semantics. The refactor should move compatibility and pipeline execution
+below the SDK, then generate the built-in registration layer during build.
 
 ## Maintenance Rules
 
 - keep this file focused on family classification, routing, and package roles
 - move semantic placement questions to [ir-boundaries.md](ir-boundaries.md)
 - move result-contract questions to [capabilities-and-loss.md](capabilities-and-loss.md)
+- keep build-time discovery deterministic and explicit; do not scan arbitrary
+  runtime dependencies

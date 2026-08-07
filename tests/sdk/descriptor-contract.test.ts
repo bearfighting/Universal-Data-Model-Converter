@@ -228,23 +228,13 @@ describe("format descriptor contracts", () => {
         };
       },
     };
-    const converter = createConverter(
-      createConversionRegistry({
-        parsers: [mismatchedParser],
-        generators: [jsonGeneratorDescriptor],
-      }),
+    expectDescriptorRegistrationFailure(
+      () =>
+        createConversionRegistry({
+          parsers: [mismatchedParser],
+          generators: [jsonGeneratorDescriptor],
+        }),
+      "descriptor-capability-mismatch",
     );
-
-    expect(
-      converter.convert({
-        sourceFormat: "mismatched-shape-source",
-        targetFormat: "json",
-        input: "ignored",
-      }),
-    ).toMatchObject({
-      ok: false,
-      code: "parser-capability-mismatch",
-      phase: "parse",
-    });
   });
 });

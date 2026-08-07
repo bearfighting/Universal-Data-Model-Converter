@@ -124,6 +124,8 @@ Use [consumer-surface-checklist.md](consumer-surface-checklist.md) as the single
 See [architecture-assessment.md](architecture-assessment.md) for the current
 project-level review of interface stability, coupling, duplication, and
 refactoring priorities.
+The staged execution checklist is in
+[pipeline-refactor-checklist.md](pipeline-refactor-checklist.md).
 
 ## What Is Deferred
 
@@ -173,6 +175,22 @@ The resulting maturity is now:
 - normalization: real and already reused by test equivalence helpers, but still early enough that new rules should be added selectively
 - registry extensibility: built-in discovery is descriptor-driven; third-party registration is explicit and runtime package scanning remains intentionally deferred
 
+The first pipeline-contract refactor slice is now implemented: core exposes
+typed `IrDocument`, `IrArtifacts`, `IrBundle`, parser/generator execution
+contexts, transformer descriptors, and generic parser/generator capability
+contracts. Existing descriptors use bundle inputs and canonical parse results;
+SDK route selection remains intentionally unchanged until the later registry
+and two-stage pipeline phases.
+
+A follow-up contract-hardening slice now validates IR bundles and artifacts at
+the pipeline boundary, validates transformer input/output kinds, preserves
+parser failure mappings, and covers malformed bundle and transformer-output
+cases in core tests. Canonical descriptor contracts now live under the core
+pipeline boundary, and registry capability registration rejects inconsistent
+legacy/new IR declarations before route planning. Core also owns generic parser
+and generator execution boundaries, including exception conversion and
+artifact-preserving SDK adaptation.
+
 This slice did not expose a blocking parser, IR, generator, or public-surface regression.
 It moved shared traversal extraction from the next refactor into implemented repository infrastructure.
 
@@ -180,12 +198,13 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 The latest full local verification pass completed on August 7, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (70 test files, 830 passing tests)
+- `./node_modules/.bin/vitest run` (71 test files, 842 passing tests)
 - `./node_modules/.bin/tsc --noEmit`
 - `./node_modules/.bin/eslint .`
 - `./node_modules/.bin/prettier --check .`
 - `node scripts/check-boundaries.mjs`
 - `node scripts/check-api-snapshots.mjs`
+- `git diff --check`
 - direct `tsup` builds for the TOML parser, TOML generator, and SDK
 
 The workspace `pnpm build` wrapper still cannot run in this environment because

@@ -1,12 +1,38 @@
 import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
+import type { ValueDocument } from "../value/types.js";
 
 export type IrKind = "value" | "shape" | "constraint";
 export type ValueRootKind = "scalar" | "object" | "array";
 export type EntryIrKind = Exclude<IrKind, "constraint">;
 export type OverlayIrKind = Extract<IrKind, "constraint">;
 export type ConversionIrPreference = "auto" | "value" | "shape";
+
+export type IrDocument = ValueDocument | SchemaDocument | ConstraintDocument;
+
+export interface IrArtifacts {
+  value?: ValueDocument;
+  shape?: SchemaDocument;
+  constraints?: ConstraintDocument;
+}
+
+export interface IrBundle<TDocument extends IrDocument = IrDocument> {
+  document: TDocument;
+  artifacts?: IrArtifacts;
+}
+
+export function isIrBundle(input: unknown): input is IrBundle {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return false;
+  }
+  const document = (input as { document?: unknown }).document;
+  return (
+    typeof document === "object" &&
+    document !== null &&
+    typeof (document as { kind?: unknown }).kind === "string"
+  );
+}
 
 export interface ConversionIrSelection {
   requested: ConversionIrPreference;
@@ -91,13 +117,25 @@ export interface ConversionLossHotspot {
 export interface ParserCapabilities {
   format: string;
   producesIr: IrKind[];
+  outputs?: IrOutputContract[];
   capabilities: ConversionCapability[];
+  valueRootKinds?: ValueRootKind[];
+}
+
+export interface IrInputContract {
+  ir: IrKind;
+  valueRootKinds?: ValueRootKind[];
+}
+
+export interface IrOutputContract {
+  ir: IrKind;
   valueRootKinds?: ValueRootKind[];
 }
 
 export interface GeneratorCapabilities {
   target: string;
   consumesIr: IrKind[];
+  entries?: IrInputContract[];
   entryIr?: EntryIrKind[];
   overlays?: OverlayIrKind[];
   supportsCapabilities: ConversionCapability[];

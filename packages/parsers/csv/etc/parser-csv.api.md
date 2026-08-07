@@ -48,8 +48,15 @@ export declare const csvParserCapabilities: ParserCapabilities;
 ## packages/parsers/csv/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const csvParserDescriptor: ParserDescriptor;
+import type {
+  IrDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { CsvParseOptions } from "./options.js";
+export declare const csvParserDescriptor: ParserDescriptor<
+  IrDocument,
+  CsvParseOptions
+>;
 ```
 
 ## packages/parsers/csv/src/index.d.ts
@@ -74,7 +81,10 @@ export declare const csvParser: {
   parse(
     input: string,
     options?: import("./options.js").CsvParseOptions,
-  ): import("@schema-transformation-toolkit/core").ParseResult<string>;
+  ): import("@schema-transformation-toolkit/core").ParseResult<
+    import("@schema-transformation-toolkit/core").IrDocument,
+    string
+  >;
 };
 ```
 

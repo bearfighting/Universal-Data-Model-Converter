@@ -49,8 +49,15 @@ export declare function decodeJsonText(input: string): JsonValue;
 ## packages/parsers/json/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const jsonParserDescriptor: ParserDescriptor;
+import type {
+  IrDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { JsonParseOptions } from "./schema/options.js";
+export declare const jsonParserDescriptor: ParserDescriptor<
+  IrDocument,
+  JsonParseOptions
+>;
 ```
 
 ## packages/parsers/json/src/errors.d.ts

@@ -106,8 +106,16 @@ export declare const typeScriptGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/typescript/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const typeScriptGeneratorDescriptor: GeneratorDescriptor<string>;
+import type {
+  GeneratorDescriptor,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
+import type { TypeScriptGeneratorOptions } from "./options.js";
+export declare const typeScriptGeneratorDescriptor: GeneratorDescriptor<
+  SchemaDocument,
+  string,
+  TypeScriptGeneratorOptions
+>;
 ```
 
 ## packages/generators/typescript/src/failure.d.ts

@@ -4,6 +4,7 @@ export const jsonSchemaGeneratorCapabilities: GeneratorCapabilities = {
   target: "json-schema",
   consumesIr: ["shape", "constraint"],
   entryIr: ["shape"],
+  entries: [{ ir: "shape" }],
   overlays: ["constraint"],
   supportsCapabilities: [
     "shape-ir",

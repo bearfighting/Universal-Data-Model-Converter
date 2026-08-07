@@ -1,6 +1,8 @@
+import { isIrBundle } from "@schema-transformation-toolkit/core";
 import type {
   GeneratorDescriptor,
   GeneratorExecutionContext,
+  IrBundle,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import { tryGenerateToml } from "./api.js";
@@ -8,14 +10,21 @@ import { tomlGeneratorCapabilities } from "./capabilities.js";
 import { tomlGeneratorOptionCatalog } from "./option-metadata.js";
 import type { TomlGeneratorOptions } from "./options.js";
 
-export const tomlGeneratorDescriptor: GeneratorDescriptor<string> = {
+export const tomlGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string,
+  TomlGeneratorOptions
+> = {
   kind: "generator",
   descriptorVersion: "0.1",
   format: "toml",
   capabilities: tomlGeneratorCapabilities,
   options: tomlGeneratorOptionCatalog,
-  generate(document, context: GeneratorExecutionContext) {
-    if (!isValueDocument(document)) {
+  generate(
+    input: IrBundle<ValueDocument>,
+    context: GeneratorExecutionContext<TomlGeneratorOptions>,
+  ) {
+    if (!isIrBundle(input) || !isValueDocument(input.document)) {
       return {
         ok: false,
         code: "invalid-generator-input",
@@ -30,10 +39,7 @@ export const tomlGeneratorDescriptor: GeneratorDescriptor<string> = {
         ],
       };
     }
-    return tryGenerateToml(
-      document as ValueDocument,
-      (context.options ?? {}) as TomlGeneratorOptions,
-    );
+    return tryGenerateToml(input.document, context.options ?? {});
   },
 };
 

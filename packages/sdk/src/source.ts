@@ -6,7 +6,7 @@ import type {
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import type { IrKind } from "@schema-transformation-toolkit/core";
-import { validateSchemaDocument } from "@schema-transformation-toolkit/core";
+import { executeParser } from "@schema-transformation-toolkit/core";
 import { resolveParserDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
 import type {
@@ -38,27 +38,26 @@ export function parseSource(
   requestedIr?: readonly IrKind[],
 ): ParseSourceResult {
   const descriptor = resolveParserDescriptor(sourceFormat, registry);
-  let parseResult;
-  try {
-    parseResult = descriptor.parse(input, {
-      name,
-      targetFormat,
-      ...(requestedIr ? { requestedIr } : {}),
-      options: parserOptionsFor(sourceFormat, options),
-    });
-  } catch {
-    return createParserFailure(
-      sourceFormat,
-      targetFormat,
-      "parser-descriptor-failed",
-      "The source parser failed while producing its result.",
-    );
-  }
+  const parserRequestedIr = requestedIr?.includes("shape")
+    ? "shape"
+    : requestedIr?.length === 1
+      ? requestedIr[0]
+      : undefined;
+  const parseResult = executeParser(descriptor, input, {
+    name,
+    ...(parserRequestedIr ? { requestedIr: parserRequestedIr } : {}),
+    options: parserOptionsFor(sourceFormat, options),
+  });
 
   if (!parseResult.ok) {
+    const code =
+      parseResult.code === "invalid-ir-document" ||
+      parseResult.code === "invalid-shape-document"
+        ? "parser-invalid-shape"
+        : parseResult.code;
     return {
       ok: false,
-      code: parseResult.code,
+      code,
       message: parseResult.message,
       phase: "parse",
       plan: {
@@ -73,21 +72,9 @@ export function parseSource(
     };
   }
 
-  if (parseResult.document) {
-    try {
-      validateSchemaDocument(parseResult.document);
-    } catch {
-      return createParserFailure(
-        sourceFormat,
-        targetFormat,
-        "parser-invalid-shape",
-        "The source parser produced an invalid Shape IR document.",
-      );
-    }
-  }
-
   if (
-    parseResult.document &&
+    (parseResult.document.kind === "document" ||
+      parseResult.artifacts?.shape) &&
     !descriptor.capabilities.producesIr.includes("shape")
   ) {
     return createParserFailure(
@@ -98,7 +85,8 @@ export function parseSource(
     );
   }
   if (
-    parseResult.value &&
+    (parseResult.document.kind === "value-document" ||
+      parseResult.artifacts?.value) &&
     !descriptor.capabilities.producesIr.includes("value")
   ) {
     return createParserFailure(
@@ -109,7 +97,7 @@ export function parseSource(
     );
   }
   if (
-    parseResult.constraints &&
+    parseResult.artifacts?.constraints &&
     !descriptor.capabilities.producesIr.includes("constraint")
   ) {
     return createParserFailure(
@@ -120,16 +108,31 @@ export function parseSource(
     );
   }
 
-  if (!parseResult.document && !parseResult.value) {
+  if (parseResult.document.kind === "constraint-document") {
     return createParserFailure(
       sourceFormat,
       targetFormat,
       "parser-produced-no-ir",
-      "The source parser produced neither Value IR nor Shape IR.",
+      "The source parser produced Constraint IR without a Value or Shape entry IR.",
+    );
+  }
+  if (
+    parseResult.document.kind !== "document" &&
+    parseResult.document.kind !== "value-document"
+  ) {
+    return createParserFailure(
+      sourceFormat,
+      targetFormat,
+      "parser-invalid-shape",
+      "The source parser produced an invalid IR document.",
     );
   }
 
-  if (requestedIr?.includes("shape") && !parseResult.document) {
+  if (
+    requestedIr?.includes("shape") &&
+    parseResult.document.kind !== "document" &&
+    !parseResult.artifacts?.shape
+  ) {
     return createParserFailure(
       sourceFormat,
       targetFormat,
@@ -142,10 +145,16 @@ export function parseSource(
     ok: true,
     diagnostics: parseResult.diagnostics ?? [],
     semanticNotes: parseResult.semanticNotes ?? [],
-    ...(parseResult.document ? { shape: parseResult.document } : {}),
-    ...(parseResult.value ? { value: parseResult.value } : {}),
-    ...(parseResult.constraints
-      ? { constraints: parseResult.constraints }
+    ...(parseResult.document.kind === "document"
+      ? { shape: parseResult.document }
+      : parseResult.artifacts?.shape
+        ? { shape: parseResult.artifacts.shape }
+        : { value: parseResult.document }),
+    ...(parseResult.artifacts?.value
+      ? { value: parseResult.artifacts.value }
+      : {}),
+    ...(parseResult.artifacts?.constraints
+      ? { constraints: parseResult.artifacts.constraints }
       : {}),
   };
 }

@@ -77,8 +77,15 @@ export declare const jsonSchemaParserCapabilities: ParserCapabilities;
 ## packages/parsers/json-schema/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const jsonSchemaParserDescriptor: ParserDescriptor;
+import type {
+  SchemaDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { JsonSchemaParseOptions } from "./options.js";
+export declare const jsonSchemaParserDescriptor: ParserDescriptor<
+  SchemaDocument,
+  JsonSchemaParseOptions
+>;
 ```
 
 ## packages/parsers/json-schema/src/errors.d.ts

@@ -24,8 +24,14 @@ export declare const jsonGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/json/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const jsonGeneratorDescriptor: GeneratorDescriptor<string>;
+import type {
+  GeneratorDescriptor,
+  ValueDocument,
+} from "@schema-transformation-toolkit/core";
+export declare const jsonGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string
+>;
 ```
 
 ## packages/generators/json/src/index.d.ts

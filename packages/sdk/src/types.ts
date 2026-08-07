@@ -80,11 +80,13 @@ export interface ExtensionConversionOptions {
 
 export interface ConversionRegistry {
   registerParser(descriptor: ParserDescriptor): void;
-  registerGenerator(descriptor: GeneratorDescriptor): void;
+  registerGenerator(
+    descriptor: GeneratorDescriptor<never, unknown, unknown>,
+  ): void;
   listParsers(): ParserDescriptor[];
-  listGenerators(): GeneratorDescriptor[];
+  listGenerators(): GeneratorDescriptor<never, unknown, unknown>[];
   parser?(format: string): ParserDescriptor;
-  generator?(format: string): GeneratorDescriptor;
+  generator?(format: string): GeneratorDescriptor<never, unknown, unknown>;
 }
 
 export interface ConvertAdvancedOptions {

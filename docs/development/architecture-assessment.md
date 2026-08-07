@@ -273,13 +273,23 @@ The existing semantic boundaries are more valuable than maximum abstraction.
 
 ## Recommended Work Order
 
-1. Move Value root-shape compatibility calculation from SDK registry code into
-   the shared core pipeline contract while preserving descriptor compatibility.
-2. Settle the `convert()` unsupported-route failure contract.
-3. Decide the canonical `Schema` versus `Shape` vocabulary.
-4. Split the registry internally while preserving its public exports.
-5. Add small descriptor helpers and package-local error-code unions.
-6. Improve public artifact validation only when a real consumer requires it.
+The executable checklist for this work is
+[pipeline-refactor-checklist.md](pipeline-refactor-checklist.md). Each phase
+has its own validation gate and must be completed before the next phase begins.
+
+1. Define the generic parser, transformer, generator, IR contract, and result
+   interfaces in core without importing built-in components.
+2. Move Value/Shape/Constraint compatibility and route construction into a
+   generic pipeline layer, including root-shape compatibility.
+3. Split registry registration/resolution from generated built-in registration.
+4. Add a deterministic build preprocess that emits the built-in registry and
+   supports explicit third-party component manifests.
+5. Migrate SDK `convert()` to the two-stage generic pipeline and remove format
+   dispatch/route assumptions from SDK internals.
+6. Preserve the current public SDK facade through adapters and update contract,
+   integration, and package-boundary tests.
+7. Settle the canonical `Schema` versus `Shape` vocabulary and improve public
+   artifact validation only when a real consumer requires it.
 
 ## Verification Baseline
 

@@ -10,6 +10,11 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  IrArtifacts,
+  IrBundle,
+  IrDocument,
+  IrInputContract,
+  IrOutputContract,
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
@@ -23,10 +28,32 @@ export type {
   SemanticLossPhase,
   SemanticLossAnalysisContext,
 } from "./contracts.js";
+export { isIrBundle } from "./contracts.js";
+export { executeGenerator, executeParser } from "./execution.js";
+export {
+  executeIrTransformer,
+  tryValidateIrBundle,
+  tryValidateIrDocument,
+} from "./validation.js";
+export type {
+  IrValidationFailure,
+  IrValidationResult,
+  IrValidationSuccess,
+} from "./validation.js";
 export type {
   DescriptorVersion,
+  GenerateFailureResult,
+  GenerateResult,
+  GenerateSuccessResult,
   GeneratorDescriptor,
   GeneratorExecutionContext,
+  IrTransformerDescriptor,
+  ParseFailureResult,
+  ParseResult,
+  ParseSuccessResult,
+  TransformResult,
+  TransformSuccessResult,
+  TransformerExecutionContext,
   ParserDescriptor,
   ParserExecutionContext,
-} from "../schema/contracts.js";
+} from "./descriptor-contracts.js";

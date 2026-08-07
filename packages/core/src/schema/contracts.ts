@@ -1,12 +1,4 @@
-import type {
-  SchemaDiagnostic,
-  SchemaDocument,
-  SchemaSemanticNote,
-} from "./types.js";
-import type { ConstraintDocument } from "../constraint/types.js";
-import type { OptionCatalog } from "../option-metadata.js";
-import type { ValueDocument } from "../value/types.js";
-import type { IrKind } from "../pipeline/contracts.js";
+import type { SchemaDocument } from "./types.js";
 
 export interface ParseOptions {
   name?: string;
@@ -26,33 +18,12 @@ export interface ConfiguredParser<
   prepared: PreparedOptions<TResolved>;
 }
 
-export type ParseSuccessResult =
-  | {
-      ok: true;
-      document: SchemaDocument;
-      value?: ValueDocument;
-      constraints?: ConstraintDocument;
-      diagnostics?: SchemaDiagnostic[];
-      semanticNotes?: SchemaSemanticNote[];
-    }
-  | {
-      ok: true;
-      value: ValueDocument;
-      document?: never;
-      constraints?: never;
-      diagnostics?: SchemaDiagnostic[];
-      semanticNotes?: SchemaSemanticNote[];
-    };
-
-export interface ParseFailureResult<TCode extends string = string> {
-  ok: false;
-  code: TCode;
-  message: string;
-  diagnostics?: SchemaDiagnostic[];
-}
-
-export type ParseResult<TCode extends string = string> =
-  ParseSuccessResult | ParseFailureResult<TCode>;
+export type {
+  ParseFailureResult,
+  ParseResult,
+  ParseSuccessResult,
+} from "../pipeline/descriptor-contracts.js";
+import type { ParseResult } from "../pipeline/descriptor-contracts.js";
 
 export interface SchemaParser<
   TInput = string,
@@ -77,22 +48,12 @@ export interface ConfiguredGenerator<
   prepared: PreparedOptions<TResolved>;
 }
 
-export interface GenerateSuccessResult<TOutput = string> {
-  ok: true;
-  output: TOutput;
-  diagnostics?: SchemaDiagnostic[];
-  semanticNotes?: SchemaSemanticNote[];
-}
-
-export interface GenerateFailureResult<TCode extends string = string> {
-  ok: false;
-  code: TCode;
-  message: string;
-  diagnostics?: SchemaDiagnostic[];
-}
-
-export type GenerateResult<TOutput = string, TCode extends string = string> =
-  GenerateSuccessResult<TOutput> | GenerateFailureResult<TCode>;
+export type {
+  GenerateFailureResult,
+  GenerateResult,
+  GenerateSuccessResult,
+} from "../pipeline/descriptor-contracts.js";
+import type { GenerateResult } from "../pipeline/descriptor-contracts.js";
 
 export interface SchemaGenerator<
   TOutput = string,
@@ -101,41 +62,4 @@ export interface SchemaGenerator<
 > {
   target: string;
   generate(document: SchemaDocument, options?: TOptions): TResult;
-}
-
-export interface ParserExecutionContext {
-  name: string;
-  targetFormat?: string;
-  requestedIr?: readonly IrKind[];
-  options?: unknown;
-}
-
-export interface GeneratorExecutionContext {
-  sourceFormat?: string;
-  options?: unknown;
-  constraints?: ConstraintDocument;
-}
-
-export type DescriptorVersion = "0.1";
-
-export interface ParserDescriptor {
-  kind: "parser";
-  format: string;
-  descriptorVersion: DescriptorVersion;
-  capabilities: import("../pipeline/contracts.js").ParserCapabilities;
-  options: OptionCatalog;
-  parse(input: string, context: ParserExecutionContext): ParseResult;
-}
-
-export interface GeneratorDescriptor<TOutput = unknown> {
-  kind: "generator";
-  format: string;
-  descriptorVersion: DescriptorVersion;
-  capabilities: import("../pipeline/contracts.js").GeneratorCapabilities;
-  options: OptionCatalog;
-  analysis?: import("../pipeline/contracts.js").GeneratorAnalysisHooks;
-  generate(
-    document: SchemaDocument | ValueDocument,
-    context: GeneratorExecutionContext,
-  ): GenerateResult<TOutput>;
 }

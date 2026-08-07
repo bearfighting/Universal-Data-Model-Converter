@@ -26,8 +26,14 @@ export declare const yamlGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/yaml/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const yamlGeneratorDescriptor: GeneratorDescriptor<string>;
+import {
+  type GeneratorDescriptor,
+  type ValueDocument,
+} from "@schema-transformation-toolkit/core";
+export declare const yamlGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string
+>;
 ```
 
 ## packages/generators/yaml/src/index.d.ts

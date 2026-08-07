@@ -59,27 +59,27 @@ describe("YAML parser", () => {
   it("does not select Value-only parsing for a non-value IR request", () => {
     const result = yamlParserDescriptor.parse("id: 1\n", {
       name: "User",
-      requestedIr: ["constraint"],
+      requestedIr: "constraint",
     });
 
     expect(result).toMatchObject({
       ok: true,
       document: { kind: "document" },
-      value: { kind: "value-document" },
+      artifacts: { value: { kind: "value-document" } },
     });
   });
 
   it("honors a value-only descriptor request", () => {
     const result = yamlParserDescriptor.parse('items: [1, "a"]\n', {
       name: "Mixed",
-      requestedIr: ["value"],
+      requestedIr: "value",
     });
 
     expect(result).toMatchObject({
       ok: true,
-      value: { kind: "value-document", name: "Mixed" },
+      document: { kind: "value-document", name: "Mixed" },
     });
-    if (result.ok) expect(result.document).toBeUndefined();
+    if (result.ok) expect(result.document.kind).toBe("value-document");
   });
 
   it("exposes a descriptor with both IR capabilities", () => {

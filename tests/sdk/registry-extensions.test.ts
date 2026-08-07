@@ -27,7 +27,8 @@ const extensionGenerator: GeneratorDescriptor = {
     role: "generator",
     options: [],
   },
-  generate(document) {
+  generate(input) {
+    const document = input.document;
     if (document.kind !== "document") {
       return {
         ok: false,
@@ -181,7 +182,8 @@ describe("sdk extensible registry", () => {
         consumesIr: ["value", "shape"],
       },
       options: { ...extensionGenerator.options, format: "dual-target" },
-      generate(document) {
+      generate(input) {
+        const document = input.document;
         return {
           ok: true,
           output: document.kind === "value-document" ? "value" : "shape",

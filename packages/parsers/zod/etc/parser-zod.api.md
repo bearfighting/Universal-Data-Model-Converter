@@ -81,8 +81,15 @@ export declare const zodParserCapabilities: ParserCapabilities;
 ## packages/parsers/zod/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const zodParserDescriptor: ParserDescriptor;
+import type {
+  SchemaDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { ZodParseOptions } from "./options.js";
+export declare const zodParserDescriptor: ParserDescriptor<
+  SchemaDocument,
+  ZodParseOptions
+>;
 ```
 
 ## packages/parsers/zod/src/errors.d.ts

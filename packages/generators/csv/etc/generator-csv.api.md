@@ -31,8 +31,16 @@ export declare const csvGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/csv/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const csvGeneratorDescriptor: GeneratorDescriptor<string>;
+import type {
+  GeneratorDescriptor,
+  ValueDocument,
+} from "@schema-transformation-toolkit/core";
+import type { CsvGeneratorOptions } from "./options.js";
+export declare const csvGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string,
+  CsvGeneratorOptions
+>;
 ```
 
 ## packages/generators/csv/src/index.d.ts

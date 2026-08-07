@@ -4,6 +4,7 @@ export const openApiGeneratorCapabilities: GeneratorCapabilities = {
   target: "openapi",
   consumesIr: ["shape", "constraint"],
   entryIr: ["shape"],
+  entries: [{ ir: "shape" }],
   overlays: ["constraint"],
   supportsCapabilities: [
     "shape-ir",

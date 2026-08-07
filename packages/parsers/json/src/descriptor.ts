@@ -1,5 +1,6 @@
 import type {
   ParseResult,
+  IrDocument,
   ParserDescriptor,
   ParserExecutionContext,
 } from "@schema-transformation-toolkit/core";
@@ -13,7 +14,10 @@ import { jsonParserCapabilities } from "./capabilities.js";
 import { jsonParserOptionCatalog } from "./option-metadata.js";
 import type { JsonParseOptions } from "./schema/options.js";
 
-export const jsonParserDescriptor: ParserDescriptor = {
+export const jsonParserDescriptor: ParserDescriptor<
+  IrDocument,
+  JsonParseOptions
+> = {
   kind: "parser",
   descriptorVersion: "0.1",
   format: "json",
@@ -30,14 +34,10 @@ export const jsonParserDescriptor: ParserDescriptor = {
       return valueResult;
     }
 
-    if (
-      context.requestedIr &&
-      !context.requestedIr.includes("shape") &&
-      context.requestedIr.includes("value")
-    ) {
+    if (context.requestedIr === "value") {
       return {
         ok: true,
-        value: valueResult.document,
+        document: valueResult.document,
       };
     }
 
@@ -50,7 +50,7 @@ export const jsonParserDescriptor: ParserDescriptor = {
       return {
         ok: true,
         document: shapeResult.document,
-        value: valueResult.document,
+        artifacts: { value: valueResult.document },
         ...(shapeResult.diagnostics
           ? { diagnostics: shapeResult.diagnostics }
           : {}),
@@ -65,7 +65,9 @@ export const jsonParserDescriptor: ParserDescriptor = {
     return {
       ok: true,
       document: fallback.document,
-      value: parseJsonValueDocumentWithOptions(input, options),
+      artifacts: {
+        value: parseJsonValueDocumentWithOptions(input, options),
+      },
       ...(fallback.diagnostics ? { diagnostics: fallback.diagnostics } : {}),
     };
   },

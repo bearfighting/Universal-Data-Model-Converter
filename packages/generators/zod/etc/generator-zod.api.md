@@ -49,8 +49,16 @@ export declare const zodGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/zod/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const zodGeneratorDescriptor: GeneratorDescriptor<string>;
+import type {
+  GeneratorDescriptor,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
+import type { ZodGeneratorOptions } from "./options.js";
+export declare const zodGeneratorDescriptor: GeneratorDescriptor<
+  SchemaDocument,
+  string,
+  ZodGeneratorOptions
+>;
 ```
 
 ## packages/generators/zod/src/failure.d.ts

@@ -80,14 +80,14 @@ describe("CSV parser", () => {
   it("uses Value-only parsing when the descriptor is asked for Value IR", () => {
     const result = csvParserDescriptor.parse("id\n1\n", {
       name: "Rows",
-      requestedIr: ["value"],
+      requestedIr: "value",
     });
 
     expect(result).toMatchObject({
       ok: true,
-      value: { kind: "value-document" },
+      document: { kind: "value-document" },
     });
-    if (result.ok) expect(result.document).toBeUndefined();
+    if (result.ok) expect(result.document.kind).toBe("value-document");
   });
 
   it.each([

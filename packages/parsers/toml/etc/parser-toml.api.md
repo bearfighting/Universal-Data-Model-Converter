@@ -48,8 +48,15 @@ export declare const tomlParserCapabilities: ParserCapabilities;
 ## packages/parsers/toml/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const tomlParserDescriptor: ParserDescriptor;
+import type {
+  IrDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { TomlParseOptions } from "./options.js";
+export declare const tomlParserDescriptor: ParserDescriptor<
+  IrDocument,
+  TomlParseOptions
+>;
 ```
 
 ## packages/parsers/toml/src/index.d.ts
@@ -74,7 +81,10 @@ export declare const tomlParser: {
   parse(
     input: string,
     options?: import("./options.js").TomlParseOptions,
-  ): import("@schema-transformation-toolkit/core").ParseResult<string>;
+  ): import("@schema-transformation-toolkit/core").ParseResult<
+    import("@schema-transformation-toolkit/core").IrDocument,
+    string
+  >;
 };
 ```
 

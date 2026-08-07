@@ -4,6 +4,7 @@ import type {
   EntryIrKind,
   GeneratorCapabilities,
   GeneratorDescriptor,
+  IrDocument,
   IrKind,
   OverlayIrKind,
   ParserCapabilities,
@@ -72,6 +73,12 @@ export interface NormalizedGeneratorCapabilities {
   valueRootKinds?: ValueRootKind[];
 }
 
+type RegisteredGeneratorDescriptor = GeneratorDescriptor<
+  never,
+  unknown,
+  unknown
+>;
+
 const normalizedCapabilities = new WeakMap<
   GeneratorDescriptor,
   NormalizedGeneratorCapabilities
@@ -79,7 +86,10 @@ const normalizedCapabilities = new WeakMap<
 
 class MutableConversionRegistry implements ConversionRegistry {
   private readonly parsers = new Map<string, ParserDescriptor>();
-  private readonly generators = new Map<string, GeneratorDescriptor>();
+  private readonly generators = new Map<
+    string,
+    RegisteredGeneratorDescriptor
+  >();
 
   registerParser(descriptor: ParserDescriptor): void {
     validateParserDescriptor(descriptor);
@@ -92,7 +102,7 @@ class MutableConversionRegistry implements ConversionRegistry {
     this.parsers.set(descriptor.format, descriptor);
   }
 
-  registerGenerator(descriptor: GeneratorDescriptor): void {
+  registerGenerator(descriptor: RegisteredGeneratorDescriptor): void {
     validateGeneratorDescriptor(descriptor);
     if (this.generators.has(descriptor.format)) {
       throw new DescriptorRegistrationError(
@@ -111,7 +121,7 @@ class MutableConversionRegistry implements ConversionRegistry {
     return [...this.parsers.values()];
   }
 
-  listGenerators(): GeneratorDescriptor[] {
+  listGenerators(): RegisteredGeneratorDescriptor[] {
     return [...this.generators.values()];
   }
 
@@ -126,7 +136,7 @@ class MutableConversionRegistry implements ConversionRegistry {
     return descriptor;
   }
 
-  generator(format: string): GeneratorDescriptor {
+  generator(format: string): RegisteredGeneratorDescriptor {
     const descriptor = this.generators.get(format);
     if (!descriptor) {
       throw new ConversionRouteError(
@@ -141,7 +151,7 @@ class MutableConversionRegistry implements ConversionRegistry {
 export function createConversionRegistry(
   options: {
     parsers?: ParserDescriptor[];
-    generators?: GeneratorDescriptor[];
+    generators?: RegisteredGeneratorDescriptor[];
   } = {},
 ): ConversionRegistry {
   const registry = new MutableConversionRegistry();
@@ -337,9 +347,13 @@ export function resolveParserDescriptor(
 export function resolveGeneratorDescriptor<TOutput = unknown>(
   targetFormat: ConversionFormat,
   registry: ConversionRegistry = defaultConversionRegistry,
-): GeneratorDescriptor<TOutput> {
+): GeneratorDescriptor<IrDocument, TOutput, unknown> {
   if (registry.generator) {
-    return registry.generator(targetFormat) as GeneratorDescriptor<TOutput>;
+    return registry.generator(targetFormat) as unknown as GeneratorDescriptor<
+      IrDocument,
+      TOutput,
+      unknown
+    >;
   }
   const descriptor = registry
     .listGenerators()
@@ -350,7 +364,11 @@ export function resolveGeneratorDescriptor<TOutput = unknown>(
       `Unsupported target format: ${targetFormat}`,
     );
   }
-  return descriptor as GeneratorDescriptor<TOutput>;
+  return descriptor as unknown as GeneratorDescriptor<
+    IrDocument,
+    TOutput,
+    unknown
+  >;
 }
 
 export function resolveNormalizedGeneratorCapabilities(
@@ -524,12 +542,21 @@ function normalizeGeneratorCapabilities(
   const legacyOverlays = capabilities.consumesIr.filter(
     (ir): ir is OverlayIrKind => ir === "constraint",
   );
-  const entryIr = capabilities.entryIr ?? legacyEntryIr;
+  if (capabilities.entries?.some((entry) => entry.ir === "constraint")) {
+    throw new DescriptorRegistrationError(
+      "descriptor-capability-mismatch",
+      `Generator "${capabilities.target}" cannot use Constraint IR as an entry contract.`,
+    );
+  }
+  const declaredEntries = capabilities.entries;
+  const entriesIr = declaredEntries?.map((entry) => entry.ir as EntryIrKind);
+  const entryIr = entriesIr ?? capabilities.entryIr ?? legacyEntryIr;
   const overlays = capabilities.overlays ?? legacyOverlays;
 
   if (
     (capabilities.entryIr &&
       !sameIrKinds(capabilities.entryIr, legacyEntryIr)) ||
+    (entriesIr && !sameIrKinds(entriesIr, legacyEntryIr)) ||
     (capabilities.overlays &&
       !sameIrKinds(capabilities.overlays, legacyOverlays))
   ) {
@@ -539,11 +566,33 @@ function normalizeGeneratorCapabilities(
     );
   }
 
+  const declaredValueRoots = declaredEntries?.find(
+    (entry) => entry.ir === "value",
+  )?.valueRootKinds;
+  if (
+    declaredValueRoots &&
+    capabilities.valueRootKinds &&
+    !sameValueRootKinds(declaredValueRoots, capabilities.valueRootKinds)
+  ) {
+    throw new DescriptorRegistrationError(
+      "descriptor-capability-mismatch",
+      `Generator "${capabilities.target}" has inconsistent Value root-shape fields.`,
+    );
+  }
+
   return {
     entryIr: [...entryIr],
     overlays: [...overlays],
-    ...(capabilities.valueRootKinds
-      ? { valueRootKinds: [...capabilities.valueRootKinds] }
+    ...((declaredEntries?.find((entry) => entry.ir === "value")
+      ?.valueRootKinds ?? capabilities.valueRootKinds)
+      ? {
+          valueRootKinds: [
+            ...(declaredEntries?.find((entry) => entry.ir === "value")
+              ?.valueRootKinds ??
+              capabilities.valueRootKinds ??
+              []),
+          ],
+        }
       : {}),
   };
 }
@@ -552,7 +601,9 @@ function compatibleValueRootKinds(
   parserCapabilities: ParserCapabilities,
   generatorCapabilities: NormalizedGeneratorCapabilities,
 ): boolean {
-  const parserRoots = parserCapabilities.valueRootKinds;
+  const parserRoots =
+    parserCapabilities.outputs?.find((output) => output.ir === "value")
+      ?.valueRootKinds ?? parserCapabilities.valueRootKinds;
   const generatorRoots = generatorCapabilities.valueRootKinds;
   if (!parserRoots || !generatorRoots) return true;
   return parserRoots.some((root) => generatorRoots.includes(root));
@@ -563,6 +614,19 @@ function sameIrKinds(
   right: readonly IrKind[],
 ): boolean {
   return left.length === right.length && left.every((ir) => right.includes(ir));
+}
+
+function sameValueRootKinds(
+  left: readonly ValueRootKind[],
+  right: readonly ValueRootKind[],
+): boolean {
+  return (
+    left.length === right.length && left.every((kind) => right.includes(kind))
+  );
+}
+
+function isIrKind(value: unknown): value is IrKind {
+  return value === "value" || value === "shape" || value === "constraint";
 }
 
 function validateParserDescriptor(descriptor: ParserDescriptor): void {
@@ -589,6 +653,36 @@ function validateParserDescriptor(descriptor: ParserDescriptor): void {
       "descriptor-missing-ir",
       `Parser "${descriptor.format}" must produce at least one IR kind.`,
     );
+  }
+  if (descriptor.capabilities.outputs) {
+    const outputs = descriptor.capabilities.outputs;
+    if (
+      outputs.length === 0 ||
+      outputs.some((output) => !isIrKind(output.ir)) ||
+      !sameIrKinds(
+        outputs.map((output) => output.ir),
+        descriptor.capabilities.producesIr,
+      )
+    ) {
+      throw new DescriptorRegistrationError(
+        "descriptor-capability-mismatch",
+        `Parser "${descriptor.format}" has inconsistent producesIr and outputs fields.`,
+      );
+    }
+    const valueOutput = outputs.find((output) => output.ir === "value");
+    if (
+      valueOutput?.valueRootKinds &&
+      descriptor.capabilities.valueRootKinds &&
+      !sameValueRootKinds(
+        valueOutput.valueRootKinds,
+        descriptor.capabilities.valueRootKinds,
+      )
+    ) {
+      throw new DescriptorRegistrationError(
+        "descriptor-capability-mismatch",
+        `Parser "${descriptor.format}" has inconsistent Value root-shape fields.`,
+      );
+    }
   }
   if (typeof descriptor.parse !== "function") {
     throw new DescriptorRegistrationError(

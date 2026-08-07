@@ -4,5 +4,6 @@ export const yamlGeneratorCapabilities: GeneratorCapabilities = {
   target: "yaml",
   consumesIr: ["value"],
   entryIr: ["value"],
+  entries: [{ ir: "value" }],
   supportsCapabilities: ["value-ir"],
 };

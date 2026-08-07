@@ -2235,6 +2235,7 @@ import type {
   EntryIrKind,
   GeneratorCapabilities,
   GeneratorDescriptor,
+  IrDocument,
   IrKind,
   OverlayIrKind,
   ParserCapabilities,
@@ -2271,9 +2272,14 @@ export interface NormalizedGeneratorCapabilities {
   overlays: OverlayIrKind[];
   valueRootKinds?: ValueRootKind[];
 }
+type RegisteredGeneratorDescriptor = GeneratorDescriptor<
+  never,
+  unknown,
+  unknown
+>;
 export declare function createConversionRegistry(options?: {
   parsers?: ParserDescriptor[];
-  generators?: GeneratorDescriptor[];
+  generators?: RegisteredGeneratorDescriptor[];
 }): ConversionRegistry;
 export declare const defaultConversionRegistry: ConversionRegistry;
 export declare function listConversionRoutes(
@@ -2328,11 +2334,12 @@ export declare function resolveParserDescriptor(
 export declare function resolveGeneratorDescriptor<TOutput = unknown>(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
-): GeneratorDescriptor<TOutput>;
+): GeneratorDescriptor<IrDocument, TOutput, unknown>;
 export declare function resolveNormalizedGeneratorCapabilities(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
 ): NormalizedGeneratorCapabilities;
+export {};
 ```
 
 ## packages/sdk/src/support-matrix.d.ts
@@ -2461,11 +2468,13 @@ export interface ExtensionConversionOptions {
 }
 export interface ConversionRegistry {
   registerParser(descriptor: ParserDescriptor): void;
-  registerGenerator(descriptor: GeneratorDescriptor): void;
+  registerGenerator(
+    descriptor: GeneratorDescriptor<never, unknown, unknown>,
+  ): void;
   listParsers(): ParserDescriptor[];
-  listGenerators(): GeneratorDescriptor[];
+  listGenerators(): GeneratorDescriptor<never, unknown, unknown>[];
   parser?(format: string): ParserDescriptor;
-  generator?(format: string): GeneratorDescriptor;
+  generator?(format: string): GeneratorDescriptor<never, unknown, unknown>;
 }
 export interface ConvertAdvancedOptions {
   parser?: {

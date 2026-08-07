@@ -48,8 +48,15 @@ export declare const yamlParserCapabilities: ParserCapabilities;
 ## packages/parsers/yaml/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const yamlParserDescriptor: ParserDescriptor;
+import type {
+  IrDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { YamlParseOptions } from "./options.js";
+export declare const yamlParserDescriptor: ParserDescriptor<
+  IrDocument,
+  YamlParseOptions
+>;
 ```
 
 ## packages/parsers/yaml/src/index.d.ts
@@ -74,7 +81,10 @@ export declare const yamlParser: {
   parse(
     input: string,
     options?: import("./options.js").YamlParseOptions,
-  ): import("@schema-transformation-toolkit/core").ParseResult<string>;
+  ): import("@schema-transformation-toolkit/core").ParseResult<
+    import("@schema-transformation-toolkit/core").IrDocument,
+    string
+  >;
 };
 ```
 

@@ -1,5 +1,7 @@
+import { executeGenerator } from "@schema-transformation-toolkit/core";
 import type {
   ConstraintDocument,
+  IrBundle,
   SchemaDocument,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
@@ -24,13 +26,14 @@ export function generateTarget<TOutput = unknown>(
     targetFormat,
     registry,
   );
-  const context = {
-    sourceFormat: options.sourceFormat,
-    options: generatorOptionsFor(targetFormat, options),
-    ...(constraints ? { constraints } : {}),
+  const input: IrBundle = {
+    document,
+    ...(constraints ? { artifacts: { constraints } } : {}),
   };
-  const result = descriptor.generate(document, context);
-  return result;
+  const result = executeGenerator(descriptor, input, {
+    options: generatorOptionsFor(targetFormat, options),
+  });
+  return result as import("@schema-transformation-toolkit/core").GenerateResult<TOutput>;
 }
 
 function generatorOptionsFor(
