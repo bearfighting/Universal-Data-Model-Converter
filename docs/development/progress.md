@@ -13,7 +13,7 @@ It should stay short and answer:
 The repository is past architecture validation and has a stable-enough conversion kernel:
 
 - multi-layer IR with `Value IR`, `Shape IR`, `Constraint IR`, and `IrModel`
-- parser and generator packages for JSON, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
+- parser and generator packages for JSON, strict JSON-compatible YAML, JSON Schema, TypeScript, OpenAPI 3.1, and Zod 4, including a static Zod source parser
 - the Zod parser now uses a split static-analysis kernel with strict import, reference-cycle, presence, constraint-path, and diagnostic boundaries
 - Zod static enums lower to literal unions, portable metadata is preserved through Constraint IR, and default input-presence caveats are reported explicitly
 - structured diagnostics, semantic notes, capability declarations, and semantic-loss reporting
@@ -50,6 +50,9 @@ Validated end-to-end routes today:
 - `json -> value -> shape -> typescript`
 - `json -> value -> shape -> json-schema`
 - `json -> value -> json`
+- `yaml -> value -> yaml`
+- `yaml -> value -> shape -> typescript/json-schema`
+- `json -> value -> yaml`
 - `json-schema -> shape -> typescript`
 - `json-schema -> shape + constraint -> json-schema`
 - `typescript -> shape -> typescript`
@@ -190,5 +193,6 @@ For active implementation work:
 - read [release-process.md](release-process.md) when cutting a GitHub-tagged engine release without npm publication
 - read [web-integration-notes.md](web-integration-notes.md) when wiring the first downstream Web surface onto `@schema-transformation-toolkit/sdk`
 - read [schema-traversal.md](schema-traversal.md) before changing shared IR traversal, transform, or normalization behavior
+- read [ir-evolution.md](ir-evolution.md) before proposing new shared IR concepts or nodes
 - read [sdk-report-analysis.md](sdk-report-analysis.md) or [../../packages/sdk/README.md](../../packages/sdk/README.md) when changing higher-level `sdk` report interpretation or examples
 - read [typescript-parser-cases.md](typescript-parser-cases.md) and [typescript-parser-preprocess.md](typescript-parser-preprocess.md) only when touching the TypeScript parser boundary

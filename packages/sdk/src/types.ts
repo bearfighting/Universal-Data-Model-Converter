@@ -23,24 +23,27 @@ import type {
 } from "@schema-transformation-toolkit/generator-openapi";
 import type { TypeScriptGeneratorOptions } from "@schema-transformation-toolkit/generator-typescript";
 import type { ZodGeneratorOptions } from "@schema-transformation-toolkit/generator-zod";
+import type { YamlOutput } from "@schema-transformation-toolkit/generator-yaml";
 import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-json";
 import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
 import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
 import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
+import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
 
 export type ConversionIrPreference = CoreConversionIrPreference;
 
 export type BuiltinSourceFormat =
-  "json" | "json-schema" | "typescript" | "openapi" | "zod";
+  "json" | "json-schema" | "typescript" | "openapi" | "zod" | "yaml";
 export type BuiltinTargetFormat =
-  "json" | "json-schema" | "typescript" | "zod" | "openapi";
+  "json" | "json-schema" | "typescript" | "zod" | "openapi" | "yaml";
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
   "json-schema": JsonSchemaOutput;
   typescript: string;
   zod: string;
   openapi: OpenApiOutput;
+  yaml: YamlOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -76,12 +79,14 @@ export interface ConvertAdvancedOptions {
     typeScript?: TypeScriptParseOptions;
     openapi?: OpenApiParseOptions;
     zod?: ZodParseOptions;
+    yaml?: YamlParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
     typeScript?: TypeScriptGeneratorOptions;
     zod?: ZodGeneratorOptions;
     openapi?: OpenApiGeneratorOptions;
+    yaml?: Record<string, never>;
   };
 }
 

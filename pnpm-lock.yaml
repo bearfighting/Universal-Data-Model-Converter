@@ -80,6 +80,15 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/generators/yaml:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
+
   packages/parsers/json:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -122,6 +131,18 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/parsers/yaml:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+      "@schema-transformation-toolkit/parser-json":
+        specifier: workspace:*
+        version: link:../json
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
+
   packages/sdk:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -142,6 +163,9 @@ importers:
       "@schema-transformation-toolkit/generator-zod":
         specifier: workspace:*
         version: link:../generators/zod
+      "@schema-transformation-toolkit/generator-yaml":
+        specifier: workspace:*
+        version: link:../generators/yaml
       "@schema-transformation-toolkit/parser-json":
         specifier: workspace:*
         version: link:../parsers/json
@@ -157,6 +181,9 @@ importers:
       "@schema-transformation-toolkit/parser-zod":
         specifier: workspace:*
         version: link:../parsers/zod
+      "@schema-transformation-toolkit/parser-yaml":
+        specifier: workspace:*
+        version: link:../parsers/yaml
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

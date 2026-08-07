@@ -85,6 +85,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "JavaScript output provides runtime schemas only; TypeScript output additionally emits z.infer types.",
     "Object openness without explicit IR evidence uses a strict-object target policy and reports a policy note.",
   ],
+  yaml: [
+    "YAML support is limited to a strict JSON-compatible single-document profile.",
+    "Comments, formatting style, anchors, aliases, merge keys, custom tags, and non-string mapping keys are not supported or preserved.",
+    "YAML generation consumes Value IR only; schema-only sources cannot generate a concrete YAML value.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -96,6 +101,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
   ],
   openapi: ["full-document-processing", "allOf-composition"],
   zod: ["javascript-output", "constraint-refinement-rendering"],
+  yaml: ["broader YAML data-model support", "comment-and-style preservation"],
 };
 
 export function describeFormatSupport(
@@ -111,7 +117,8 @@ export function describeFormatSupport(
       ? { generator: toGeneratorSupportSummary(generator.capabilities) }
       : {}),
     sharedShapeKinds: [...SHARED_SHAPE_KINDS],
-    constraintFamilies: format === "json" ? [] : [...CONSTRAINT_FAMILIES],
+    constraintFamilies:
+      format === "json" || format === "yaml" ? [] : [...CONSTRAINT_FAMILIES],
     notableLimitations: [...(FORMAT_LIMITATIONS[format] ?? [])],
     experimentalAreas: [...(FORMAT_EXPERIMENTAL_AREAS[format] ?? [])],
   };

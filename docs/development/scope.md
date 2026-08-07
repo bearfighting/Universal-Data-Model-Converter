@@ -25,6 +25,11 @@ These are the kinds of schema features we should support and do well:
 - optional presence
 - enum-like literal union
 
+YAML is supported only through a strict JSON-compatible single-document
+profile. YAML-specific data-model features such as tags, anchors, aliases,
+merge keys, duplicate keys, non-string mapping keys, and multiple documents
+remain outside the shared IR boundary.
+
 ## Defer Or Reject
 
 These should be treated cautiously or left unsupported unless they can be reduced to stable serializable-shape semantics:

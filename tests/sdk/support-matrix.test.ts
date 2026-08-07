@@ -70,6 +70,23 @@ describe("sdk support matrix", () => {
     });
   });
 
+  it("describes YAML without constraint capabilities", () => {
+    expect(describeFormatSupport("yaml")).toMatchObject({
+      format: "yaml",
+      parser: {
+        producesIr: ["value", "shape"],
+        capabilities: ["value-ir", "shape-ir"],
+      },
+      generator: {
+        consumesIr: ["value"],
+        entryIr: ["value"],
+        overlays: [],
+        capabilities: ["value-ir"],
+      },
+      constraintFamilies: [],
+    });
+  });
+
   it("describes json-schema as both a source and target surface", () => {
     expect(describeFormatSupport("json-schema")).toEqual({
       format: "json-schema",
@@ -181,18 +198,19 @@ describe("sdk support matrix", () => {
       "typescript",
       "openapi",
       "zod",
+      "yaml",
     ]);
   });
 
   it("keeps generator-only formats out of source format discovery", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "json-schema", "typescript", "openapi", "zod"],
+      ["json", "json-schema", "typescript", "openapi", "zod", "yaml"],
     );
     expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
       true,
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
-      ["json", "json-schema", "typescript", "openapi", "zod"],
+      ["json", "json-schema", "typescript", "openapi", "zod", "yaml"],
     );
   });
 
@@ -219,7 +237,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(21);
+    expect(listConversionRoutes()).toHaveLength(28);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

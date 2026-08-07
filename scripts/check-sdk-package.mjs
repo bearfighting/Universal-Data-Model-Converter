@@ -90,11 +90,13 @@ try {
               "@schema-transformation-toolkit/generator-openapi",
               "@schema-transformation-toolkit/generator-typescript",
               "@schema-transformation-toolkit/generator-zod",
+              "@schema-transformation-toolkit/generator-yaml",
               "@schema-transformation-toolkit/parser-json",
               "@schema-transformation-toolkit/parser-json-schema",
               "@schema-transformation-toolkit/parser-openapi",
               "@schema-transformation-toolkit/parser-typescript",
               "@schema-transformation-toolkit/parser-zod",
+              "@schema-transformation-toolkit/parser-yaml",
             ].map((name) => [
               name,
               `file:${path.join(repoRoot, "packages", packageDirectoryFor(name))}`,
@@ -125,10 +127,10 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "json,json-schema,openapi,typescript,zod") {
+    if (sources.join(",") !== "json,json-schema,openapi,typescript,yaml,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "json,json-schema,openapi,typescript,zod") {
+    if (targets.join(",") !== "json,json-schema,openapi,typescript,yaml,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 
@@ -137,6 +139,8 @@ try {
       { sourceFormat: "json-schema", targetFormat: "zod", input: JSON.stringify({ type: "object", properties: { id: { type: "integer" } } }) },
       { sourceFormat: "typescript", targetFormat: "json-schema", input: "export interface User { id: number }" },
       { sourceFormat: "openapi", targetFormat: "openapi", input: JSON.stringify({ openapi: "3.1.0", info: { title: "Smoke", version: "1.0.0" }, paths: {}, components: { schemas: { User: { type: "object" } } } }) },
+      { sourceFormat: "yaml", targetFormat: "typescript", input: "id: 1\\nname: Ada\\n" },
+      { sourceFormat: "json", targetFormat: "yaml", input: "{\\"id\\":1}" },
     ];
     for (const item of cases) {
       const result = convert(item);

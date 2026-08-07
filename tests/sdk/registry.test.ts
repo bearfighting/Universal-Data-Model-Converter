@@ -18,6 +18,7 @@ describe("sdk registry", () => {
       planConversion("json", "json-schema"),
       planConversion("json", "typescript"),
       planConversion("json", "zod"),
+      planConversion("json", "yaml"),
       planConversion("json", "openapi"),
       planConversion("json-schema", "json-schema"),
       planConversion("json-schema", "typescript"),
@@ -35,6 +36,12 @@ describe("sdk registry", () => {
       planConversion("zod", "typescript"),
       planConversion("zod", "zod"),
       planConversion("zod", "openapi"),
+      planConversion("yaml", "json"),
+      planConversion("yaml", "json-schema"),
+      planConversion("yaml", "typescript"),
+      planConversion("yaml", "zod"),
+      planConversion("yaml", "yaml"),
+      planConversion("yaml", "openapi"),
     ]);
   });
 
