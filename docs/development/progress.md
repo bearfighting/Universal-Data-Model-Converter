@@ -191,6 +191,20 @@ legacy/new IR declarations before route planning. Core also owns generic parser
 and generator execution boundaries, including exception conversion and
 artifact-preserving SDK adaptation.
 
+Phase 2 generic compatibility planning is now implemented: core owns IR-kind
+and Value root-shape compatibility, exposes the default Value-to-Shape
+transformer, and the SDK adapts generic plans without format-pair rules.
+CSV-to-TOML and TOML-to-CSV are rejected from route discovery because their
+declared array/object Value contracts do not intersect; the current builtin
+route count is 46. Shape-to-Constraint remains explicit rather than being
+invented by generic inference.
+
+The Phase 0 baseline is now recorded in
+[pipeline-refactor-checklist.md](pipeline-refactor-checklist.md): 849 tests,
+46 builtin routes, passing package/API boundary checks, and the intentional
+beta contract changes for Phase 1/2. The current Phase 1/2 worktree must be
+committed as a clean boundary before Phase 3 generated-registry work begins.
+
 This slice did not expose a blocking parser, IR, generator, or public-surface regression.
 It moved shared traversal extraction from the next refactor into implemented repository infrastructure.
 
@@ -198,7 +212,7 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 The latest full local verification pass completed on August 7, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (71 test files, 842 passing tests)
+- `./node_modules/.bin/vitest run` (71 test files, 849 passing tests)
 - `./node_modules/.bin/tsc --noEmit`
 - `./node_modules/.bin/eslint .`
 - `./node_modules/.bin/prettier --check .`

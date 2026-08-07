@@ -2,12 +2,15 @@ import type {
   ConversionCapabilityRequirement,
   ConversionLossHotspot,
   ConstraintDocument,
+  IrDocument,
+  TransformResult,
   SemanticLoss,
   SchemaDiagnostic,
   SchemaDocument,
   SchemaSemanticNote,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
+import { executeIrTransformer } from "@schema-transformation-toolkit/core";
 import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
 import type { OpenApiOutput } from "@schema-transformation-toolkit/generator-openapi";
 import { generateTarget } from "./generate.js";
@@ -21,6 +24,7 @@ import {
   defaultConversionRegistry,
   resolveGeneratorDescriptor,
   resolveConversionRouteDecision,
+  resolveTransformerDescriptor,
   ConversionRouteError,
 } from "./registry.js";
 import type { ConversionRegistry } from "./types.js";
@@ -135,6 +139,8 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   const losses: SemanticLoss[] = [];
   const semanticNotes: SchemaSemanticNote[] = [];
   const parseSemanticNotes: SchemaSemanticNote[] = [];
+  const transformDiagnostics: SchemaDiagnostic[] = [];
+  const transformSemanticNotes: SchemaSemanticNote[] = [];
   const generateSemanticNotes: SchemaSemanticNote[] = [];
   const capabilityRequirements: ConversionCapabilityRequirement[] = [];
   const lossHotspots: ConversionLossHotspot[] = [];
@@ -166,6 +172,71 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   parseDiagnostics.push(...parseResult.diagnostics);
   semanticNotes.push(...parseResult.semanticNotes);
   parseSemanticNotes.push(...parseResult.semanticNotes);
+
+  let pipelineDocument: IrDocument | undefined = shapeArtifact ?? valueArtifact;
+  for (const transformerId of routeDecision.transformerIds) {
+    if (!pipelineDocument) break;
+    const transformer = resolveTransformerDescriptor(transformerId, registry);
+    const currentDocument: IrDocument = pipelineDocument;
+    const currentKind: string = (currentDocument as unknown as { kind: string })
+      .kind;
+    const transformed: TransformResult = executeIrTransformer(
+      transformer,
+      {
+        document: currentDocument,
+        artifacts: {
+          ...(valueArtifact && currentDocument !== valueArtifact
+            ? { value: valueArtifact }
+            : {}),
+          ...(shapeArtifact && currentDocument !== shapeArtifact
+            ? { shape: shapeArtifact }
+            : {}),
+          ...(constraintsArtifact && currentKind !== "constraint-document"
+            ? { constraints: constraintsArtifact }
+            : {}),
+        },
+      },
+      {},
+    );
+    if (!transformed.ok) {
+      const transformationDiagnostics = combineDiagnostics(
+        diagnostics,
+        transformed.diagnostics,
+      );
+      return {
+        ok: false,
+        code: transformed.code,
+        message: transformed.message,
+        phase: "transform",
+        plan,
+        ...(transformationDiagnostics
+          ? { diagnostics: transformationDiagnostics }
+          : {}),
+      };
+    }
+    const nextDocument: IrDocument = transformed.document;
+    if (transformed.diagnostics) {
+      diagnostics.push(...transformed.diagnostics);
+      transformDiagnostics.push(...transformed.diagnostics);
+    }
+    if (transformed.semanticNotes) {
+      semanticNotes.push(...transformed.semanticNotes);
+      transformSemanticNotes.push(...transformed.semanticNotes);
+    }
+    pipelineDocument = nextDocument;
+    if (nextDocument.kind === "value-document") valueArtifact = nextDocument;
+    if (nextDocument.kind === "document") shapeArtifact = nextDocument;
+    if (nextDocument.kind === "constraint-document") {
+      constraintsArtifact = nextDocument;
+    }
+    if (transformed.artifacts?.value)
+      valueArtifact = transformed.artifacts.value;
+    if (transformed.artifacts?.shape)
+      shapeArtifact = transformed.artifacts.shape;
+    if (transformed.artifacts?.constraints) {
+      constraintsArtifact = transformed.artifacts.constraints;
+    }
+  }
 
   if (!shapeArtifact && !valueArtifact) {
     return {
@@ -327,6 +398,8 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
       selected: routeDecision.selectedIr,
       fallback: routeDecision.fallback,
     },
+    transformDiagnostics,
+    transformSemanticNotes,
   );
 
   return {

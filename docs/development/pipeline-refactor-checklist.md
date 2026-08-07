@@ -6,10 +6,36 @@ validation gate before the next phase starts.
 
 ## Phase 0 — Baseline and freeze
 
-- [ ] Record the current test count, route count, public API snapshots, and package boundaries.
-- [ ] Confirm JSON, YAML, CSV, and TOML normal conversion fixtures are green.
-- [ ] Confirm no new parser/generator family is added during this refactor.
-- [ ] Record intentional public API changes before implementation begins.
+- [x] Record the current test count, route count, public API snapshots, and package boundaries.
+- [x] Confirm JSON, YAML, CSV, and TOML normal conversion fixtures are green.
+- [x] Confirm no new parser/generator family is added during this refactor.
+- [x] Record intentional public API changes for the Phase 1/2 implementation boundary.
+
+Phase 0 baseline record (2026-08-07):
+
+- Reference branch: `refactorings`.
+- Last committed baseline before the current Phase 1/2 worktree: `847fcbb`.
+- Current verification: 71 test files, 849 passing tests; TypeScript,
+  ESLint, Prettier, package boundaries, API snapshots, and `git diff --check`
+  all pass.
+- Current builtin route count: 46. Static `csv -> toml` and `toml -> csv`
+  routes are intentionally absent.
+- Public API snapshots are tracked for core, SDK, and all affected parser and
+  generator packages.
+- The current worktree contains the Phase 1/2 implementation and is not yet a
+  clean release boundary. Phase 3 must begin from a committed clean baseline.
+
+Intentional beta API changes recorded for Phase 1/2:
+
+- Core exposes generic IR bundle, compatibility planner, transformer contract,
+  and default Value-to-Shape transformer exports.
+- Core contracts add parser output and generator input artifact metadata and
+  allow `IrPipelinePlan.selectedIr` to represent any `IrKind`.
+- SDK registry accepts optional transformer registration and lookup methods.
+- SDK conversion failures add `phase: "transform"`.
+- SDK conversion reports can expose transform diagnostics and semantic notes.
+- Legacy descriptor fields (`entryIr`, `overlays`, and top-level root metadata)
+  and existing format package entry points remain as compatibility aliases.
 
 Validation gate:
 
@@ -51,12 +77,12 @@ Exit criteria:
 
 ## Phase 2 — Generic IR compatibility and pipeline planning
 
-- [ ] Move IR-kind compatibility into core pipeline logic.
-- [ ] Move Value root-shape compatibility into the same generic compatibility layer.
-- [ ] Model Value-to-Shape and Shape-to-Constraint as transformer paths.
-- [ ] Generate routes from parser output, transformer edges, and generator input contracts.
-- [ ] Remove format-pair checks from route planning.
-- [ ] Test static incompatibility and runtime dynamic-root failures separately.
+- [x] Move IR-kind compatibility into core pipeline logic.
+- [x] Move Value root-shape compatibility into the same generic compatibility layer.
+- [x] Model Value-to-Shape and Shape-to-Constraint as transformer paths.
+- [x] Generate routes from parser output, transformer edges, and generator input contracts.
+- [x] Remove format-pair checks from route planning.
+- [x] Test static incompatibility and runtime dynamic-root failures separately.
 
 Validation gate:
 
@@ -67,11 +93,23 @@ Validation gate:
 
 Required cases:
 
-- [ ] `csv -> toml` has no compatible path.
-- [ ] `toml -> csv` has no compatible path.
-- [ ] `json -> toml` remains statically plannable.
-- [ ] Scalar JSON input to TOML fails only after the concrete Value IR is produced.
-- [ ] Custom descriptors with compatible contracts produce routes automatically.
+- [x] `csv -> toml` has no compatible path.
+- [x] `toml -> csv` has no compatible path.
+- [x] `json -> toml` remains statically plannable.
+- [x] Scalar JSON input to TOML fails only after the concrete Value IR is produced.
+- [x] Custom descriptors with compatible contracts produce routes automatically.
+
+Phase 2 implementation notes:
+
+- Core exposes `planIrPipeline()` and normalizes legacy capability fields into
+  generic parser output and generator input contracts.
+- Value root-shape compatibility is evaluated as contract intersection; the
+  planner never wraps or reshapes a Value document.
+- Core provides a default `value-to-shape` transformer. Shape-to-Constraint is
+  only used when an explicit transformer or parser-produced Constraint artifact
+  exists.
+- The SDK remains the builtin registry owner for this phase, but delegates
+  compatibility decisions to core and adapts generic plans to its route shape.
 
 ## Phase 3 — Registry core and generated builtin registry
 

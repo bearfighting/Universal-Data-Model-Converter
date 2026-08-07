@@ -143,6 +143,18 @@ contracts such as root shape, not source/target format names. Static
 incompatibility fails during planning; dynamic input constraints remain
 runtime IR validation.
 
+The core planner consumes parser output contracts, generator input contracts,
+and an explicit transformer catalog. Its default catalog contains the truthful
+`Value IR -> Shape IR` inference edge. `Shape IR -> Constraint IR` is not a
+universal inference rule: it is available only when a parser already provides
+constraints or an explicit transformer declares that edge. This prevents the
+planner from inventing constraints merely to make a route appear supported.
+
+The SDK may adapt a generic plan to its public `ConversionRoute` shape, but it
+must not recreate the compatibility decision. A route such as CSV to TOML is
+rejected because the declared Value root contracts have no intersection, not
+because the SDK contains a CSV/TOML special case.
+
 ## Runtime Planning Rule
 
 For any requested conversion, the planner should answer:

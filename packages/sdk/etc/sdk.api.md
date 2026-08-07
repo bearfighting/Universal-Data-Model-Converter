@@ -2237,6 +2237,7 @@ import type {
   GeneratorDescriptor,
   IrDocument,
   IrKind,
+  IrTransformerDescriptor,
   OverlayIrKind,
   ParserCapabilities,
   ParserDescriptor,
@@ -2271,15 +2272,18 @@ export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
   overlays: OverlayIrKind[];
   valueRootKinds?: ValueRootKind[];
+  entries: import("@schema-transformation-toolkit/core").IrInputContract[];
 }
 type RegisteredGeneratorDescriptor = GeneratorDescriptor<
   never,
   unknown,
   unknown
 >;
+type RegisteredTransformerDescriptor = IrTransformerDescriptor;
 export declare function createConversionRegistry(options?: {
   parsers?: ParserDescriptor[];
   generators?: RegisteredGeneratorDescriptor[];
+  transformers?: RegisteredTransformerDescriptor[];
 }): ConversionRegistry;
 export declare const defaultConversionRegistry: ConversionRegistry;
 export declare function listConversionRoutes(
@@ -2300,6 +2304,7 @@ export interface ConversionExecutionPlan {
   requiresConstraintInference: boolean;
   generatorInputIr: Exclude<ConversionIrPreference, "auto">;
   parserRequestedIr: readonly IrKind[];
+  transformerIds: readonly string[];
 }
 /** @deprecated Use ConversionExecutionPlan. */
 export type ConversionRouteDecision = ConversionExecutionPlan;
@@ -2335,6 +2340,10 @@ export declare function resolveGeneratorDescriptor<TOutput = unknown>(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
 ): GeneratorDescriptor<IrDocument, TOutput, unknown>;
+export declare function resolveTransformerDescriptor(
+  id: string,
+  registry?: ConversionRegistry,
+): IrTransformerDescriptor;
 export declare function resolveNormalizedGeneratorCapabilities(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
@@ -2404,6 +2413,7 @@ import type {
   ConversionRoute,
   ParserDescriptor,
   GeneratorDescriptor,
+  IrTransformerDescriptor,
 } from "@schema-transformation-toolkit/core";
 import type {
   JsonSchemaGeneratorOptions,
@@ -2473,8 +2483,11 @@ export interface ConversionRegistry {
   ): void;
   listParsers(): ParserDescriptor[];
   listGenerators(): GeneratorDescriptor<never, unknown, unknown>[];
+  registerTransformer?(descriptor: IrTransformerDescriptor): void;
+  listTransformers?(): IrTransformerDescriptor[];
   parser?(format: string): ParserDescriptor;
   generator?(format: string): GeneratorDescriptor<never, unknown, unknown>;
+  transformer?(id: string): IrTransformerDescriptor;
 }
 export interface ConvertAdvancedOptions {
   parser?: {
@@ -2529,7 +2542,7 @@ export interface ConvertFailureResult {
   ok: false;
   code: string;
   message: string;
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   plan: ConversionRoute;
   diagnostics?: SchemaDiagnostic[];
 }

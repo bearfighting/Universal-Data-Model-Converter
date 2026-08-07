@@ -37,9 +37,19 @@ export function buildConversionReport(
   capabilityRequirements: ConversionCapabilityRequirement[] = [],
   lossHotspots: ConversionLossHotspot[] = [],
   irSelection?: ConversionIrSelection,
+  transformDiagnostics: SchemaDiagnostic[] = [],
+  transformSemanticNotes: SchemaSemanticNote[] = [],
 ): ConversionReport | undefined {
-  const allDiagnostics = [...parseDiagnostics, ...generateDiagnostics];
-  const allSemanticNotes = [...parseSemanticNotes, ...generateSemanticNotes];
+  const allDiagnostics = [
+    ...parseDiagnostics,
+    ...transformDiagnostics,
+    ...generateDiagnostics,
+  ];
+  const allSemanticNotes = [
+    ...parseSemanticNotes,
+    ...transformSemanticNotes,
+    ...generateSemanticNotes,
+  ];
   const policyDecisions = extractPolicyDecisions(
     parseSemanticNotes,
     generateSemanticNotes,
@@ -71,6 +81,9 @@ export function buildConversionReport(
       ? {
           diagnostics: {
             ...(parseDiagnostics.length > 0 ? { parse: parseDiagnostics } : {}),
+            ...(transformDiagnostics.length > 0
+              ? { transform: transformDiagnostics }
+              : {}),
             ...(generateDiagnostics.length > 0
               ? { generate: generateDiagnostics }
               : {}),
@@ -85,6 +98,9 @@ export function buildConversionReport(
           semanticNotes: {
             ...(parseSemanticNotes.length > 0
               ? { parse: parseSemanticNotes }
+              : {}),
+            ...(transformSemanticNotes.length > 0
+              ? { transform: transformSemanticNotes }
               : {}),
             ...(generateSemanticNotes.length > 0
               ? { generate: generateSemanticNotes }

@@ -111,15 +111,13 @@ describe("sdk api contract", () => {
       targetFormat: "typescript",
       irSequence: ["value", "shape"],
       stages: [
-        { kind: "parse-source", from: "json", to: "json-value" },
+        { kind: "parse-source", from: "json", to: "shape", ir: "shape" },
         {
-          kind: "lower-to-value",
-          from: "json-value",
-          to: "value",
-          ir: "value",
+          kind: "generate-target",
+          from: "shape",
+          to: "typescript",
+          ir: "shape",
         },
-        { kind: "infer-shape", from: "value", to: "shape", ir: "shape" },
-        { kind: "generate-target", from: "shape", to: "typescript" },
       ],
     });
   });
@@ -202,7 +200,12 @@ describe("sdk api contract", () => {
       irSequence: ["shape", "constraint"],
       stages: [
         { kind: "parse-source", from: "json-schema", to: "shape", ir: "shape" },
-        { kind: "generate-target", from: "shape", to: "json-schema" },
+        {
+          kind: "generate-target",
+          from: "shape",
+          to: "json-schema",
+          ir: "shape",
+        },
       ],
     });
   });

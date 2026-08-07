@@ -14,6 +14,11 @@ import {
   type GeneratorDescriptor,
   type ParserDescriptor,
   type ParseResult,
+  planIrPipeline,
+  parserOutputsFromCapabilities,
+  generatorEntriesFromCapabilities,
+  valueToShapeTransformer,
+  IrCompatibilityError,
 } from "../index.js";
 
 describe("pipeline IR contracts", () => {
@@ -143,6 +148,119 @@ describe("pipeline IR contracts", () => {
         {},
       ),
     ).toMatchObject({ ok: false, code: "invalid-generator-input" });
+  });
+
+  it("plans Value root-shape compatibility without format knowledge", () => {
+    expect(() =>
+      planIrPipeline({
+        parserOutputs: [{ ir: "value", valueRootKinds: ["array"] }],
+        generatorEntries: [{ ir: "value", valueRootKinds: ["object"] }],
+      }),
+    ).toThrowError(IrCompatibilityError);
+
+    expect(
+      planIrPipeline({
+        parserOutputs: [{ ir: "value", valueRootKinds: ["object"] }],
+        generatorEntries: [{ ir: "value", valueRootKinds: ["object"] }],
+      }),
+    ).toMatchObject({ selectedIr: "value", stages: [] });
+  });
+
+  it("uses the default Value-to-Shape transformer for value-only parsers", () => {
+    const plan = planIrPipeline({
+      parserOutputs: [{ ir: "value" }],
+      generatorEntries: [{ ir: "shape" }],
+      transformers: [valueToShapeTransformer],
+      preference: "shape",
+    });
+
+    expect(plan).toMatchObject({
+      selectedIr: "shape",
+      stages: [
+        {
+          kind: "transform",
+          transformerId: "value-to-shape",
+          from: "value",
+          to: "shape",
+        },
+      ],
+    });
+  });
+
+  it("requires an explicit transformer for Shape-to-Constraint artifacts", () => {
+    const shapeToConstraint: IrTransformerDescriptor = {
+      kind: "transformer",
+      id: "shape-to-constraint-fixture",
+      descriptorVersion: "0.1",
+      inputIr: "shape",
+      outputIr: "constraint",
+      transform: () => ({
+        ok: true,
+        document: constraintDocument("Contract"),
+      }),
+    };
+
+    expect(() =>
+      planIrPipeline({
+        parserOutputs: [{ ir: "shape" }],
+        generatorEntries: [{ ir: "shape", artifacts: ["constraint"] }],
+      }),
+    ).toThrowError(IrCompatibilityError);
+
+    expect(
+      planIrPipeline({
+        parserOutputs: [{ ir: "shape" }],
+        generatorEntries: [{ ir: "shape", artifacts: ["constraint"] }],
+        transformers: [shapeToConstraint],
+      }),
+    ).toMatchObject({
+      selectedIr: "shape",
+      stages: [
+        {
+          transformerId: "shape-to-constraint-fixture",
+          from: "shape",
+          to: "constraint",
+        },
+      ],
+    });
+  });
+
+  it("preserves legacy root metadata and distinct artifact contracts", () => {
+    const parserOutputs = parserOutputsFromCapabilities({
+      format: "legacy",
+      producesIr: ["value"],
+      outputs: [{ ir: "value" }],
+      valueRootKinds: ["array"],
+      capabilities: ["value-ir"],
+    });
+    const generatorEntries = generatorEntriesFromCapabilities({
+      target: "legacy-target",
+      consumesIr: ["value"],
+      entries: [{ ir: "value" }],
+      valueRootKinds: ["array"],
+      supportsCapabilities: ["value-ir"],
+    });
+
+    expect(parserOutputs[0]?.valueRootKinds).toEqual(["array"]);
+    expect(generatorEntries[0]?.valueRootKinds).toEqual(["array"]);
+    expect(
+      planIrPipeline({
+        parserOutputs: [{ ir: "shape" }],
+        generatorEntries: [
+          { ir: "shape", artifacts: ["constraint"] },
+          { ir: "shape" },
+        ],
+      }),
+    ).toMatchObject({ selectedIr: "shape", stages: [] });
+  });
+
+  it("supports Constraint IR as a generic primary document", () => {
+    expect(
+      planIrPipeline({
+        parserOutputs: [{ ir: "constraint" }],
+        generatorEntries: [{ ir: "constraint" }],
+      }),
+    ).toMatchObject({ selectedIr: "constraint", stages: [] });
   });
 
   it("rejects malformed documents and duplicated primary artifacts", () => {

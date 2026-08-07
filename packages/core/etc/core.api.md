@@ -241,6 +241,7 @@ import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
 import type { ValueDocument } from "../value/types.js";
+import type { IrTransformerDescriptor } from "./descriptor-contracts.js";
 export type IrKind = "value" | "shape" | "constraint";
 export type ValueRootKind = "scalar" | "object" | "array";
 export type EntryIrKind = Exclude<IrKind, "constraint">;
@@ -284,6 +285,7 @@ export interface SemanticLoss {
 }
 export interface ConversionReportStage<TFact> {
   parse?: TFact[];
+  transform?: TFact[];
   generate?: TFact[];
   all: TFact[];
 }
@@ -339,10 +341,29 @@ export interface ParserCapabilities {
 export interface IrInputContract {
   ir: IrKind;
   valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
 }
 export interface IrOutputContract {
   ir: IrKind;
   valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
+}
+export interface IrCompatibilityRequest {
+  parserOutputs: IrOutputContract[];
+  generatorEntries: IrInputContract[];
+  transformers?: readonly IrTransformerDescriptor[];
+  preference?: ConversionIrPreference;
+}
+export interface IrPipelineStage {
+  kind: "transform";
+  transformerId: string;
+  from: IrKind;
+  to: IrKind;
+}
+export interface IrPipelinePlan {
+  selectedIr: IrKind;
+  stages: IrPipelineStage[];
+  requiredArtifacts?: IrKind[];
 }
 export interface GeneratorCapabilities {
   target: string;
@@ -384,6 +405,7 @@ export type PipelineStageKind =
   | "lower-to-value"
   | "infer-shape"
   | "derive-constraints"
+  | "transform-ir"
   | "generate-target";
 export interface PipelineStage {
   kind: PipelineStageKind;
@@ -569,9 +591,12 @@ export type {
   GeneratorCapabilities,
   IrArtifacts,
   IrBundle,
+  IrCompatibilityRequest,
   IrDocument,
   IrInputContract,
   IrOutputContract,
+  IrPipelinePlan,
+  IrPipelineStage,
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
@@ -586,6 +611,16 @@ export type {
   SemanticLossAnalysisContext,
 } from "./contracts.js";
 export { isIrBundle } from "./contracts.js";
+export {
+  IrCompatibilityError,
+  generatorEntriesFromCapabilities,
+  parserOutputsFromCapabilities,
+  planIrPipeline,
+} from "./planner.js";
+export {
+  defaultIrTransformers,
+  valueToShapeTransformer,
+} from "./transformers.js";
 export { executeGenerator, executeParser } from "./execution.js";
 export {
   executeIrTransformer,
@@ -614,6 +649,48 @@ export type {
   ParserDescriptor,
   ParserExecutionContext,
 } from "./descriptor-contracts.js";
+```
+
+## packages/core/src/pipeline/planner.d.ts
+
+```ts
+import type {
+  GeneratorCapabilities,
+  IrCompatibilityRequest,
+  IrInputContract,
+  IrOutputContract,
+  IrPipelinePlan,
+  ParserCapabilities,
+} from "./contracts.js";
+export declare class IrCompatibilityError extends Error {
+  readonly code: "unsupported-route" | "unsupported-ir-preference";
+  constructor(
+    code: "unsupported-route" | "unsupported-ir-preference",
+    message: string,
+  );
+}
+export declare function planIrPipeline(
+  request: IrCompatibilityRequest,
+): IrPipelinePlan;
+export declare function parserOutputsFromCapabilities(
+  capabilities: ParserCapabilities,
+): IrOutputContract[];
+export declare function generatorEntriesFromCapabilities(
+  capabilities: GeneratorCapabilities,
+): IrInputContract[];
+```
+
+## packages/core/src/pipeline/transformers.d.ts
+
+```ts
+import type { SchemaDocument } from "../schema/types.js";
+import type { ValueDocument } from "../value/types.js";
+import type { IrTransformerDescriptor } from "./descriptor-contracts.js";
+export declare const valueToShapeTransformer: IrTransformerDescriptor<
+  ValueDocument,
+  SchemaDocument
+>;
+export declare const defaultIrTransformers: readonly IrTransformerDescriptor[];
 ```
 
 ## packages/core/src/pipeline/validation.d.ts

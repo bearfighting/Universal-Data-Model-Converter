@@ -111,6 +111,10 @@ That means:
 - introduce new IR semantics only when the meaning is genuinely shared
 - fail explicitly for unsupported input instead of silently approximating it
 
+Parser descriptors expose their available primary IR documents through output
+contracts. A parser may also expose supplementary artifacts produced during
+the same parse, but an artifact must not duplicate the primary document.
+
 ## Generator Boundary
 
 Generators consume valid IR and render target output from shared semantics.
@@ -120,6 +124,11 @@ That means:
 - generators should not invent new shared schema meaning
 - generator failures should usually be target-rendering failures, not IR redesign signals
 - target validation may still reject a valid IR when a chosen target configuration cannot render it safely
+
+Generator input contracts may declare a Value root-shape set and explicitly
+required supplementary IR artifacts. Root-shape compatibility is checked by
+the generic planner before execution; the concrete generator still validates
+the actual IR document and reports dynamic root failures.
 
 ## Diagnostic Contract
 

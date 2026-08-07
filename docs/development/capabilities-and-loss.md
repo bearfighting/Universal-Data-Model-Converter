@@ -9,6 +9,13 @@ This document defines how parser, generator, and future transform layers should 
 
 Use [ir-boundaries.md](ir-boundaries.md) for semantic placement and [architecture-layering.md](architecture-layering.md) for routing.
 
+Route capability is derived from IR contracts rather than format pairs. A
+parser's ability to produce Value IR is not by itself sufficient for
+`supportsValueIr`; the selected generator must accept Value IR and the declared
+Value root contracts must be compatible. Static root-shape incompatibility is
+an unsupported route, while a dynamically invalid concrete root remains a
+runtime generator failure.
+
 ## Core Rule
 
 Use this rule throughout the repository:

@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   schemaDocument,
   schemaScalarNode,
+  valueDocument,
+  valueScalarNode,
+  type IrTransformerDescriptor,
   type GeneratorDescriptor,
   type ParserDescriptor,
 } from "@schema-transformation-toolkit/core";
@@ -62,6 +65,56 @@ const extensionParser: ParserDescriptor = {
   },
 };
 
+const valueOnlyParser: ParserDescriptor = {
+  kind: "parser",
+  descriptorVersion: "0.1",
+  format: "value-source",
+  capabilities: {
+    format: "value-source",
+    producesIr: ["value"],
+    outputs: [{ ir: "value" }],
+    capabilities: ["value-ir"],
+  },
+  options: { format: "value-source", role: "parser", options: [] },
+  parse(_input, context) {
+    return {
+      ok: true,
+      document: valueDocument(context.name, valueScalarNode("value")),
+    };
+  },
+};
+
+const valueToShapeFixture: IrTransformerDescriptor = {
+  kind: "transformer",
+  id: "value-to-shape-fixture",
+  descriptorVersion: "0.1",
+  inputIr: "value",
+  outputIr: "shape",
+  transform(input) {
+    return {
+      ok: true,
+      document: schemaDocument(input.document.name, schemaScalarNode("string")),
+      diagnostics: [
+        {
+          severity: "info",
+          code: "fixture-transform-diagnostic",
+          message: "The fixture transformer ran.",
+          source: "transformer-value-to-shape-fixture",
+        },
+      ],
+      semanticNotes: [
+        {
+          kind: "normalization",
+          code: "fixture-transform-note",
+          message: "The fixture transformer normalized the value.",
+          layer: "shape",
+          source: "transformer-value-to-shape-fixture",
+        },
+      ],
+    };
+  },
+};
+
 describe("sdk extensible registry", () => {
   it("derives routes, support, and option catalogs from registered descriptors", () => {
     const registry = createConversionRegistry({
@@ -92,6 +145,47 @@ describe("sdk extensible registry", () => {
         input: "ignored",
       }),
     ).toMatchObject({ ok: true, output: "fixture:fixture_sourceDocument" });
+  });
+
+  it("executes a registered transformer between parser and generator", () => {
+    const registry = createConversionRegistry({
+      parsers: [valueOnlyParser],
+      generators: [extensionGenerator],
+      transformers: [valueToShapeFixture],
+    });
+    const converter = createConverter(registry);
+
+    expect(
+      converter.planConversion("value-source", "fixture-target", "shape"),
+    ).toMatchObject({
+      irSequence: ["value", "shape"],
+      stages: expect.arrayContaining([
+        { kind: "transform-ir", from: "value", to: "shape", ir: "shape" },
+      ]),
+    });
+    expect(
+      converter.convert({
+        sourceFormat: "value-source",
+        targetFormat: "fixture-target",
+        input: "ignored",
+        irPreference: "shape",
+      }),
+    ).toMatchObject({
+      ok: true,
+      output: "fixture:value_sourceDocument",
+      report: {
+        diagnostics: {
+          transform: [
+            expect.objectContaining({ code: "fixture-transform-diagnostic" }),
+          ],
+        },
+        semanticNotes: {
+          transform: [
+            expect.objectContaining({ code: "fixture-transform-note" }),
+          ],
+        },
+      },
+    });
   });
 
   it("rejects duplicate and structurally invalid registrations", () => {

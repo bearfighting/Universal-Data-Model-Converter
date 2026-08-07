@@ -86,7 +86,38 @@ export function executeIrTransformer<
       `Transformer "${descriptor.id}" must produce ${descriptor.outputIr} IR.`,
     );
   }
-  return result;
+  const inputKind = documentIrKind(input.document);
+  const outputKind = documentIrKind(result.document);
+  const mergedArtifacts: IrArtifacts = {
+    ...(input.artifacts ?? {}),
+    ...(result.artifacts ?? {}),
+    ...artifactForKind(inputKind, input.document),
+  };
+  deleteArtifactForKind(mergedArtifacts, outputKind);
+  return {
+    ...result,
+    ...(Object.keys(mergedArtifacts).length
+      ? { artifacts: mergedArtifacts }
+      : {}),
+  };
+}
+
+function documentIrKind(document: IrDocument): IrKind {
+  if (document.kind === "value-document") return "value";
+  if (document.kind === "document") return "shape";
+  return "constraint";
+}
+
+function artifactForKind(kind: IrKind, document: IrDocument): IrArtifacts {
+  if (kind === "value") return { value: document as never };
+  if (kind === "shape") return { shape: document as never };
+  return { constraints: document as never };
+}
+
+function deleteArtifactForKind(artifacts: IrArtifacts, kind: IrKind): void {
+  if (kind === "value") delete artifacts.value;
+  if (kind === "shape") delete artifacts.shape;
+  if (kind === "constraint") delete artifacts.constraints;
 }
 
 export function tryValidateIrBundle(input: unknown): IrValidationResult {

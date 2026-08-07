@@ -65,6 +65,16 @@ describe("sdk registry", () => {
     expect(listConversionRoutes()).toEqual(expectedRoutes);
   });
 
+  it("derives root-shape incompatibility without format-pair rules", () => {
+    expect(() => planConversion("csv", "toml")).toThrow(
+      /Unsupported conversion route/,
+    );
+    expect(() => planConversion("toml", "csv")).toThrow(
+      /Unsupported conversion route/,
+    );
+    expect(() => planConversion("json", "toml")).not.toThrow();
+  });
+
   it("tracks IR usage and stage exposure from planned routes", () => {
     const route = planConversion("json", "json-schema");
 
@@ -108,7 +118,7 @@ describe("sdk registry", () => {
       selectedIr: "shape",
       fallback: true,
       requiresShapeInference: false,
-      requiresConstraintInference: true,
+      requiresConstraintInference: false,
       generatorInputIr: "shape",
       route: { irSequence: ["shape", "constraint"] },
     });

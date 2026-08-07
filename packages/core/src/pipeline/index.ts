@@ -12,9 +12,12 @@ export type {
   GeneratorCapabilities,
   IrArtifacts,
   IrBundle,
+  IrCompatibilityRequest,
   IrDocument,
   IrInputContract,
   IrOutputContract,
+  IrPipelinePlan,
+  IrPipelineStage,
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
@@ -29,6 +32,16 @@ export type {
   SemanticLossAnalysisContext,
 } from "./contracts.js";
 export { isIrBundle } from "./contracts.js";
+export {
+  IrCompatibilityError,
+  generatorEntriesFromCapabilities,
+  parserOutputsFromCapabilities,
+  planIrPipeline,
+} from "./planner.js";
+export {
+  defaultIrTransformers,
+  valueToShapeTransformer,
+} from "./transformers.js";
 export { executeGenerator, executeParser } from "./execution.js";
 export {
   executeIrTransformer,

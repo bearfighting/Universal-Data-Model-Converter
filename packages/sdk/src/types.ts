@@ -11,6 +11,7 @@ import type {
   ConversionRoute,
   ParserDescriptor,
   GeneratorDescriptor,
+  IrTransformerDescriptor,
 } from "@schema-transformation-toolkit/core";
 import type {
   JsonSchemaGeneratorOptions,
@@ -85,8 +86,11 @@ export interface ConversionRegistry {
   ): void;
   listParsers(): ParserDescriptor[];
   listGenerators(): GeneratorDescriptor<never, unknown, unknown>[];
+  registerTransformer?(descriptor: IrTransformerDescriptor): void;
+  listTransformers?(): IrTransformerDescriptor[];
   parser?(format: string): ParserDescriptor;
   generator?(format: string): GeneratorDescriptor<never, unknown, unknown>;
+  transformer?(id: string): IrTransformerDescriptor;
 }
 
 export interface ConvertAdvancedOptions {
@@ -146,7 +150,7 @@ export interface ConvertFailureResult {
   ok: false;
   code: string;
   message: string;
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   plan: ConversionRoute;
   diagnostics?: SchemaDiagnostic[];
 }

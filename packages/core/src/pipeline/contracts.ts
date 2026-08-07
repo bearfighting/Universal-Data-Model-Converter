@@ -2,6 +2,7 @@ import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
 import type { ValueDocument } from "../value/types.js";
+import type { IrTransformerDescriptor } from "./descriptor-contracts.js";
 
 export type IrKind = "value" | "shape" | "constraint";
 export type ValueRootKind = "scalar" | "object" | "array";
@@ -63,6 +64,7 @@ export interface SemanticLoss {
 
 export interface ConversionReportStage<TFact> {
   parse?: TFact[];
+  transform?: TFact[];
   generate?: TFact[];
   all: TFact[];
 }
@@ -125,11 +127,33 @@ export interface ParserCapabilities {
 export interface IrInputContract {
   ir: IrKind;
   valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
 }
 
 export interface IrOutputContract {
   ir: IrKind;
   valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
+}
+
+export interface IrCompatibilityRequest {
+  parserOutputs: IrOutputContract[];
+  generatorEntries: IrInputContract[];
+  transformers?: readonly IrTransformerDescriptor[];
+  preference?: ConversionIrPreference;
+}
+
+export interface IrPipelineStage {
+  kind: "transform";
+  transformerId: string;
+  from: IrKind;
+  to: IrKind;
+}
+
+export interface IrPipelinePlan {
+  selectedIr: IrKind;
+  stages: IrPipelineStage[];
+  requiredArtifacts?: IrKind[];
 }
 
 export interface GeneratorCapabilities {
@@ -176,6 +200,7 @@ export type PipelineStageKind =
   | "lower-to-value"
   | "infer-shape"
   | "derive-constraints"
+  | "transform-ir"
   | "generate-target";
 
 export interface PipelineStage {
