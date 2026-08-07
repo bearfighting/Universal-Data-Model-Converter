@@ -228,6 +228,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   openapi: "openapi";
   typescript: "typescript";
   json: "json";
+  csv: "csv";
   zod: "zod";
   yaml: "yaml";
 }>;
@@ -236,6 +237,7 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   openapi: "openapi";
   typescript: "typescript";
   json: "json";
+  csv: "csv";
   zod: "zod";
   yaml: "yaml";
 }>;
@@ -455,6 +457,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       openapi: "openapi";
       typescript: "typescript";
       json: "json";
+      csv: "csv";
       zod: "zod";
       yaml: "yaml";
     }>;
@@ -463,6 +466,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       openapi: "openapi";
       typescript: "typescript";
       json: "json";
+      csv: "csv";
       zod: "zod";
       yaml: "yaml";
     }>;
@@ -2354,17 +2358,20 @@ import type {
 import type { TypeScriptGeneratorOptions } from "@schema-transformation-toolkit/generator-typescript";
 import type { ZodGeneratorOptions } from "@schema-transformation-toolkit/generator-zod";
 import type { YamlOutput } from "@schema-transformation-toolkit/generator-yaml";
+import type { CsvOutput } from "@schema-transformation-toolkit/generator-csv";
+import type { CsvGeneratorOptions } from "@schema-transformation-toolkit/generator-csv";
 import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-json";
 import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
 import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
 import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
 import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
 import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
+import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
 export type ConversionIrPreference = CoreConversionIrPreference;
 export type BuiltinSourceFormat =
-  "json" | "json-schema" | "typescript" | "openapi" | "zod" | "yaml";
+  "json" | "json-schema" | "typescript" | "openapi" | "zod" | "yaml" | "csv";
 export type BuiltinTargetFormat =
-  "json" | "json-schema" | "typescript" | "zod" | "openapi" | "yaml";
+  "json" | "json-schema" | "typescript" | "zod" | "openapi" | "yaml" | "csv";
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
   "json-schema": JsonSchemaOutput;
@@ -2372,6 +2379,7 @@ export interface BuiltinGeneratorOutputs {
   zod: string;
   openapi: OpenApiOutput;
   yaml: YamlOutput;
+  csv: CsvOutput;
 }
 export type ConversionFormat =
   BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
@@ -2405,6 +2413,7 @@ export interface ConvertAdvancedOptions {
     openapi?: OpenApiParseOptions;
     zod?: ZodParseOptions;
     yaml?: YamlParseOptions;
+    csv?: CsvParseOptions;
   };
   generator?: {
     jsonSchema?: JsonSchemaGeneratorOptions;
@@ -2412,6 +2421,7 @@ export interface ConvertAdvancedOptions {
     zod?: ZodGeneratorOptions;
     openapi?: OpenApiGeneratorOptions;
     yaml?: Record<string, never>;
+    csv?: CsvGeneratorOptions;
   };
 }
 export interface ConvertOptions {

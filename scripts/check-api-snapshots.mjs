@@ -66,6 +66,12 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-csv",
+    root: path.join(repoRoot, "packages/parsers/csv"),
+    entry: path.join(repoRoot, "packages/parsers/csv/src/index.ts"),
+    snapshot: path.join(repoRoot, "packages/parsers/csv/etc/parser-csv.api.md"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     root: path.join(repoRoot, "packages/generators/json-schema"),
     entry: path.join(repoRoot, "packages/generators/json-schema/src/index.ts"),
@@ -117,6 +123,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/yaml/etc/generator-yaml.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-csv",
+    root: path.join(repoRoot, "packages/generators/csv"),
+    entry: path.join(repoRoot, "packages/generators/csv/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/csv/etc/generator-csv.api.md",
     ),
   },
   {

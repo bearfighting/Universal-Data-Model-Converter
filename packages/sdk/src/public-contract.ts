@@ -7,6 +7,7 @@ export const conversionSourceFormatSchema = z.enum([
   "openapi",
   "zod",
   "yaml",
+  "csv",
 ]);
 
 export const conversionTargetFormatSchema = z.enum([
@@ -16,6 +17,7 @@ export const conversionTargetFormatSchema = z.enum([
   "zod",
   "openapi",
   "yaml",
+  "csv",
 ]);
 
 export const conversionIrPreferenceSchema = z.enum(["auto", "value", "shape"]);

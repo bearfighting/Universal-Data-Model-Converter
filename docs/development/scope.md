@@ -30,6 +30,11 @@ profile. YAML-specific data-model features such as tags, anchors, aliases,
 merge keys, duplicate keys, non-string mapping keys, and multiple documents
 remain outside the shared IR boundary.
 
+CSV is supported through a strict header-based table profile. It lowers to an
+array of flat objects with string values and generates only from flat Value IR
+object arrays. Type inference, headerless input, nested cells, multiple
+tables, and CSV-specific metadata remain outside the current boundary.
+
 ## Defer Or Reject
 
 These should be treated cautiously or left unsupported unless they can be reduced to stable serializable-shape semantics:

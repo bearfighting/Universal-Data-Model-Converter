@@ -90,6 +90,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Comments, formatting style, anchors, aliases, merge keys, custom tags, and non-string mapping keys are not supported or preserved.",
     "YAML generation consumes Value IR only; schema-only sources cannot generate a concrete YAML value.",
   ],
+  csv: [
+    "CSV support is limited to one header row and flat object rows with consistent columns.",
+    "CSV cells are parsed as strings; automatic type inference, null tokens, nested values, and multiple tables are unsupported.",
+    "CSV generation consumes Value IR only; empty arrays require explicit columns.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -102,6 +107,11 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
   openapi: ["full-document-processing", "allOf-composition"],
   zod: ["javascript-output", "constraint-refinement-rendering"],
   yaml: ["broader YAML data-model support", "comment-and-style preservation"],
+  csv: [
+    "delimiter options",
+    "headerless input",
+    "explicit cell type inference",
+  ],
 };
 
 export function describeFormatSupport(
@@ -118,7 +128,9 @@ export function describeFormatSupport(
       : {}),
     sharedShapeKinds: [...SHARED_SHAPE_KINDS],
     constraintFamilies:
-      format === "json" || format === "yaml" ? [] : [...CONSTRAINT_FAMILIES],
+      format === "json" || format === "yaml" || format === "csv"
+        ? []
+        : [...CONSTRAINT_FAMILIES],
     notableLimitations: [...(FORMAT_LIMITATIONS[format] ?? [])],
     experimentalAreas: [...(FORMAT_EXPERIMENTAL_AREAS[format] ?? [])],
   };

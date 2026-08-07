@@ -46,6 +46,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/yaml"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-csv",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/csv"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -74,6 +79,11 @@ const packageConfigs = [
     name: "@schema-transformation-toolkit/generator-yaml",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/yaml"),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-csv",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/csv"),
   },
 ];
 
@@ -299,12 +309,14 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
     "@schema-transformation-toolkit/parser-yaml",
+    "@schema-transformation-toolkit/parser-csv",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",
     "@schema-transformation-toolkit/generator-yaml",
+    "@schema-transformation-toolkit/generator-csv",
   ]);
 }
 

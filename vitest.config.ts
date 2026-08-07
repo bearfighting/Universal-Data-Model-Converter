@@ -10,6 +10,8 @@ export default defineConfig({
         "/packages/generators/json-schema/src/index.ts",
       "@schema-transformation-toolkit/generator-json":
         "/packages/generators/json/src/index.ts",
+      "@schema-transformation-toolkit/generator-csv":
+        "/packages/generators/csv/src/index.ts",
       "@schema-transformation-toolkit/generator-openapi":
         "/packages/generators/openapi/src/index.ts",
       "@schema-transformation-toolkit/generator-typescript":
@@ -20,6 +22,8 @@ export default defineConfig({
         "/packages/generators/zod/src/index.ts",
       "@schema-transformation-toolkit/parser-json":
         "/packages/parsers/json/src/index.ts",
+      "@schema-transformation-toolkit/parser-csv":
+        "/packages/parsers/csv/src/index.ts",
       "@schema-transformation-toolkit/parser-json-schema":
         "/packages/parsers/json-schema/src/index.ts",
       "@schema-transformation-toolkit/parser-typescript":

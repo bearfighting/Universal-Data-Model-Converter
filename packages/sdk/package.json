@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@schema-transformation-toolkit/generator-json": "workspace:*",
+    "@schema-transformation-toolkit/generator-csv": "workspace:*",
     "@schema-transformation-toolkit/core": "workspace:*",
     "@schema-transformation-toolkit/generator-json-schema": "workspace:*",
     "@schema-transformation-toolkit/generator-openapi": "workspace:*",
@@ -28,6 +29,7 @@
     "@schema-transformation-toolkit/generator-zod": "workspace:*",
     "@schema-transformation-toolkit/generator-yaml": "workspace:*",
     "@schema-transformation-toolkit/parser-json": "workspace:*",
+    "@schema-transformation-toolkit/parser-csv": "workspace:*",
     "@schema-transformation-toolkit/parser-json-schema": "workspace:*",
     "@schema-transformation-toolkit/parser-openapi": "workspace:*",
     "@schema-transformation-toolkit/parser-typescript": "workspace:*",
@@ -35,6 +37,8 @@
     "@schema-transformation-toolkit/parser-yaml": "workspace:*",
     "typescript": "^5.9.3",
     "yaml": "^2.8.1",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
     "zod": "^4.4.3"
   },
   "scripts": {

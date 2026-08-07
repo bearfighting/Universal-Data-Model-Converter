@@ -47,6 +47,15 @@ importers:
 
   packages/core: {}
 
+  packages/generators/csv:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+      csv-stringify:
+        specifier: ^6.6.0
+        version: 6.8.3
+
   packages/generators/json:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -88,6 +97,15 @@ importers:
       "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../../core
+
+  packages/parsers/csv:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+      csv-parse:
+        specifier: ^6.1.0
+        version: 6.2.1
 
   packages/parsers/json:
     dependencies:
@@ -145,6 +163,9 @@ importers:
       "@schema-transformation-toolkit/core":
         specifier: workspace:*
         version: link:../core
+      "@schema-transformation-toolkit/generator-csv":
+        specifier: workspace:*
+        version: link:../generators/csv
       "@schema-transformation-toolkit/generator-json":
         specifier: workspace:*
         version: link:../generators/json
@@ -163,6 +184,9 @@ importers:
       "@schema-transformation-toolkit/generator-zod":
         specifier: workspace:*
         version: link:../generators/zod
+      "@schema-transformation-toolkit/parser-csv":
+        specifier: workspace:*
+        version: link:../parsers/csv
       "@schema-transformation-toolkit/parser-json":
         specifier: workspace:*
         version: link:../parsers/json
@@ -181,6 +205,12 @@ importers:
       "@schema-transformation-toolkit/parser-zod":
         specifier: workspace:*
         version: link:../parsers/zod
+      csv-parse:
+        specifier: ^6.1.0
+        version: 6.2.1
+      csv-stringify:
+        specifier: ^6.6.0
+        version: 6.8.3
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1102,6 +1132,18 @@ packages:
         integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==,
       }
     engines: { node: ">= 8" }
+
+  csv-parse@6.2.1:
+    resolution:
+      {
+        integrity: sha512-LRLMV+UCyfMokp8Wb411duBf1gaBKJfOfBWU9eHMJ+b+cJYZsNu3AFmjJf3+yPGd59Exz1TsMjaSFyxnYB9+IQ==,
+      }
+
+  csv-stringify@6.8.3:
+    resolution:
+      {
+        integrity: sha512-gIeSCvq5F4VtXV3naV3VAewLhBkiZBz+PPhTOA8H3Y8h/ELa+R1ml0GZck/4/Nzo9ep2lvOluilJ6MJlbZsKMA==,
+      }
 
   debug@4.4.3:
     resolution:
@@ -2429,6 +2471,10 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  csv-parse@6.2.1: {}
+
+  csv-stringify@6.8.3: {}
 
   debug@4.4.3:
     dependencies:
