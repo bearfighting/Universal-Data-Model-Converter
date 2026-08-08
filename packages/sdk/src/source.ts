@@ -9,6 +9,7 @@ import type { IrKind } from "@schema-transformation-toolkit/core";
 import { executeParser } from "@schema-transformation-toolkit/core";
 import { resolveParserDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
+import { parserOptionsFor } from "./component-options.js";
 import type {
   ConvertFailureResult,
   ConvertOptions,
@@ -46,7 +47,7 @@ export function parseSource(
   const parseResult = executeParser(descriptor, input, {
     name,
     ...(parserRequestedIr ? { requestedIr: parserRequestedIr } : {}),
-    options: parserOptionsFor(sourceFormat, options),
+    options: parserOptionsFor(descriptor, options),
   });
 
   if (!parseResult.ok) {
@@ -185,33 +186,4 @@ function createParserFailure(
       },
     ],
   };
-}
-
-function parserOptionsFor(
-  sourceFormat: ConversionSourceFormat,
-  options: ConvertOptions,
-): unknown {
-  if (sourceFormat === "json") return options.advanced?.parser?.json ?? {};
-  if (sourceFormat === "json-schema") {
-    return options.advanced?.parser?.jsonSchema ?? {};
-  }
-  if (sourceFormat === "typescript") {
-    return options.advanced?.parser?.typeScript ?? {};
-  }
-  if (sourceFormat === "openapi") {
-    return options.advanced?.parser?.openapi ?? {};
-  }
-  if (sourceFormat === "zod") {
-    return options.advanced?.parser?.zod ?? {};
-  }
-  if (sourceFormat === "yaml") {
-    return options.advanced?.parser?.yaml ?? {};
-  }
-  if (sourceFormat === "csv") {
-    return options.advanced?.parser?.csv ?? {};
-  }
-  if (sourceFormat === "toml") {
-    return options.advanced?.parser?.toml ?? {};
-  }
-  return options.extension?.parser ?? {};
 }

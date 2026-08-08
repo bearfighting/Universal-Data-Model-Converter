@@ -24,6 +24,7 @@ import {
   buildConversionReport,
   collectPreservedCapabilities,
 } from "./report.js";
+import { generatorOptionsFor, parserOptionsFor } from "./component-options.js";
 export type {
   ConvertAdvancedOptions,
   ConversionArtifacts,
@@ -157,10 +158,12 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
       ...(routeDecision.parserRequestedIr[0]
         ? { requestedIr: routeDecision.parserRequestedIr[0] }
         : {}),
-      options: parserOptionsFor(options),
+      options: parserOptionsFor(parser, options),
     },
     transformerContext: {},
-    generatorContext: { options: generatorOptionsFor(options) },
+    generatorContext: {
+      options: generatorOptionsFor(generatorDescriptor, options),
+    },
     sourceFormat: options.sourceFormat,
     targetFormat: options.targetFormat,
     routeCapabilities,
@@ -289,31 +292,6 @@ function resolveParserDescriptorForPipeline(
       `Unsupported source format: ${sourceFormat}`,
     );
   return descriptor;
-}
-
-function parserOptionsFor(options: ConvertOptions): unknown {
-  const advanced = options.advanced?.parser;
-  if (options.sourceFormat === "json") return advanced?.json ?? {};
-  if (options.sourceFormat === "json-schema") return advanced?.jsonSchema ?? {};
-  if (options.sourceFormat === "typescript") return advanced?.typeScript ?? {};
-  if (options.sourceFormat === "openapi") return advanced?.openapi ?? {};
-  if (options.sourceFormat === "zod") return advanced?.zod ?? {};
-  if (options.sourceFormat === "yaml") return advanced?.yaml ?? {};
-  if (options.sourceFormat === "csv") return advanced?.csv ?? {};
-  if (options.sourceFormat === "toml") return advanced?.toml ?? {};
-  return options.extension?.parser ?? {};
-}
-
-function generatorOptionsFor(options: ConvertOptions): unknown {
-  const advanced = options.advanced?.generator;
-  if (options.targetFormat === "json-schema") return advanced?.jsonSchema ?? {};
-  if (options.targetFormat === "typescript") return advanced?.typeScript ?? {};
-  if (options.targetFormat === "zod") return advanced?.zod ?? {};
-  if (options.targetFormat === "openapi") return advanced?.openapi ?? {};
-  if (options.targetFormat === "yaml") return advanced?.yaml ?? {};
-  if (options.targetFormat === "csv") return advanced?.csv ?? {};
-  if (options.targetFormat === "toml") return advanced?.toml ?? {};
-  return options.extension?.generator ?? {};
 }
 
 function defaultDocumentName(

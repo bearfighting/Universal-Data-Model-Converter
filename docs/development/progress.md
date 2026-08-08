@@ -26,6 +26,9 @@ The repository is past architecture validation and has a stable-enough conversio
 - a descriptor-driven SDK registry with isolated custom parser/generator registration
 - generic generator output typing, descriptor analysis hooks, versioned registration errors, and shared descriptor contract helpers
 - a generic core execution pipeline that owns parser, transformer, and generator orchestration with stage-grouped evidence and artifact-preserving failures
+- Phase 5 format adapter consolidation completed across JSON, YAML, CSV, TOML,
+  JSON Schema, TypeScript, Zod, and OpenAPI; SDK component options now resolve
+  from the selected descriptor without format-specific execution dispatch
 
 Shared normalization coverage currently includes:
 
@@ -176,6 +179,9 @@ The resulting maturity is now:
 - normalization: real and already reused by test equivalence helpers, but still early enough that new rules should be added selectively
 - registry extensibility: built-in discovery is descriptor-driven; third-party registration is explicit and runtime package scanning remains intentionally deferred
 - two-stage execution pipeline: all current SDK conversion routes use the shared core executor; the SDK remains a compatibility and report-wrapping facade
+- format pipeline readiness: all current parser/generator families are verified
+  as descriptor-driven at the pipeline boundary; Phase 6 SDK public type and
+  builtin-import reduction remains intentionally deferred
 
 Phase 3 registry extraction is now implemented: core owns the generic
 descriptor registry, builtin packages declare versioned registry metadata, and
@@ -219,6 +225,14 @@ Descriptor exceptions now also produce stage diagnostics, and missing semantic
 analysis context is reported explicitly rather than silently omitting loss
 analysis.
 
+Phase 5 format adapter consolidation is now complete: JSON, YAML, CSV, TOML,
+JSON Schema, TypeScript, Zod, and OpenAPI have been verified against their
+generated descriptor registrations and the shared core execution pipeline. SDK
+parser and generator option adaptation is now descriptor-based and preserves
+the existing advanced option keys and public compatibility helpers. Removing
+the remaining builtin SDK imports, public format unions, and output maps is
+intentionally deferred to Phase 6.
+
 Phase 2 generic compatibility planning is now implemented: core owns IR-kind
 and Value root-shape compatibility, exposes the default Value-to-Shape
 transformer, and the SDK adapts generic plans without format-pair rules.
@@ -238,9 +252,9 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 ## Verification
 
-The latest full local verification pass completed on August 7, 2026 and included:
+The latest full local verification pass completed on August 8, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (73 test files, 855 passing tests)
+- `./node_modules/.bin/vitest run` (76 test files, 876 passing tests)
 - `./node_modules/.bin/tsc --noEmit`
 - `./node_modules/.bin/eslint .`
 - `./node_modules/.bin/prettier --check .`

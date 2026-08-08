@@ -210,24 +210,50 @@ Phase 4 hardening follow-up (2026-08-08):
 
 Migrate one family at a time, in this order:
 
-- [ ] JSON
-- [ ] YAML
-- [ ] CSV
-- [ ] TOML
-- [ ] JSON Schema
-- [ ] TypeScript
-- [ ] Zod
-- [ ] OpenAPI
+- [x] JSON
+- [x] YAML
+- [x] CSV
+- [x] TOML
+- [x] JSON Schema
+- [x] TypeScript
+- [x] Zod
+- [x] OpenAPI
 
 For each family:
 
-- [ ] Add or migrate its descriptor manifest entry.
-- [ ] Declare parser output and generator input contracts.
-- [ ] Remove SDK-specific dispatch for the family.
-- [ ] Run package-local parser/generator tests.
-- [ ] Run generic pipeline integration tests.
-- [ ] Verify normal output and structured failures are unchanged.
-- [ ] Update API snapshots and package boundary declarations if needed.
+- [x] Add or migrate its descriptor manifest entry.
+- [x] Declare parser output and generator input contracts.
+- [x] Remove SDK-specific execution and option dispatch for the family.
+- [x] Run package-local parser/generator tests.
+- [x] Run generic pipeline integration tests.
+- [x] Verify normal output and structured failures are unchanged.
+- [x] Update API snapshots and package boundary declarations if needed.
+
+Phase 5 verification record (2026-08-08):
+
+- All eight parser and generator families were verified through the generated
+  descriptor registry and their declared IR contracts; those registrations
+  were established by the earlier registry and pipeline phases.
+- SDK `convert()`, `parseSource()`, and `generateTarget()` resolve advanced
+  options from the selected descriptor rather than maintaining per-format
+  execution dispatch. Existing `typeScript` and `jsonSchema` option keys are
+  matched compatibly with their descriptor formats.
+- Existing Value-only, Value-to-Shape, Shape + Constraint, root-shape failure,
+  semantic-loss, custom registry, and OpenAPI/JSON Schema adapter scenarios
+  remain covered by the generic pipeline and integration tests. The Phase 5
+  change specifically consolidates SDK component option adaptation around the
+  selected descriptors.
+- Focused format matrix: JSON, YAML, CSV, TOML, JSON Schema, TypeScript, Zod,
+  and OpenAPI each execute through `convert()` and assert the planned route;
+  Value-only, Value-to-Shape, and Shape + Constraint artifact lanes are also
+  asserted. Custom descriptor options are verified through `createConverter()`
+  rather than only through the resolver unit test.
+- Verification: 76 test files, 876 passing tests; TypeScript, ESLint,
+  Prettier, boundary, API snapshot, generated registry, and diff checks all
+  passed.
+
+Phase 5 deliberately does not remove SDK builtin imports, hardcoded public
+format unions, or builtin output typing. Those changes remain Phase 6 work.
 
 Validation gate after each family:
 

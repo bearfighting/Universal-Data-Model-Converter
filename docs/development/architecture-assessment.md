@@ -33,15 +33,15 @@ object routes now fail before parsing or generation, without implicit wrapping.
 
 ## Current Maturity
 
-| Area                        | Assessment      | Comment                                                                                                                          |
-| --------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| IR boundaries               | Strong          | The Value/Shape/Constraint split is explicit and documented.                                                                     |
-| Parser/generator separation | Strong          | Format packages mostly depend on core, not on each other.                                                                        |
-| Route planning              | Stronger        | Descriptor-driven planning now includes Value root-shape compatibility.                                                          |
-| Public SDK surface          | Beta-stable     | The main entry points are clear, but several contracts are duplicated manually.                                                  |
-| Runtime input validation    | Improved        | Shared validation and TOML descriptor guards reject malformed runtime input structurally.                                        |
-| Diagnostics                 | Good foundation | Structured diagnostics exist, but code and location contracts are not fully typed or uniform.                                    |
-| Maintainability             | Improved        | `registry.ts` and core traversal/transform modules remain hotspots; conversion execution and plan validation are shared in core. |
+| Area                        | Assessment      | Comment                                                                                                                                                                     |
+| --------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IR boundaries               | Strong          | The Value/Shape/Constraint split is explicit and documented.                                                                                                                |
+| Parser/generator separation | Strong          | Format packages mostly depend on core, not on each other.                                                                                                                   |
+| Route planning              | Stronger        | Descriptor-driven planning now includes Value root-shape compatibility.                                                                                                     |
+| Public SDK surface          | Beta-stable     | The main entry points are clear, but several contracts are duplicated manually.                                                                                             |
+| Runtime input validation    | Improved        | Shared validation and TOML descriptor guards reject malformed runtime input structurally.                                                                                   |
+| Diagnostics                 | Good foundation | Structured diagnostics exist, but code and location contracts are not fully typed or uniform.                                                                               |
+| Maintainability             | Improved        | `registry.ts` and core traversal/transform modules remain hotspots; conversion execution, plan validation, and format option adaptation are shared below the public facade. |
 
 ## Priority Risks
 
@@ -170,7 +170,8 @@ Adding one format currently requires editing multiple independent locations:
 - SDK builtin format unions;
 - public Zod enums;
 - registry lists;
-- parser and generator option dispatch;
+- duplicated public format metadata and output typing (the Phase 5 parser and
+  generator option dispatch migration is complete);
 - support matrix exceptions;
 - option metadata tests;
 - route tests and API snapshots.
@@ -286,9 +287,11 @@ has its own validation gate and must be completed before the next phase begins.
    supports explicit third-party component manifests.
 5. Migrate SDK `convert()` to the two-stage generic pipeline and remove format
    dispatch/route assumptions from SDK internals.
-6. Preserve the current public SDK facade through adapters and update contract,
-   integration, and package-boundary tests.
-7. Settle the canonical `Schema` versus `Shape` vocabulary and improve public
+6. Migrate each format family through the descriptor pipeline while preserving
+   the public SDK facade and compatibility option keys.
+7. Reduce remaining builtin assumptions from the SDK and improve public
+   registry-driven typing only with an explicit migration contract.
+8. Settle the canonical `Schema` versus `Shape` vocabulary and improve public
    artifact validation only when a real consumer requires it.
 
 ## Verification Baseline
