@@ -1,47 +1,40 @@
+import {
+  generatorEntriesFromCapabilities,
+  IrCompatibilityError,
+  planIrPipeline,
+  parserOutputsFromCapabilities,
+  defaultIrTransformers,
+  valueToShapeTransformer,
+  createDescriptorRegistry,
+  DescriptorLookupError,
+  DescriptorRegistryError as DescriptorRegistrationError,
+} from "@schema-transformation-toolkit/core";
 import type {
   ConversionRoute,
   ConversionRouteCapabilities,
   EntryIrKind,
   GeneratorCapabilities,
   GeneratorDescriptor,
+  IrDocument,
   IrKind,
+  IrPipelinePlan,
+  IrTransformerDescriptor,
   OverlayIrKind,
   ParserCapabilities,
   ParserDescriptor,
   PipelineStage,
   ValueRootKind,
+  DescriptorRegistry,
+  DescriptorRegistryErrorCode,
 } from "@schema-transformation-toolkit/core";
-import { typeScriptGeneratorDescriptor } from "@schema-transformation-toolkit/generator-typescript";
-import { jsonGeneratorDescriptor } from "@schema-transformation-toolkit/generator-json";
-import { csvGeneratorDescriptor } from "@schema-transformation-toolkit/generator-csv";
-import { tomlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-toml";
-import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
-import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
-import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
-import { yamlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-yaml";
-import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
-import { csvParserDescriptor } from "@schema-transformation-toolkit/parser-csv";
-import { tomlParserDescriptor } from "@schema-transformation-toolkit/parser-toml";
-import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
-import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
-import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
-import { zodParserDescriptor } from "@schema-transformation-toolkit/parser-zod";
-import { yamlParserDescriptor } from "@schema-transformation-toolkit/parser-yaml";
+import { createBuiltinRegistry } from "./generated/builtin-registry.js";
 import type {
   ConversionFormat,
   ConversionIrPreference,
   ConversionRegistry,
 } from "./types.js";
 
-export type DescriptorRegistrationErrorCode =
-  | "descriptor-invalid-version"
-  | "descriptor-format-mismatch"
-  | "descriptor-options-mismatch"
-  | "descriptor-missing-shape-ir"
-  | "descriptor-missing-ir"
-  | "descriptor-missing-handler"
-  | "descriptor-capability-mismatch"
-  | "descriptor-duplicate-format";
+export type { DescriptorRegistryErrorCode as DescriptorRegistrationErrorCode };
 
 export type ConversionRouteErrorCode =
   "unsupported-route" | "unsupported-ir-preference";
@@ -56,124 +49,148 @@ export class ConversionRouteError extends Error {
   }
 }
 
-export class DescriptorRegistrationError extends Error {
-  readonly code: DescriptorRegistrationErrorCode;
-
-  constructor(code: DescriptorRegistrationErrorCode, message: string) {
-    super(message);
-    this.name = "DescriptorRegistrationError";
-    this.code = code;
-  }
-}
+export { DescriptorRegistrationError };
 
 export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
   overlays: OverlayIrKind[];
   valueRootKinds?: ValueRootKind[];
+  entries: import("@schema-transformation-toolkit/core").IrInputContract[];
 }
+
+type RegisteredGeneratorDescriptor = GeneratorDescriptor<
+  never,
+  unknown,
+  unknown
+>;
+type RegisteredTransformerDescriptor = IrTransformerDescriptor;
 
 const normalizedCapabilities = new WeakMap<
   GeneratorDescriptor,
   NormalizedGeneratorCapabilities
 >();
 
-class MutableConversionRegistry implements ConversionRegistry {
-  private readonly parsers = new Map<string, ParserDescriptor>();
-  private readonly generators = new Map<string, GeneratorDescriptor>();
-
-  registerParser(descriptor: ParserDescriptor): void {
-    validateParserDescriptor(descriptor);
-    if (this.parsers.has(descriptor.format)) {
-      throw new DescriptorRegistrationError(
-        "descriptor-duplicate-format",
-        `A parser is already registered for "${descriptor.format}".`,
-      );
-    }
-    this.parsers.set(descriptor.format, descriptor);
-  }
-
-  registerGenerator(descriptor: GeneratorDescriptor): void {
-    validateGeneratorDescriptor(descriptor);
-    if (this.generators.has(descriptor.format)) {
-      throw new DescriptorRegistrationError(
-        "descriptor-duplicate-format",
-        `A generator is already registered for "${descriptor.format}".`,
-      );
-    }
-    normalizedCapabilities.set(
-      descriptor,
-      normalizeGeneratorCapabilities(descriptor.capabilities),
-    );
-    this.generators.set(descriptor.format, descriptor);
-  }
-
-  listParsers(): ParserDescriptor[] {
-    return [...this.parsers.values()];
-  }
-
-  listGenerators(): GeneratorDescriptor[] {
-    return [...this.generators.values()];
-  }
-
-  parser(format: string): ParserDescriptor {
-    const descriptor = this.parsers.get(format);
-    if (!descriptor) {
-      throw new ConversionRouteError(
-        "unsupported-route",
-        `Unsupported source format: ${format}`,
-      );
-    }
-    return descriptor;
-  }
-
-  generator(format: string): GeneratorDescriptor {
-    const descriptor = this.generators.get(format);
-    if (!descriptor) {
-      throw new ConversionRouteError(
-        "unsupported-route",
-        `Unsupported target format: ${format}`,
-      );
-    }
-    return descriptor;
-  }
-}
-
 export function createConversionRegistry(
   options: {
     parsers?: ParserDescriptor[];
-    generators?: GeneratorDescriptor[];
+    generators?: RegisteredGeneratorDescriptor[];
+    transformers?: RegisteredTransformerDescriptor[];
   } = {},
 ): ConversionRegistry {
-  const registry = new MutableConversionRegistry();
-  for (const parser of options.parsers ?? []) registry.registerParser(parser);
-  for (const generator of options.generators ?? []) {
-    registry.registerGenerator(generator);
-  }
-  return registry;
+  const registry = createDescriptorRegistry();
+  const customTransformerIds = new Set(
+    (options.transformers ?? []).map((descriptor) => descriptor.id),
+  );
+  return adaptDescriptorRegistry(registry, {
+    ...options,
+    transformers: [
+      ...defaultIrTransformers.filter(
+        (descriptor) => !customTransformerIds.has(descriptor.id),
+      ),
+      ...(options.transformers ?? []),
+    ],
+  });
 }
 
-export const defaultConversionRegistry = createConversionRegistry({
-  parsers: [
-    jsonParserDescriptor,
-    csvParserDescriptor,
-    tomlParserDescriptor,
-    jsonSchemaParserDescriptor,
-    typeScriptParserDescriptor,
-    openApiParserDescriptor,
-    zodParserDescriptor,
-    yamlParserDescriptor,
-  ],
-  generators: [
-    jsonGeneratorDescriptor,
-    csvGeneratorDescriptor,
-    tomlGeneratorDescriptor,
-    jsonSchemaDescriptor,
-    typeScriptGeneratorDescriptor,
-    zodGeneratorDescriptor,
-    yamlGeneratorDescriptor,
-    openApiGeneratorDescriptor,
-  ],
-});
+export const defaultConversionRegistry = adaptDescriptorRegistry(
+  createBuiltinRegistry(),
+);
+
+function adaptDescriptorRegistry(
+  coreRegistry: DescriptorRegistry,
+  initial: {
+    parsers?: ParserDescriptor[];
+    generators?: RegisteredGeneratorDescriptor[];
+    transformers?: RegisteredTransformerDescriptor[];
+  } = {},
+): ConversionRegistry {
+  const registerParser = (descriptor: ParserDescriptor): void => {
+    try {
+      coreRegistry.registerParser(descriptor);
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+  const registerGenerator = (
+    descriptor: RegisteredGeneratorDescriptor,
+  ): void => {
+    try {
+      coreRegistry.registerGenerator(descriptor);
+      normalizedCapabilities.set(
+        descriptor,
+        normalizeGeneratorCapabilities(descriptor.capabilities),
+      );
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+  const registerTransformer = (
+    descriptor: RegisteredTransformerDescriptor,
+  ): void => {
+    try {
+      coreRegistry.registerTransformer(descriptor);
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+
+  for (const parser of initial.parsers ?? []) registerParser(parser);
+  for (const generator of initial.generators ?? [])
+    registerGenerator(generator);
+  for (const transformer of initial.transformers ?? []) {
+    registerTransformer(transformer);
+  }
+
+  return {
+    registerParser,
+    registerGenerator,
+    registerTransformer,
+    listParsers: () => coreRegistry.listParsers(),
+    listGenerators: () =>
+      coreRegistry.listGenerators() as RegisteredGeneratorDescriptor[],
+    listTransformers: () => coreRegistry.listTransformers(),
+    parser(format) {
+      try {
+        return coreRegistry.parser(format);
+      } catch (error) {
+        throw toSdkLookupError(error, "source format", format);
+      }
+    },
+    generator(format) {
+      try {
+        return coreRegistry.generator(format) as RegisteredGeneratorDescriptor;
+      } catch (error) {
+        throw toSdkLookupError(error, "target format", format);
+      }
+    },
+    transformer(id) {
+      try {
+        return coreRegistry.transformer(id);
+      } catch (error) {
+        throw toSdkLookupError(error, "transformer", id);
+      }
+    },
+  };
+}
+
+function toSdkRegistrationError(error: unknown): DescriptorRegistrationError {
+  if (error instanceof DescriptorRegistrationError) return error;
+  throw error;
+}
+
+function toSdkLookupError(
+  error: unknown,
+  label: string,
+  id: string,
+): ConversionRouteError {
+  if (error instanceof DescriptorLookupError) {
+    return new ConversionRouteError(
+      "unsupported-route",
+      `Unsupported ${label}: ${id}`,
+    );
+  }
+  throw error;
+}
 
 export function listConversionRoutes(
   registry: ConversionRegistry = defaultConversionRegistry,
@@ -181,14 +198,37 @@ export function listConversionRoutes(
   const sources = registry.listParsers();
   const targets = registry.listGenerators();
 
-  return sources.flatMap((source) =>
-    targets.flatMap((target) => {
-      try {
-        return [planConversion(source.format, target.format, registry)];
-      } catch {
-        return [];
-      }
-    }),
+  return sources
+    .flatMap((source) =>
+      targets.flatMap((target) => {
+        try {
+          return [planConversion(source.format, target.format, registry)];
+        } catch {
+          return [];
+        }
+      }),
+    )
+    .sort(compareRoutes);
+}
+
+function compareRoutes(left: ConversionRoute, right: ConversionRoute): number {
+  return (
+    left.sourceFormat.localeCompare(right.sourceFormat) ||
+    left.targetFormat.localeCompare(right.targetFormat) ||
+    left.irSequence.join("\0").localeCompare(right.irSequence.join("\0")) ||
+    left.stages
+      .map(
+        (stage) => `${stage.kind}:${stage.from}:${stage.to}:${stage.ir ?? ""}`,
+      )
+      .join("\0")
+      .localeCompare(
+        right.stages
+          .map(
+            (stage) =>
+              `${stage.kind}:${stage.from}:${stage.to}:${stage.ir ?? ""}`,
+          )
+          .join("\0"),
+      )
   );
 }
 
@@ -216,11 +256,13 @@ export function planConversion(
     parserCapabilities,
     normalizedGenerator,
     irPreference,
+    resolveTransformerDescriptors(registry),
   ).route;
 }
 
 export interface ConversionExecutionPlan {
   route: ConversionRoute;
+  pipelinePlan: IrPipelinePlan;
   selectedIr: Exclude<ConversionIrPreference, "auto">;
   requestedIr: ConversionIrPreference;
   fallback: boolean;
@@ -228,6 +270,7 @@ export interface ConversionExecutionPlan {
   requiresConstraintInference: boolean;
   generatorInputIr: Exclude<ConversionIrPreference, "auto">;
   parserRequestedIr: readonly IrKind[];
+  transformerIds: readonly string[];
 }
 
 /** @deprecated Use ConversionExecutionPlan. */
@@ -251,6 +294,7 @@ export function resolveConversionRouteDecision(
     parserCapabilities,
     normalizedGenerator,
     irPreference,
+    resolveTransformerDescriptors(registry),
   );
 }
 
@@ -278,16 +322,22 @@ export function describeConversionRouteCapabilities(
   );
 
   return {
-    supportsValueIr:
-      parserCapabilities.producesIr.includes("value") &&
-      normalizedGenerator.entryIr.includes("value") &&
-      compatibleValueRootKinds(parserCapabilities, normalizedGenerator),
-    supportsShapeIr:
-      parserCapabilities.producesIr.includes("shape") &&
-      normalizedGenerator.entryIr.includes("shape"),
-    supportsConstraintIr:
-      parserCapabilities.producesIr.includes("constraint") &&
-      normalizedGenerator.overlays.includes("constraint"),
+    supportsValueIr: canPlanIr(
+      parserCapabilities,
+      normalizedGenerator,
+      "value",
+      resolveTransformerDescriptors(registry),
+    ),
+    supportsShapeIr: canPlanIr(
+      parserCapabilities,
+      normalizedGenerator,
+      "shape",
+      resolveTransformerDescriptors(registry),
+    ),
+    supportsConstraintIr: supportsConstraintIr(
+      parserCapabilities,
+      normalizedGenerator,
+    ),
     parserCapabilities: parserCapabilities.capabilities,
     generatorCapabilities: generatorCapabilities.supportsCapabilities,
     preservedCapabilities,
@@ -337,9 +387,13 @@ export function resolveParserDescriptor(
 export function resolveGeneratorDescriptor<TOutput = unknown>(
   targetFormat: ConversionFormat,
   registry: ConversionRegistry = defaultConversionRegistry,
-): GeneratorDescriptor<TOutput> {
+): GeneratorDescriptor<IrDocument, TOutput, unknown> {
   if (registry.generator) {
-    return registry.generator(targetFormat) as GeneratorDescriptor<TOutput>;
+    return registry.generator(targetFormat) as unknown as GeneratorDescriptor<
+      IrDocument,
+      TOutput,
+      unknown
+    >;
   }
   const descriptor = registry
     .listGenerators()
@@ -350,7 +404,30 @@ export function resolveGeneratorDescriptor<TOutput = unknown>(
       `Unsupported target format: ${targetFormat}`,
     );
   }
-  return descriptor as GeneratorDescriptor<TOutput>;
+  return descriptor as unknown as GeneratorDescriptor<
+    IrDocument,
+    TOutput,
+    unknown
+  >;
+}
+
+export function resolveTransformerDescriptor(
+  id: string,
+  registry: ConversionRegistry = defaultConversionRegistry,
+): IrTransformerDescriptor {
+  const descriptor = registry
+    .listTransformers?.()
+    .find((candidate) => candidate.id === id);
+  if (descriptor) return descriptor;
+  if (id === valueToShapeTransformer.id) return valueToShapeTransformer;
+  if (registry.transformer) return registry.transformer(id);
+  if (!descriptor) {
+    throw new ConversionRouteError(
+      "unsupported-route",
+      `Unsupported transformer: ${id}`,
+    );
+  }
+  return descriptor;
 }
 
 export function resolveNormalizedGeneratorCapabilities(
@@ -370,44 +447,41 @@ function resolveConversionRoute(
   parserCapabilities: ParserCapabilities,
   normalizedGenerator: NormalizedGeneratorCapabilities,
   irPreference: ConversionIrPreference,
+  transformers: readonly IrTransformerDescriptor[],
 ): ConversionExecutionPlan {
-  const canUseValue =
-    parserCapabilities.producesIr.includes("value") &&
-    normalizedGenerator.entryIr.includes("value") &&
-    compatibleValueRootKinds(parserCapabilities, normalizedGenerator);
-  const canUseShape =
-    parserCapabilities.producesIr.includes("shape") &&
-    normalizedGenerator.entryIr.includes("shape");
-  const selectedIr =
-    irPreference === "value"
-      ? canUseValue
-        ? "value"
-        : undefined
-      : irPreference === "shape"
-        ? canUseShape
-          ? "shape"
-          : undefined
-        : canUseValue
-          ? "value"
-          : canUseShape
-            ? "shape"
-            : undefined;
-
-  if (selectedIr === undefined) {
-    const otherIrAvailable =
-      irPreference === "value"
-        ? canUseShape
-        : irPreference === "shape"
-          ? canUseValue
-          : false;
-    throw new ConversionRouteError(
-      otherIrAvailable ? "unsupported-ir-preference" : "unsupported-route",
-      otherIrAvailable
-        ? `IR preference "${irPreference}" is not available for ${sourceFormat} -> ${targetFormat}.`
-        : `Unsupported conversion route: ${sourceFormat} -> ${targetFormat}.`,
-    );
+  let genericPlan: IrPipelinePlan;
+  try {
+    genericPlan = planIrPipeline({
+      parserOutputs: parserOutputsFromCapabilities(parserCapabilities),
+      generatorEntries: normalizedGenerator.entries,
+      transformers,
+      preference: irPreference,
+    });
+  } catch (error) {
+    if (error instanceof IrCompatibilityError) {
+      throw new ConversionRouteError(
+        error.code,
+        error.code === "unsupported-route"
+          ? `Unsupported conversion route: ${sourceFormat} -> ${targetFormat}.`
+          : `IR preference "${irPreference}" is not available for ${sourceFormat} -> ${targetFormat}.`,
+      );
+    }
+    throw error;
   }
 
+  const selectedIr = genericPlan.selectedIr;
+  if (selectedIr === "constraint") {
+    throw new ConversionRouteError(
+      "unsupported-route",
+      `Generator route ${sourceFormat} -> ${targetFormat} requires Constraint IR as its primary input, which the SDK generator contract does not support.`,
+    );
+  }
+  const canUseValue = canPlanIr(
+    parserCapabilities,
+    normalizedGenerator,
+    "value",
+    transformers,
+  );
   if (selectedIr === "value") {
     const route: ConversionRoute = {
       sourceFormat,
@@ -436,6 +510,7 @@ function resolveConversionRoute(
     };
     return {
       route,
+      pipelinePlan: genericPlan,
       selectedIr,
       requestedIr: irPreference,
       fallback: irPreference === "auto" && !canUseValue,
@@ -443,18 +518,27 @@ function resolveConversionRoute(
       requiresConstraintInference: false,
       generatorInputIr: "value",
       parserRequestedIr: ["value"],
+      transformerIds: [],
     };
   }
 
-  const irSequence: IrKind[] = [];
-  if (parserCapabilities.producesIr.includes("value")) irSequence.push("value");
-  irSequence.push("shape");
-  const requiresConstraintInference =
-    parserCapabilities.producesIr.includes("constraint") &&
-    normalizedGenerator.overlays.includes("constraint");
-  if (requiresConstraintInference) {
-    irSequence.push("constraint");
-  }
+  const irSequence: IrKind[] = [
+    ...(parserCapabilities.producesIr.includes("value")
+      ? ["value" as const]
+      : []),
+    "shape",
+    ...(genericPlan.requiredArtifacts?.includes("constraint") ||
+    (parserCapabilities.producesIr.includes("constraint") &&
+      normalizedGenerator.overlays.includes("constraint"))
+      ? ["constraint" as const]
+      : []),
+  ];
+  const requiresShapeInference = genericPlan.stages.some(
+    (stage) => stage.from === "value" && stage.to === "shape",
+  );
+  const requiresConstraintInference = genericPlan.stages.some(
+    (stage) => stage.to === "constraint",
+  );
 
   const route: ConversionRoute = {
     sourceFormat,
@@ -464,18 +548,20 @@ function resolveConversionRoute(
       sourceFormat,
       targetFormat,
       parserCapabilities,
-      requiresConstraintInference,
+      genericPlan,
     ),
   };
   return {
     route,
+    pipelinePlan: genericPlan,
     selectedIr,
     requestedIr: irPreference,
     fallback: irPreference === "auto" && !canUseValue,
-    requiresShapeInference: parserCapabilities.producesIr.includes("value"),
+    requiresShapeInference,
     requiresConstraintInference,
     generatorInputIr: "shape",
-    parserRequestedIr: irSequence,
+    parserRequestedIr: requiresShapeInference ? ["value"] : ["shape"],
+    transformerIds: genericPlan.stages.map((stage) => stage.transformerId),
   };
 }
 
@@ -483,36 +569,49 @@ function buildPipelineStages(
   sourceFormat: string,
   targetFormat: string,
   parserCapabilities: ParserCapabilities,
-  requiresConstraintInference: boolean,
+  genericPlan: IrPipelinePlan,
 ): PipelineStage[] {
-  if (parserCapabilities.producesIr.includes("value")) {
-    return [
-      { kind: "parse-source", from: sourceFormat, to: `${sourceFormat}-value` },
-      {
-        kind: "lower-to-value",
-        from: `${sourceFormat}-value`,
-        to: "value",
-        ir: "value",
-      },
-      { kind: "infer-shape", from: "value", to: "shape", ir: "shape" },
-      ...(requiresConstraintInference
-        ? [
-            {
-              kind: "derive-constraints" as const,
-              from: "shape",
-              to: "constraint",
-              ir: "constraint" as const,
-            },
-          ]
-        : []),
-      { kind: "generate-target", from: "shape", to: targetFormat },
-    ];
+  const usesValueTransformation = genericPlan.stages[0]?.from === "value";
+  const stages: PipelineStage[] =
+    parserCapabilities.producesIr.includes("value") && usesValueTransformation
+      ? [
+          {
+            kind: "parse-source",
+            from: sourceFormat,
+            to: `${sourceFormat}-value`,
+          },
+          {
+            kind: "lower-to-value",
+            from: `${sourceFormat}-value`,
+            to: "value",
+            ir: "value",
+          },
+        ]
+      : [
+          {
+            kind: "parse-source",
+            from: sourceFormat,
+            to: genericPlan.selectedIr,
+            ir: genericPlan.selectedIr,
+          },
+        ];
+  if (usesValueTransformation) {
+    stages.push(
+      ...genericPlan.stages.map((stage) => ({
+        kind: "transform-ir" as const,
+        from: stage.from,
+        to: stage.to,
+        ir: stage.to,
+      })),
+    );
   }
-
-  return [
-    { kind: "parse-source", from: sourceFormat, to: "shape", ir: "shape" },
-    { kind: "generate-target", from: "shape", to: targetFormat },
-  ];
+  stages.push({
+    kind: "generate-target",
+    from: genericPlan.selectedIr,
+    to: targetFormat,
+    ir: genericPlan.selectedIr,
+  });
+  return stages;
 }
 
 function normalizeGeneratorCapabilities(
@@ -524,12 +623,21 @@ function normalizeGeneratorCapabilities(
   const legacyOverlays = capabilities.consumesIr.filter(
     (ir): ir is OverlayIrKind => ir === "constraint",
   );
-  const entryIr = capabilities.entryIr ?? legacyEntryIr;
+  if (capabilities.entries?.some((entry) => entry.ir === "constraint")) {
+    throw new DescriptorRegistrationError(
+      "descriptor-capability-mismatch",
+      `Generator "${capabilities.target}" cannot use Constraint IR as an entry contract.`,
+    );
+  }
+  const declaredEntries = capabilities.entries;
+  const entriesIr = declaredEntries?.map((entry) => entry.ir as EntryIrKind);
+  const entryIr = entriesIr ?? capabilities.entryIr ?? legacyEntryIr;
   const overlays = capabilities.overlays ?? legacyOverlays;
 
   if (
     (capabilities.entryIr &&
       !sameIrKinds(capabilities.entryIr, legacyEntryIr)) ||
+    (entriesIr && !sameIrKinds(entriesIr, legacyEntryIr)) ||
     (capabilities.overlays &&
       !sameIrKinds(capabilities.overlays, legacyOverlays))
   ) {
@@ -539,23 +647,86 @@ function normalizeGeneratorCapabilities(
     );
   }
 
+  const declaredValueRoots = declaredEntries?.find(
+    (entry) => entry.ir === "value",
+  )?.valueRootKinds;
+  if (
+    declaredValueRoots &&
+    capabilities.valueRootKinds &&
+    !sameValueRootKinds(declaredValueRoots, capabilities.valueRootKinds)
+  ) {
+    throw new DescriptorRegistrationError(
+      "descriptor-capability-mismatch",
+      `Generator "${capabilities.target}" has inconsistent Value root-shape fields.`,
+    );
+  }
+
   return {
     entryIr: [...entryIr],
     overlays: [...overlays],
-    ...(capabilities.valueRootKinds
-      ? { valueRootKinds: [...capabilities.valueRootKinds] }
+    entries: generatorEntriesFromCapabilities(capabilities),
+    ...((declaredEntries?.find((entry) => entry.ir === "value")
+      ?.valueRootKinds ?? capabilities.valueRootKinds)
+      ? {
+          valueRootKinds: [
+            ...(declaredEntries?.find((entry) => entry.ir === "value")
+              ?.valueRootKinds ??
+              capabilities.valueRootKinds ??
+              []),
+          ],
+        }
       : {}),
   };
 }
 
-function compatibleValueRootKinds(
+function canPlanIr(
+  parserCapabilities: ParserCapabilities,
+  generatorCapabilities: NormalizedGeneratorCapabilities,
+  preference: Exclude<ConversionIrPreference, "auto">,
+  transformers: readonly IrTransformerDescriptor[],
+): boolean {
+  try {
+    planIrPipeline({
+      parserOutputs: parserOutputsFromCapabilities(parserCapabilities),
+      generatorEntries: generatorCapabilities.entries,
+      transformers,
+      preference,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function supportsConstraintIr(
   parserCapabilities: ParserCapabilities,
   generatorCapabilities: NormalizedGeneratorCapabilities,
 ): boolean {
-  const parserRoots = parserCapabilities.valueRootKinds;
-  const generatorRoots = generatorCapabilities.valueRootKinds;
-  if (!parserRoots || !generatorRoots) return true;
-  return parserRoots.some((root) => generatorRoots.includes(root));
+  const parserOutputs = parserOutputsFromCapabilities(parserCapabilities);
+  const parserProvidesConstraint = parserOutputs.some(
+    (output) =>
+      output.ir === "constraint" || output.artifacts?.includes("constraint"),
+  );
+  const generatorAcceptsConstraint =
+    generatorCapabilities.overlays.includes("constraint") ||
+    generatorCapabilities.entries.some((entry) =>
+      entry.artifacts?.includes("constraint"),
+    );
+  return parserProvidesConstraint && generatorAcceptsConstraint;
+}
+
+function resolveTransformerDescriptors(
+  registry: ConversionRegistry,
+): readonly IrTransformerDescriptor[] {
+  const registered = registry.listTransformers?.();
+  if (!registered) return defaultIrTransformers;
+  const defaultIds = new Set(
+    defaultIrTransformers.map((descriptor) => descriptor.id),
+  );
+  return [
+    ...registered.filter((descriptor) => !defaultIds.has(descriptor.id)),
+    ...registered.filter((descriptor) => defaultIds.has(descriptor.id)),
+  ];
 }
 
 function sameIrKinds(
@@ -565,87 +736,11 @@ function sameIrKinds(
   return left.length === right.length && left.every((ir) => right.includes(ir));
 }
 
-function validateParserDescriptor(descriptor: ParserDescriptor): void {
-  if (descriptor.descriptorVersion !== "0.1") {
-    throw new DescriptorRegistrationError(
-      "descriptor-invalid-version",
-      `Unsupported parser descriptor version: ${descriptor.descriptorVersion}.`,
-    );
-  }
-  if (descriptor.kind !== "parser" || descriptor.format.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      "Invalid parser descriptor: kind and format are required.",
-    );
-  }
-  if (descriptor.capabilities.format !== descriptor.format) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      `Parser descriptor format does not match its capabilities: ${descriptor.format}.`,
-    );
-  }
-  if (descriptor.capabilities.producesIr.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-ir",
-      `Parser "${descriptor.format}" must produce at least one IR kind.`,
-    );
-  }
-  if (typeof descriptor.parse !== "function") {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-handler",
-      `Parser "${descriptor.format}" must provide parse().`,
-    );
-  }
-  if (
-    descriptor.options.format !== descriptor.format ||
-    descriptor.options.role !== "parser"
-  ) {
-    throw new DescriptorRegistrationError(
-      "descriptor-options-mismatch",
-      `Parser "${descriptor.format}" options metadata does not match its descriptor.`,
-    );
-  }
-}
-
-function validateGeneratorDescriptor(descriptor: GeneratorDescriptor): void {
-  if (descriptor.descriptorVersion !== "0.1") {
-    throw new DescriptorRegistrationError(
-      "descriptor-invalid-version",
-      `Unsupported generator descriptor version: ${descriptor.descriptorVersion}.`,
-    );
-  }
-  if (descriptor.kind !== "generator" || descriptor.format.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      "Invalid generator descriptor: kind and format are required.",
-    );
-  }
-  if (descriptor.capabilities.target !== descriptor.format) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      `Generator descriptor format does not match its capabilities: ${descriptor.format}.`,
-    );
-  }
-  if (descriptor.capabilities.consumesIr.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-ir",
-      `Generator "${descriptor.format}" must consume at least one IR kind.`,
-    );
-  }
-  normalizeGeneratorCapabilities(descriptor.capabilities);
-  if (typeof descriptor.generate !== "function") {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-handler",
-      `Generator "${descriptor.format}" must provide generate().`,
-    );
-  }
-  if (
-    descriptor.options.format !== descriptor.format ||
-    descriptor.options.role !== "generator"
-  ) {
-    throw new DescriptorRegistrationError(
-      "descriptor-options-mismatch",
-      `Generator "${descriptor.format}" options metadata does not match its descriptor.`,
-    );
-  }
+function sameValueRootKinds(
+  left: readonly ValueRootKind[],
+  right: readonly ValueRootKind[],
+): boolean {
+  return (
+    left.length === right.length && left.every((kind) => right.includes(kind))
+  );
 }

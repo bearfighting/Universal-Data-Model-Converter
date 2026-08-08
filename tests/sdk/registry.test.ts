@@ -62,7 +62,17 @@ describe("sdk registry", () => {
       planConversion("yaml", "yaml"),
       planConversion("yaml", "openapi"),
     ];
-    expect(listConversionRoutes()).toEqual(expectedRoutes);
+    expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
+  });
+
+  it("derives root-shape incompatibility without format-pair rules", () => {
+    expect(() => planConversion("csv", "toml")).toThrow(
+      /Unsupported conversion route/,
+    );
+    expect(() => planConversion("toml", "csv")).toThrow(
+      /Unsupported conversion route/,
+    );
+    expect(() => planConversion("json", "toml")).not.toThrow();
   });
 
   it("tracks IR usage and stage exposure from planned routes", () => {
@@ -108,7 +118,7 @@ describe("sdk registry", () => {
       selectedIr: "shape",
       fallback: true,
       requiresShapeInference: false,
-      requiresConstraintInference: true,
+      requiresConstraintInference: false,
       generatorInputIr: "shape",
       route: { irSequence: ["shape", "constraint"] },
     });
@@ -217,3 +227,15 @@ describe("sdk registry", () => {
     });
   });
 });
+
+function compareRoutes(
+  left: ReturnType<typeof planConversion>,
+  right: ReturnType<typeof planConversion>,
+): number {
+  return (
+    left.sourceFormat.localeCompare(right.sourceFormat) ||
+    left.targetFormat.localeCompare(right.targetFormat) ||
+    left.irSequence.join("\0").localeCompare(right.irSequence.join("\0")) ||
+    JSON.stringify(left.stages).localeCompare(JSON.stringify(right.stages))
+  );
+}

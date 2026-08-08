@@ -40,10 +40,16 @@ export type OpenApiParseResult =
   OpenApiParseSuccessResult | OpenApiParseFailureResult;
 export declare const openApiParserCapabilities: ParserCapabilities;
 export declare const openApiParserOptionCatalog: OptionCatalog;
-export declare const openApiParserDescriptor: ParserDescriptor;
+export declare const openApiParserDescriptor: ParserDescriptor<
+  SchemaDocument,
+  OpenApiParseOptions
+>;
 export declare function tryParseOpenApiDocument(
   input: string,
   options?: OpenApiParseOptions,
 ): OpenApiParseResult;
-export declare const openApiParser: ParserDescriptor;
+export declare const openApiParser: ParserDescriptor<
+  SchemaDocument,
+  OpenApiParseOptions
+>;
 ```

@@ -42,14 +42,14 @@ name = "B"
   it("supports Value-only parsing without Shape IR", () => {
     const result = tomlParserDescriptor.parse("id = 1\n", {
       name: "Config",
-      requestedIr: ["value"],
+      requestedIr: "value",
     });
 
     expect(result).toMatchObject({
       ok: true,
-      value: { kind: "value-document" },
+      document: { kind: "value-document" },
     });
-    if (result.ok) expect(result.document).toBeUndefined();
+    if (result.ok) expect(result.document.kind).toBe("value-document");
   });
 
   it.each([

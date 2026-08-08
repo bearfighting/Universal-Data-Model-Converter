@@ -1,16 +1,12 @@
 import type {
   ConversionCapabilityRequirement,
   ConversionLossHotspot,
-  ConstraintDocument,
-  SemanticLoss,
-  SchemaDiagnostic,
-  SchemaDocument,
-  SchemaSemanticNote,
-  ValueDocument,
+  IrArtifacts,
+  IrDocument,
+  PipelineExecutionResult,
 } from "@schema-transformation-toolkit/core";
-import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
-import type { OpenApiOutput } from "@schema-transformation-toolkit/generator-openapi";
-import { generateTarget } from "./generate.js";
+import { executePipeline } from "@schema-transformation-toolkit/core";
+import type { BuiltinGeneratorOutputs } from "./builtin-types.js";
 import { planSemanticLosses } from "./losses.js";
 import {
   describeConversionRouteCapabilities,
@@ -19,17 +15,43 @@ import {
   routeStages,
   routeUsesIr,
   defaultConversionRegistry,
-  resolveGeneratorDescriptor,
   resolveConversionRouteDecision,
   ConversionRouteError,
 } from "./registry.js";
+import {
+  resolveGeneratorFromRegistry,
+  resolveParserFromRegistry,
+  resolveTransformerFromRegistry,
+} from "./registry-client.js";
+import { defaultDocumentNameForFormat } from "./builtin-compatibility.js";
 import type { ConversionRegistry } from "./types.js";
 import {
   buildConversionReport,
   collectPreservedCapabilities,
-  combineDiagnostics,
 } from "./report.js";
-import { parseSource } from "./source.js";
+import {
+  generatorOptionsFor,
+  parserOptionsFor,
+  transformerOptionsFor,
+} from "./component-options.js";
+import {
+  describeConversionOptions,
+  describeGeneratorOptions,
+  describeParserOptions,
+  describeTransformerOptions,
+  listOptionCatalogs,
+  listTransformerOptions,
+} from "./options-metadata.js";
+import {
+  describeFormatSupport,
+  listFormatSupports,
+  listSourceFormatSupports,
+  listTargetFormatSupports,
+} from "./support-matrix.js";
+import { collectUserFacingDiagnostics } from "./ui-diagnostics.js";
+import type { UserFacingDiagnostic } from "./ui-diagnostics.js";
+import type { ConversionOptionCatalogs } from "./options-metadata.js";
+import type { FormatSupportSummary } from "./support-matrix.js";
 export type {
   ConvertAdvancedOptions,
   ConversionArtifacts,
@@ -47,13 +69,19 @@ export type {
   ConversionSourceFormat,
   ConversionTargetFormat,
   ExtensionConversionOptions,
+  GenericConvertAdvancedOptions,
+  RegistryConversionOutput,
+  RegistryOutputMap,
 } from "./types.js";
 import type {
+  ConversionArtifacts,
+  ConvertFailureResult,
   ConvertOptions,
   ConvertResult,
   ConversionFormat,
   ConversionIrPreference,
   ConversionOutput,
+  RegistryOutputMap,
 } from "./types.js";
 
 export {
@@ -65,7 +93,7 @@ export {
 };
 
 export interface ConversionConverter<
-  TExtensions extends Record<string, unknown> = Record<never, never>,
+  TExtensions extends RegistryOutputMap = Record<never, never>,
 > {
   convert<TTarget extends ConversionFormat>(
     options: ConvertOptions & { targetFormat: TTarget },
@@ -77,10 +105,32 @@ export interface ConversionConverter<
     irPreference?: ConversionIrPreference,
   ) => ReturnType<typeof planConversion>;
   describeConversionRouteCapabilities: typeof describeConversionRouteCapabilities;
+  listFormatSupports(): FormatSupportSummary[];
+  listSourceFormatSupports(): FormatSupportSummary[];
+  listTargetFormatSupports(): FormatSupportSummary[];
+  describeFormatSupport(format: ConversionFormat): FormatSupportSummary;
+  describeConversionOptions(
+    sourceFormat: ConversionFormat,
+    targetFormat: ConversionFormat,
+  ): ConversionOptionCatalogs;
+  describeParserOptions(
+    format: ConversionFormat,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog;
+  describeGeneratorOptions(
+    format: ConversionFormat,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog;
+  listOptionCatalogs(): import("@schema-transformation-toolkit/core").OptionCatalog[];
+  describeTransformerOptions(
+    id: string,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog | undefined;
+  listTransformerOptions(): import("@schema-transformation-toolkit/core").OptionCatalog[];
+  collectUserFacingDiagnostics<TOutput>(
+    result: ConvertResult<TOutput>,
+  ): UserFacingDiagnostic[];
 }
 
 export function createConverter<
-  TExtensions extends Record<string, unknown> = Record<never, never>,
+  TExtensions extends RegistryOutputMap = Record<never, never>,
 >(registry: ConversionRegistry): ConversionConverter<TExtensions> {
   return {
     convert: <TTarget extends ConversionFormat>(
@@ -91,10 +141,27 @@ export function createConverter<
       planConversion(sourceFormat, targetFormat, irPreference, registry),
     describeConversionRouteCapabilities: (sourceFormat, targetFormat) =>
       describeConversionRouteCapabilities(sourceFormat, targetFormat, registry),
+    listFormatSupports: () => listFormatSupports(registry),
+    listSourceFormatSupports: () => listSourceFormatSupports(registry),
+    listTargetFormatSupports: () => listTargetFormatSupports(registry),
+    describeFormatSupport: (format) => describeFormatSupport(format, registry),
+    describeConversionOptions: (sourceFormat, targetFormat) =>
+      describeConversionOptions(sourceFormat, targetFormat, registry),
+    describeParserOptions: (format) => describeParserOptions(format, registry),
+    describeGeneratorOptions: (format) =>
+      describeGeneratorOptions(format, registry),
+    listOptionCatalogs: () => listOptionCatalogs(registry),
+    describeTransformerOptions: (id) =>
+      describeTransformerOptions(id, registry),
+    listTransformerOptions: () => listTransformerOptions(registry),
+    collectUserFacingDiagnostics: (result) =>
+      collectUserFacingDiagnostics(result),
   };
 }
 
-export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
+export function convert<
+  TOutput = string | BuiltinGeneratorOutputs[keyof BuiltinGeneratorOutputs],
+>(
   options: ConvertOptions,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): ConvertResult<TOutput> {
@@ -111,168 +178,173 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   } catch (error) {
     if (
       error instanceof ConversionRouteError &&
-      error.code === "unsupported-ir-preference"
+      (error.code === "unsupported-ir-preference" ||
+        error.code === "unsupported-route")
     ) {
       return {
         ok: false,
-        code: "unsupported-ir-preference",
-        message: `The requested IR preference "${options.irPreference}" is not available for ${options.sourceFormat} -> ${options.targetFormat}.`,
+        code: error.code,
+        message:
+          error.code === "unsupported-ir-preference"
+            ? `The requested IR preference "${options.irPreference}" is not available for ${options.sourceFormat} -> ${options.targetFormat}.`
+            : error.message,
         phase: "parse",
-        plan: {
-          sourceFormat: options.sourceFormat,
-          targetFormat: options.targetFormat,
-          irSequence: [],
-          stages: [],
-        },
+        plan: emptyConversionRoute(options),
       };
     }
-    throw error;
+    return {
+      ok: false,
+      code: "conversion-orchestration-failed",
+      message: "Conversion orchestration failed.",
+      phase: "parse",
+      plan: emptyConversionRoute(options),
+    };
   }
-  const name = options.name ?? defaultDocumentName(options.sourceFormat);
-  const diagnostics: SchemaDiagnostic[] = [];
-  const parseDiagnostics: SchemaDiagnostic[] = [];
-  const generateDiagnostics: SchemaDiagnostic[] = [];
-  const losses: SemanticLoss[] = [];
-  const semanticNotes: SchemaSemanticNote[] = [];
-  const parseSemanticNotes: SchemaSemanticNote[] = [];
-  const generateSemanticNotes: SchemaSemanticNote[] = [];
+  try {
+    return executeConversion(options, registry, routeDecision, plan);
+  } catch (error) {
+    return {
+      ok: false,
+      code: "conversion-orchestration-failed",
+      message: "Conversion orchestration failed.",
+      phase:
+        error instanceof ConversionOrchestrationError ? error.phase : "parse",
+      plan,
+      ...(error instanceof ConversionOrchestrationError
+        ? (error.evidence ?? {})
+        : {}),
+    };
+  }
+}
+
+class ConversionOrchestrationError extends Error {
+  constructor(
+    readonly phase: "parse" | "transform" | "generate",
+    cause?: unknown,
+    readonly evidence?: Pick<
+      ConvertFailureResult,
+      "diagnostics" | "artifacts" | "losses" | "semanticNotes"
+    >,
+  ) {
+    super("Conversion orchestration failed.", { cause });
+    this.name = "ConversionOrchestrationError";
+  }
+}
+
+function emptyConversionRoute(
+  options: ConvertOptions,
+): ReturnType<typeof planConversion> {
+  return {
+    sourceFormat: options.sourceFormat,
+    targetFormat: options.targetFormat,
+    irSequence: [],
+    stages: [],
+  };
+}
+
+function executeConversion<TOutput>(
+  options: ConvertOptions,
+  registry: ConversionRegistry,
+  routeDecision: ReturnType<typeof resolveConversionRouteDecision>,
+  plan: ReturnType<typeof planConversion>,
+): ConvertResult<TOutput> {
+  const name =
+    options.name ?? defaultDocumentNameForFormat(options.sourceFormat);
   const capabilityRequirements: ConversionCapabilityRequirement[] = [];
   const lossHotspots: ConversionLossHotspot[] = [];
-  let valueArtifact: ValueDocument | undefined;
-  let shapeArtifact: SchemaDocument | undefined;
-  let constraintsArtifact: ConstraintDocument | undefined;
-
-  const parseResult = parseSource(
-    options.input,
-    options.sourceFormat,
-    options.targetFormat,
-    name,
-    options,
-    registry,
-    routeDecision.parserRequestedIr,
-  );
-
-  if (!parseResult.ok) {
-    return {
-      ...parseResult,
-      plan,
-    };
-  }
-
-  valueArtifact = parseResult.value;
-  shapeArtifact = parseResult.shape;
-  constraintsArtifact = parseResult.constraints;
-  diagnostics.push(...parseResult.diagnostics);
-  parseDiagnostics.push(...parseResult.diagnostics);
-  semanticNotes.push(...parseResult.semanticNotes);
-  parseSemanticNotes.push(...parseResult.semanticNotes);
-
-  if (!shapeArtifact && !valueArtifact) {
-    return {
-      ok: false,
-      code: "parser-produced-no-ir",
-      message: "The source parser produced neither Value IR nor Shape IR.",
-      phase: "parse",
-      plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "parser-produced-no-ir",
-          message: "The source parser produced neither Value IR nor Shape IR.",
-          source: `parser-${options.sourceFormat}`,
-        },
-      ],
-    };
-  }
-
-  const targetDescriptor = resolveGeneratorDescriptor(
-    options.targetFormat,
-    registry,
-  );
-  const generationInput =
-    routeDecision.generatorInputIr === "shape" ? shapeArtifact : valueArtifact;
-
-  if (!generationInput) {
-    return {
-      ok: false,
-      code: "missing-generator-input",
-      message:
-        "The target generator requires an IR artifact the parser did not produce.",
-      phase: "generate",
-      plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "missing-generator-input",
-          message:
-            "The target generator requires an IR artifact the parser did not produce.",
-          source: `generator-${options.targetFormat}`,
-        },
-      ],
-    };
-  }
-
-  const generationResult = generateTarget<TOutput>(
-    generationInput,
-    options.targetFormat,
-    options,
-    constraintsArtifact,
-    registry,
-  );
-
-  if (!generationResult.ok) {
-    const failureDiagnostics = combineDiagnostics(
-      diagnostics,
-      generationResult.diagnostics,
-    );
-
-    return {
-      ok: false,
-      code: generationResult.code,
-      message: generationResult.message,
-      phase: "generate",
-      plan,
-      ...(failureDiagnostics ? { diagnostics: failureDiagnostics } : {}),
-    };
-  }
-
-  if (generationResult.diagnostics) {
-    diagnostics.push(...generationResult.diagnostics);
-    generateDiagnostics.push(...generationResult.diagnostics);
-  }
-  if (generationResult.semanticNotes) {
-    semanticNotes.push(...generationResult.semanticNotes);
-    generateSemanticNotes.push(...generationResult.semanticNotes);
-  }
-
-  const routeCapabilities = describeConversionRouteCapabilities(
-    options.sourceFormat,
-    options.targetFormat,
-    registry,
-  );
-
+  let routeCapabilities: ReturnType<typeof describeConversionRouteCapabilities>;
   try {
-    const generatorDescriptor = targetDescriptor;
+    routeCapabilities = describeConversionRouteCapabilities(
+      options.sourceFormat,
+      options.targetFormat,
+      registry,
+    );
+  } catch (error) {
+    throw new ConversionOrchestrationError("parse", error);
+  }
+
+  let parser: ReturnType<typeof resolveParserDescriptorForPipeline>;
+  try {
+    parser = resolveParserDescriptorForPipeline(options.sourceFormat, registry);
+  } catch (error) {
+    throw new ConversionOrchestrationError("parse", error);
+  }
+  let generatorDescriptor: ReturnType<
+    typeof resolveGeneratorFromRegistry<TOutput>
+  >;
+  try {
+    generatorDescriptor = resolveGeneratorFromRegistry<TOutput>(
+      options.targetFormat,
+      registry,
+    );
+  } catch (error) {
+    throw new ConversionOrchestrationError("generate", error);
+  }
+  let transformers: ReturnType<typeof resolveTransformerFromRegistry>[];
+  try {
+    transformers = routeDecision.pipelinePlan.stages.map((stage) =>
+      resolveTransformerFromRegistry(stage.transformerId, registry),
+    );
+  } catch (error) {
+    throw new ConversionOrchestrationError("transform", error);
+  }
+  let parserOptions: unknown;
+  try {
+    parserOptions = parserOptionsFor(parser, options);
+  } catch (error) {
+    throw new ConversionOrchestrationError("parse", error);
+  }
+  let generatorOptions: unknown;
+  try {
+    generatorOptions = generatorOptionsFor(generatorDescriptor, options);
+  } catch (error) {
+    throw new ConversionOrchestrationError("generate", error);
+  }
+  let pipelineResult: PipelineExecutionResult<TOutput>;
+  try {
+    pipelineResult = executePipeline<TOutput>({
+      parser,
+      generator: generatorDescriptor,
+      transformers,
+      plan: routeDecision.pipelinePlan,
+      input: options.input,
+      parserContext: {
+        name,
+        ...(routeDecision.parserRequestedIr[0]
+          ? { requestedIr: routeDecision.parserRequestedIr[0] }
+          : {}),
+        options: parserOptions,
+      },
+      transformerContext: ({ transformer }) => ({
+        options: transformerOptionsFor(transformer.id, options),
+      }),
+      generatorContext: {
+        options: generatorOptions,
+      },
+      sourceFormat: options.sourceFormat,
+      targetFormat: options.targetFormat,
+      routeCapabilities,
+      lossPlanner: (context) =>
+        planSemanticLosses(
+          context.routeCapabilities,
+          context.constraints,
+          options.targetFormat,
+          options.sourceFormat,
+        ),
+    });
+  } catch (error) {
+    throw new ConversionOrchestrationError("parse", error);
+  }
+
+  if (!pipelineResult.ok) {
+    return pipelineFailureToConvertResult(pipelineResult, plan);
+  }
+
+  const valueArtifact = pipelineResult.bundle.artifacts?.value;
+  const shapeArtifact = pipelineResult.bundle.artifacts?.shape;
+  const constraintsArtifact = pipelineResult.bundle.artifacts?.constraints;
+  try {
     if (shapeArtifact) {
-      const analysisContext = {
-        sourceFormat: options.sourceFormat,
-        targetFormat: options.targetFormat,
-        routeCapabilities,
-        document: shapeArtifact,
-        ...(constraintsArtifact ? { constraints: constraintsArtifact } : {}),
-      };
-
-      losses.push(
-        ...(generatorDescriptor.analysis?.planSemanticLosses
-          ? generatorDescriptor.analysis.planSemanticLosses(analysisContext)
-          : planSemanticLosses(
-              routeCapabilities,
-              constraintsArtifact,
-              options.targetFormat,
-              options.sourceFormat,
-            )),
-      );
-
       if (generatorDescriptor.analysis?.collectCapabilityRequirements) {
         capabilityRequirements.push(
           ...generatorDescriptor.analysis.collectCapabilityRequirements(
@@ -293,45 +365,72 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
       message: "The target generator analysis failed.",
       phase: "generate",
       plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "generator-analysis-failed",
-          message: "The target generator analysis failed.",
-          source: `generator-${options.targetFormat}`,
-        },
-      ],
-    };
+      ...conversionEvidenceFromPipeline(pipelineResult),
+    } as ConvertResult<TOutput>;
   }
 
-  const preservedCapabilities = collectPreservedCapabilities(
-    options.sourceFormat,
-    options.targetFormat,
-    valueArtifact,
-    shapeArtifact,
-    constraintsArtifact,
-    registry,
-  );
+  const diagnostics = pipelineResult.diagnostics?.all ?? [];
+  const losses = pipelineResult.losses ?? [];
+  const semanticNotes = pipelineResult.semanticNotes?.all ?? [];
+  const parseDiagnostics = pipelineResult.diagnostics?.parse ?? [];
+  const transformDiagnostics = pipelineResult.diagnostics?.transform ?? [];
+  const generateDiagnostics = pipelineResult.diagnostics?.generate ?? [];
+  const parseSemanticNotes = pipelineResult.semanticNotes?.parse ?? [];
+  const transformSemanticNotes = pipelineResult.semanticNotes?.transform ?? [];
+  const generateSemanticNotes = pipelineResult.semanticNotes?.generate ?? [];
 
-  const report = buildConversionReport(
-    parseDiagnostics,
-    generateDiagnostics,
-    losses,
-    preservedCapabilities,
-    parseSemanticNotes,
-    generateSemanticNotes,
-    capabilityRequirements,
-    lossHotspots,
-    {
-      requested: routeDecision.requestedIr,
-      selected: routeDecision.selectedIr,
-      fallback: routeDecision.fallback,
-    },
-  );
+  let preservedCapabilities: ReturnType<typeof collectPreservedCapabilities>;
+  try {
+    preservedCapabilities = collectPreservedCapabilities(
+      options.sourceFormat,
+      options.targetFormat,
+      valueArtifact,
+      shapeArtifact,
+      constraintsArtifact,
+      registry,
+    );
+  } catch (error) {
+    throw new ConversionOrchestrationError(
+      "generate",
+      error,
+      conversionEvidenceFromPipeline(pipelineResult),
+    );
+  }
+
+  let report: ReturnType<typeof buildConversionReport>;
+  try {
+    report = buildConversionReport({
+      diagnostics: {
+        parse: parseDiagnostics,
+        transform: transformDiagnostics,
+        generate: generateDiagnostics,
+      },
+      semanticNotes: {
+        parse: parseSemanticNotes,
+        transform: transformSemanticNotes,
+        generate: generateSemanticNotes,
+      },
+      losses,
+      preservedCapabilities,
+      capabilityRequirements,
+      lossHotspots,
+      irSelection: {
+        requested: routeDecision.requestedIr,
+        selected: routeDecision.selectedIr,
+        fallback: routeDecision.fallback,
+      },
+    });
+  } catch (error) {
+    throw new ConversionOrchestrationError(
+      "generate",
+      error,
+      conversionEvidenceFromPipeline(pipelineResult),
+    );
+  }
 
   return {
     ok: true,
-    output: generationResult.output,
+    output: pipelineResult.output,
     plan,
     ...(report ? { report } : {}),
     ...(options.includeArtifacts
@@ -352,20 +451,79 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   };
 }
 
-function defaultDocumentName(
+function conversionEvidenceFromPipeline<TOutput>(
+  result: Exclude<PipelineExecutionResult<TOutput>, { ok: false }>,
+): Pick<
+  ConvertFailureResult,
+  "diagnostics" | "artifacts" | "losses" | "semanticNotes"
+> {
+  const diagnostics = result.diagnostics?.all;
+  const semanticNotes = result.semanticNotes?.all;
+  const artifacts = conversionArtifactsFromBundle(result.bundle);
+  return {
+    ...(diagnostics && diagnostics.length > 0 ? { diagnostics } : {}),
+    ...(artifacts ? { artifacts } : {}),
+    ...(result.losses && result.losses.length > 0
+      ? { losses: result.losses }
+      : {}),
+    ...(semanticNotes && semanticNotes.length > 0 ? { semanticNotes } : {}),
+  };
+}
+
+function pipelineFailureToConvertResult<TOutput>(
+  result: Exclude<PipelineExecutionResult<TOutput>, { ok: true }>,
+  plan: ReturnType<typeof planConversion>,
+): ConvertResult<TOutput> {
+  const diagnostics = result.diagnostics?.all;
+  const artifacts = result.bundle
+    ? conversionArtifactsFromBundle(result.bundle)
+    : undefined;
+  const semanticNotes = result.semanticNotes?.all;
+  return {
+    ok: false,
+    code:
+      result.code === "invalid-ir-document" ||
+      result.code === "invalid-shape-document"
+        ? "parser-invalid-shape"
+        : result.code,
+    message: result.message,
+    phase: result.phase,
+    plan,
+    ...(diagnostics && diagnostics.length > 0 ? { diagnostics } : {}),
+    ...(artifacts ? { artifacts } : {}),
+    ...(result.losses && result.losses.length > 0
+      ? { losses: result.losses }
+      : {}),
+    ...(semanticNotes && semanticNotes.length > 0 ? { semanticNotes } : {}),
+  };
+}
+
+function conversionArtifactsFromBundle(bundle: {
+  document: IrDocument;
+  artifacts?: IrArtifacts;
+}): ConversionArtifacts | undefined {
+  const artifacts = { ...(bundle.artifacts ?? {}) };
+  if (bundle.document.kind === "value-document") {
+    artifacts.value = bundle.document;
+  } else if (bundle.document.kind === "document") {
+    artifacts.shape = bundle.document;
+  } else if (bundle.document.kind === "constraint-document") {
+    artifacts.constraints = bundle.document;
+  }
+  return Object.keys(artifacts).length > 0
+    ? {
+        ...(artifacts.value ? { value: artifacts.value } : {}),
+        ...(artifacts.shape ? { shape: artifacts.shape } : {}),
+        ...(artifacts.constraints
+          ? { constraints: artifacts.constraints }
+          : {}),
+      }
+    : undefined;
+}
+
+function resolveParserDescriptorForPipeline(
   sourceFormat: ConvertOptions["sourceFormat"],
-): string {
-  if (sourceFormat === "json") {
-    return "JsonDocument";
-  }
-
-  if (sourceFormat === "json-schema") {
-    return "JsonSchemaDocument";
-  }
-
-  if (sourceFormat === "typescript") {
-    return "TypeScriptDocument";
-  }
-
-  return `${sourceFormat.replace(/[^a-zA-Z0-9]+/g, "_")}Document`;
+  registry: ConversionRegistry,
+) {
+  return resolveParserFromRegistry(sourceFormat, registry);
 }

@@ -4,6 +4,13 @@ Preserve semantics, not just syntax.
 
 Schema Transformation Toolkit is an open-source toolkit for deterministic schema transformation across programming languages and schema formats. It provides parsers, generators, a shared intermediate representation, semantic analysis, diagnostics, and transformation utilities for building reliable schema transformation pipelines.
 
+## Start Using It
+
+For the quickest path, read the [User Guide](docs/user-guide.md). It starts
+with the recommended SDK workflow, explains success and failure handling, and
+links to practical examples. The [Capability Matrix](docs/capability-matrix.md)
+describes the current supported boundary and known limitations.
+
 ## What It Is
 
 This project is built around a simple boundary:
@@ -117,9 +124,9 @@ if (parsed.ok) {
 The convenience `generate...()` functions still exist and throw on generation failure.
 The `tryGenerate...()` functions are often a better fit when you want structured diagnostics and explicit failure handling.
 
-## Recommended Stage 1 API
+## Recommended SDK API
 
-For most users, install only `@schema-transformation-toolkit/sdk`; it is the recommended Stage 1 pipeline entry point and includes the built-in parser/generator implementations.
+For most users, install only `@schema-transformation-toolkit/sdk`; it is the main consumer entry point and includes the built-in parser/generator implementations. See the [user guide](docs/user-guide.md) for the complete usage model and the [capability matrix](docs/capability-matrix.md) for current format boundaries.
 
 Use `@schema-transformation-toolkit/sdk` when you want:
 
@@ -147,14 +154,17 @@ if (!result.ok) {
 }
 ```
 
-The stable Stage 1 SDK runtime surface is intentionally small:
+The stable SDK runtime surface includes:
 
 - `convert`
 - `planConversion`
 - `listConversionRoutes`
 - `describeConversionRouteCapabilities`
+- `createConverter`
+- format support and option discovery helpers
+- structured diagnostics, semantic notes, losses, artifacts, and reports
 
-The stable Stage 1 SDK option surface is also intentionally small:
+The core conversion options are:
 
 - `sourceFormat`
 - `targetFormat`
@@ -163,7 +173,7 @@ The stable Stage 1 SDK option surface is also intentionally small:
 - `includeArtifacts`
 - `advanced`
 
-`advanced` exists for parser-specific or generator-specific overrides, but it is not the default path.
+`advanced` provides parser, transformer, and generator-specific overrides. Use the option metadata APIs to discover supported configuration before exposing it in a UI.
 
 For most successful conversions, the most useful way to read `result.report` is:
 
@@ -187,7 +197,7 @@ if (result.ok) {
 }
 ```
 
-Use [packages/sdk/README.md](packages/sdk/README.md) for the package-local quick start and [docs/development/sdk-report-analysis.md](docs/development/sdk-report-analysis.md) for the deeper interpretation model.
+Use [packages/sdk/README.md](packages/sdk/README.md) for the package-local quick start and [docs/development/design.md](docs/development/design.md) for the deeper architecture and report interpretation model.
 After `pnpm build`, you can also run [examples/sdk-report-analysis.mjs](examples/sdk-report-analysis.mjs) to inspect a real `result.report` payload.
 
 ```ts
@@ -228,8 +238,11 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 ### Start Here
 
 - [README.md](README.md): project overview, package map, and current validated flows
+- [docs/user-guide.md](docs/user-guide.md): task-oriented installation and usage guide
+- [docs/capability-matrix.md](docs/capability-matrix.md): current capabilities, route families, and limitations
 - [docs/development/progress.md](docs/development/progress.md): current repository state and next highest-leverage work
-- [docs/development/ir-evolution.md](docs/development/ir-evolution.md): shared IR evolution principles and candidate improvements
+- [docs/development/design.md](docs/development/design.md): architecture, IR boundaries, and durable semantic decisions
+- [docs/development/standards.md](docs/development/standards.md): implementation, testing, release, and documentation standards
 - [packages/sdk/README.md](packages/sdk/README.md): high-level pipeline entry point and report-reading quick start
 - [packages/core/README.md](packages/core/README.md): shared IR model, invariants, and cross-package semantic boundary
 - [examples/README.md](examples/README.md): quick tour of current end-to-end examples
@@ -258,14 +271,7 @@ The SDK is meant to be the product-facing pipeline layer, not a re-export umbrel
 ### Deep Dive
 
 - [docs/development/README.md](docs/development/README.md): development-doc index and suggested reading order
-- [docs/development/test_plan.md](docs/development/test_plan.md): current testing strategy and refactor guardrails
-- [docs/development/architecture-layering.md](docs/development/architecture-layering.md): IR layering and capability-aware orchestration direction
-- [docs/development/ir-contract.md](docs/development/ir-contract.md): canonical shared IR contract
-- [docs/development/capabilities-and-loss.md](docs/development/capabilities-and-loss.md): conversion-result truthfulness and semantic-loss contract
 - [CHANGELOG.md](CHANGELOG.md): unreleased changes and release history
-- [docs/development/sdk-report-analysis.md](docs/development/sdk-report-analysis.md): how to interpret `sdk` report fields such as `semanticCaveats`, `capabilityRequirements`, and `lossHotspots`
-- [docs/development/json-schema-shape-gap.md](docs/development/json-schema-shape-gap.md): JSON Schema semantic gap inventory against the shared IR
-- [docs/development/typescript-parser-cases.md](docs/development/typescript-parser-cases.md): TypeScript parser support and failure cases
 
 ## Development
 

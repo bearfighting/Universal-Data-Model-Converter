@@ -153,7 +153,9 @@ export function listFormatSupports(
     formats.add(descriptor.format);
   for (const descriptor of registry.listGenerators())
     formats.add(descriptor.format);
-  return [...formats].map((format) => describeFormatSupport(format, registry));
+  return [...formats]
+    .sort((left, right) => left.localeCompare(right))
+    .map((format) => describeFormatSupport(format, registry));
 }
 
 /** Lists formats that can be selected as conversion sources. */

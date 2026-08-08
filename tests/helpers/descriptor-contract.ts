@@ -1,6 +1,7 @@
 import { expect } from "vitest";
 import {
   validateSchemaDocument,
+  type IrBundle,
   type GeneratorDescriptor,
   type ParserDescriptor,
   type SchemaDocument,
@@ -14,7 +15,6 @@ import {
 export interface ParserContractCase {
   input: string;
   name?: string;
-  targetFormat?: string;
   expectSuccess?: boolean;
 }
 
@@ -58,18 +58,21 @@ export function expectParserDescriptorContract(
   for (const testCase of cases) {
     const result = descriptor.parse(testCase.input, {
       name: testCase.name ?? `${descriptor.format}-contract`,
-      ...(testCase.targetFormat ? { targetFormat: testCase.targetFormat } : {}),
     });
     const expectedSuccess = testCase.expectSuccess ?? true;
     expect(result.ok).toBe(expectedSuccess);
     if (result.ok) {
       expect(result.document).toBeDefined();
-      if (!result.document) continue;
-      validateSchemaDocument(result.document);
-      if (result.value) {
+      if (result.document.kind === "document") {
+        validateSchemaDocument(result.document);
+      }
+      if (
+        result.document.kind === "value-document" ||
+        result.artifacts?.value
+      ) {
         expect(descriptor.capabilities.producesIr).toContain("value");
       }
-      if (result.constraints) {
+      if (result.artifacts?.constraints) {
         expect(descriptor.capabilities.producesIr).toContain("constraint");
       }
       for (const diagnostic of result.diagnostics ?? []) {
@@ -87,15 +90,12 @@ export function expectGeneratorDescriptorContract(
   expectValidGeneratorDescriptor(descriptor);
 
   for (const testCase of cases) {
-    const first = descriptor.generate(testCase.document, {
-      sourceFormat: "descriptor-contract",
-    });
+    const input: IrBundle = { document: testCase.document };
+    const first = descriptor.generate(input, {});
     const expectedSuccess = testCase.expectSuccess ?? true;
     expect(first.ok).toBe(expectedSuccess);
     if (first.ok) {
-      const second = descriptor.generate(testCase.document, {
-        sourceFormat: "descriptor-contract",
-      });
+      const second = descriptor.generate(input, {});
       expect(second).toEqual(first);
     }
   }

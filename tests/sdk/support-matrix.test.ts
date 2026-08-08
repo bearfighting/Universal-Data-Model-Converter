@@ -193,28 +193,28 @@ describe("sdk support matrix", () => {
 
   it("lists all current format supports", () => {
     expect(listFormatSupports().map((summary) => summary.format)).toEqual([
-      "json",
       "csv",
-      "toml",
+      "json",
       "json-schema",
-      "typescript",
       "openapi",
-      "zod",
+      "toml",
+      "typescript",
       "yaml",
+      "zod",
     ]);
   });
 
   it("keeps generator-only formats out of source format discovery", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
       [
-        "json",
         "csv",
-        "toml",
+        "json",
         "json-schema",
-        "typescript",
         "openapi",
-        "zod",
+        "toml",
+        "typescript",
         "yaml",
+        "zod",
       ],
     );
     expect(listSourceFormatSupports().every((summary) => summary.parser)).toBe(
@@ -222,14 +222,14 @@ describe("sdk support matrix", () => {
     );
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
       [
-        "json",
         "csv",
-        "toml",
+        "json",
         "json-schema",
-        "typescript",
         "openapi",
-        "zod",
+        "toml",
+        "typescript",
         "yaml",
+        "zod",
       ],
     );
   });

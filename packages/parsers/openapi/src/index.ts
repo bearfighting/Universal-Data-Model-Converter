@@ -61,6 +61,7 @@ const diagnostic = (
 export const openApiParserCapabilities: ParserCapabilities = {
   format: "openapi",
   producesIr: ["shape", "constraint"],
+  outputs: [{ ir: "shape" }, { ir: "constraint" }],
   capabilities: [
     "shape-ir",
     "constraint-ir",
@@ -100,17 +101,33 @@ export const openApiParserOptionCatalog: OptionCatalog = {
   ],
 };
 
-export const openApiParserDescriptor: ParserDescriptor = {
+export const openApiParserDescriptor: ParserDescriptor<
+  SchemaDocument,
+  OpenApiParseOptions
+> = {
   kind: "parser",
   descriptorVersion: "0.1",
   format: "openapi",
   capabilities: openApiParserCapabilities,
   options: openApiParserOptionCatalog,
-  parse(input: string, context: ParserExecutionContext): ParseResult {
-    return tryParseOpenApiDocument(input, {
+  parse(
+    input: string,
+    context: ParserExecutionContext<OpenApiParseOptions>,
+  ): ParseResult<SchemaDocument> {
+    const result = tryParseOpenApiDocument(input, {
       ...((context.options ?? {}) as OpenApiParseOptions),
       name: context.name,
     });
+    if (!result.ok) return result;
+    return {
+      ok: true,
+      document: result.document,
+      ...(result.constraints
+        ? { artifacts: { constraints: result.constraints } }
+        : {}),
+      ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
+      ...(result.semanticNotes ? { semanticNotes: result.semanticNotes } : {}),
+    };
   },
 };
 

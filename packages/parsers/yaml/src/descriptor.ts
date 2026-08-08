@@ -1,5 +1,6 @@
 import type {
   ParseResult,
+  IrDocument,
   ParserDescriptor,
   ParserExecutionContext,
 } from "@schema-transformation-toolkit/core";
@@ -8,7 +9,10 @@ import { tryParseYamlDocument, tryParseYamlValueDocument } from "./api.js";
 import { yamlParserOptionCatalog } from "./option-metadata.js";
 import type { YamlParseOptions } from "./options.js";
 
-export const yamlParserDescriptor: ParserDescriptor = {
+export const yamlParserDescriptor: ParserDescriptor<
+  IrDocument,
+  YamlParseOptions
+> = {
   kind: "parser",
   descriptorVersion: "0.1",
   format: "yaml",
@@ -19,19 +23,22 @@ export const yamlParserDescriptor: ParserDescriptor = {
       ...((context.options ?? {}) as YamlParseOptions),
       name: context.name,
     };
-    if (
-      context.requestedIr &&
-      !context.requestedIr.includes("shape") &&
-      context.requestedIr.includes("value")
-    ) {
+    if (context.requestedIr === "value") {
       const result = tryParseYamlValueDocument(input, options);
       if (!result.ok) return result;
       return {
         ok: true,
-        value: result.document,
+        document: result.document,
         ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
       };
     }
-    return tryParseYamlDocument(input, options);
+    const result = tryParseYamlDocument(input, options);
+    if (!result.ok) return result;
+    return {
+      ok: true,
+      document: result.document,
+      artifacts: { value: result.value },
+      ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
+    };
   },
 };

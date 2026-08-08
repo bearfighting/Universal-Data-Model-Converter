@@ -29,6 +29,7 @@ export {
   schemaDiagnosticSchema,
   semanticLossSchema,
   conversionOptionCatalogsSchema,
+  genericConversionOptionCatalogsSchema,
   optionCatalogSchema,
   optionMetadataCategorySchema,
   optionMetadataExampleSchema,
@@ -41,6 +42,8 @@ export {
   describeConversionOptions,
   describeGeneratorOptions,
   describeParserOptions,
+  describeTransformerOptions,
+  listTransformerOptions,
   listOptionCatalogs,
 } from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
@@ -76,6 +79,9 @@ export type {
   ConversionOutput,
   ConversionRegistry,
   ExtensionConversionOptions,
+  GenericConvertAdvancedOptions,
+  RegistryConversionOutput,
+  RegistryOutputMap,
 } from "./convert.js";
 export type {
   ConsumerSurfaceFormat,

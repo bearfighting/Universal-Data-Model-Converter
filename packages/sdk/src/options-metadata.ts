@@ -5,6 +5,7 @@ import type {
 import {
   resolveGeneratorDescriptor,
   resolveParserDescriptor,
+  resolveConversionRouteDecision,
   defaultConversionRegistry,
 } from "./registry.js";
 import type {
@@ -18,6 +19,7 @@ export interface ConversionOptionCatalogs {
   targetFormat: ConversionTargetFormat;
   parser: OptionCatalog;
   generator: OptionCatalog;
+  transformers: OptionCatalog[];
   irPreference: OptionMetadata;
 }
 
@@ -85,21 +87,56 @@ export function describeConversionOptions(
   targetFormat: ConversionTargetFormat,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): ConversionOptionCatalogs {
+  const route = resolveConversionRouteDecision(
+    sourceFormat,
+    targetFormat,
+    "auto",
+    registry,
+  );
+  const transformerIds = new Set(
+    route.pipelinePlan.stages.map((stage) => stage.transformerId),
+  );
   return {
     sourceFormat,
     targetFormat,
     parser: describeParserOptions(sourceFormat, registry),
     generator: describeGeneratorOptions(targetFormat, registry),
+    transformers: listTransformerOptions(registry).filter((catalog) =>
+      transformerIds.has(catalog.format),
+    ),
     irPreference: { ...conversionIrPreferenceMetadata },
   };
+}
+
+export function describeTransformerOptions(
+  id: string,
+  registry: ConversionRegistry = defaultConversionRegistry,
+): OptionCatalog | undefined {
+  const descriptor = registry
+    .listTransformers?.()
+    .find((candidate) => candidate.id === id);
+  return descriptor?.options ? cloneCatalog(descriptor.options) : undefined;
+}
+
+export function listTransformerOptions(
+  registry: ConversionRegistry = defaultConversionRegistry,
+): OptionCatalog[] {
+  return (registry.listTransformers?.() ?? [])
+    .filter((descriptor) => descriptor.options)
+    .map((descriptor) => cloneCatalog(descriptor.options!));
 }
 
 export function listOptionCatalogs(
   registry: ConversionRegistry = defaultConversionRegistry,
 ): OptionCatalog[] {
-  return [...registry.listParsers(), ...registry.listGenerators()].map(
-    (descriptor) => cloneCatalog(descriptor.options),
-  );
+  return [...registry.listParsers(), ...registry.listGenerators()]
+    .sort(
+      (left, right) =>
+        (left.options.role === "parser" ? 0 : 1) -
+          (right.options.role === "parser" ? 0 : 1) ||
+        left.options.format.localeCompare(right.options.format),
+    )
+    .map((descriptor) => cloneCatalog(descriptor.options));
 }
 
 function cloneCatalog(catalog: OptionCatalog): OptionCatalog {

@@ -11,38 +11,15 @@ import type {
   ConversionRoute,
   ParserDescriptor,
   GeneratorDescriptor,
+  IrTransformerDescriptor,
 } from "@schema-transformation-toolkit/core";
 import type {
-  JsonSchemaGeneratorOptions,
-  JsonSchemaOutput,
-} from "@schema-transformation-toolkit/generator-json-schema";
-import type { JsonOutput } from "@schema-transformation-toolkit/generator-json";
-import type {
-  OpenApiGeneratorOptions,
-  OpenApiOutput,
-} from "@schema-transformation-toolkit/generator-openapi";
-import type { TypeScriptGeneratorOptions } from "@schema-transformation-toolkit/generator-typescript";
-import type { ZodGeneratorOptions } from "@schema-transformation-toolkit/generator-zod";
-import type { YamlOutput } from "@schema-transformation-toolkit/generator-yaml";
-import type { CsvOutput } from "@schema-transformation-toolkit/generator-csv";
-import type { CsvGeneratorOptions } from "@schema-transformation-toolkit/generator-csv";
-import type { JsonParseOptions } from "@schema-transformation-toolkit/parser-json";
-import type { JsonSchemaParseOptions } from "@schema-transformation-toolkit/parser-json-schema";
-import type { TypeScriptParseOptions } from "@schema-transformation-toolkit/parser-typescript";
-import type { OpenApiParseOptions } from "@schema-transformation-toolkit/parser-openapi";
-import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod";
-import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
-import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
-import type {
-  TomlGeneratorOptions,
-  TomlOutput,
-} from "@schema-transformation-toolkit/generator-toml";
-import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
-import type {
-  BuiltinSourceFormat,
-  BuiltinTargetFormat,
-} from "./builtin-formats.js";
+  BuiltinGeneratorOptions,
+  BuiltinGeneratorOutputs,
+  BuiltinParserOptions,
+} from "./builtin-types.js";
 
+export type { BuiltinGeneratorOutputs } from "./builtin-types.js";
 export type {
   BuiltinSourceFormat,
   BuiltinTargetFormat,
@@ -50,63 +27,50 @@ export type {
 
 export type ConversionIrPreference = CoreConversionIrPreference;
 
-export interface BuiltinGeneratorOutputs {
-  json: JsonOutput;
-  "json-schema": JsonSchemaOutput;
-  typescript: string;
-  zod: string;
-  openapi: OpenApiOutput;
-  yaml: YamlOutput;
-  csv: CsvOutput;
-  toml: TomlOutput;
-}
-export type ConversionFormat =
-  BuiltinSourceFormat | BuiltinTargetFormat | (string & {});
+/** Registry-driven format identity. Builtin format aliases remain available for compatibility. */
+export type ConversionFormat = string;
 export type ConversionSourceFormat = ConversionFormat;
 export type ConversionTargetFormat = ConversionFormat;
+export type RegistryOutputMap = object;
+export type RegistryConversionOutput<
+  TTarget extends string,
+  TOutputs extends RegistryOutputMap,
+> = TTarget extends keyof TOutputs ? TOutputs[TTarget] : unknown;
 export type ConversionOutput<
   TTarget extends string,
-  TExtensions extends Record<string, unknown> = Record<never, never>,
-> = TTarget extends keyof BuiltinGeneratorOutputs
-  ? BuiltinGeneratorOutputs[TTarget]
-  : TTarget extends keyof TExtensions
-    ? TExtensions[TTarget]
-    : unknown;
+  TExtensions extends RegistryOutputMap = Record<never, never>,
+> = RegistryConversionOutput<TTarget, BuiltinGeneratorOutputs & TExtensions>;
 
 export interface ExtensionConversionOptions {
   parser?: Record<string, unknown>;
+  transformer?: Record<string, unknown>;
   generator?: Record<string, unknown>;
+}
+
+export interface GenericConvertAdvancedOptions {
+  parser?: unknown;
+  transformer?: Record<string, unknown>;
+  generator?: unknown;
 }
 
 export interface ConversionRegistry {
   registerParser(descriptor: ParserDescriptor): void;
-  registerGenerator(descriptor: GeneratorDescriptor): void;
+  registerGenerator(
+    descriptor: GeneratorDescriptor<never, unknown, unknown>,
+  ): void;
   listParsers(): ParserDescriptor[];
-  listGenerators(): GeneratorDescriptor[];
+  listGenerators(): GeneratorDescriptor<never, unknown, unknown>[];
+  registerTransformer?(descriptor: IrTransformerDescriptor): void;
+  listTransformers?(): IrTransformerDescriptor[];
   parser?(format: string): ParserDescriptor;
-  generator?(format: string): GeneratorDescriptor;
+  generator?(format: string): GeneratorDescriptor<never, unknown, unknown>;
+  transformer?(id: string): IrTransformerDescriptor;
 }
 
 export interface ConvertAdvancedOptions {
-  parser?: {
-    json?: JsonParseOptions;
-    jsonSchema?: JsonSchemaParseOptions;
-    typeScript?: TypeScriptParseOptions;
-    openapi?: OpenApiParseOptions;
-    zod?: ZodParseOptions;
-    yaml?: YamlParseOptions;
-    csv?: CsvParseOptions;
-    toml?: TomlParseOptions;
-  };
-  generator?: {
-    jsonSchema?: JsonSchemaGeneratorOptions;
-    typeScript?: TypeScriptGeneratorOptions;
-    zod?: ZodGeneratorOptions;
-    openapi?: OpenApiGeneratorOptions;
-    yaml?: Record<string, never>;
-    csv?: CsvGeneratorOptions;
-    toml?: TomlGeneratorOptions;
-  };
+  parser?: BuiltinParserOptions;
+  transformer?: Record<string, unknown>;
+  generator?: BuiltinGeneratorOptions;
 }
 
 export interface ConvertOptions {
@@ -116,7 +80,7 @@ export interface ConvertOptions {
   name?: string;
   irPreference?: ConversionIrPreference;
   includeArtifacts?: boolean;
-  advanced?: ConvertAdvancedOptions;
+  advanced?: ConvertAdvancedOptions | GenericConvertAdvancedOptions;
   extension?: ExtensionConversionOptions;
 }
 
@@ -127,7 +91,7 @@ export interface ConversionArtifacts {
 }
 
 export interface ConvertSuccessResult<
-  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
+  TOutput = string | BuiltinGeneratorOutputs[keyof BuiltinGeneratorOutputs],
 > {
   ok: true;
   output: TOutput;
@@ -144,11 +108,14 @@ export interface ConvertFailureResult {
   ok: false;
   code: string;
   message: string;
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   plan: ConversionRoute;
   diagnostics?: SchemaDiagnostic[];
+  artifacts?: ConversionArtifacts;
+  losses?: SemanticLoss[];
+  semanticNotes?: SchemaSemanticNote[];
 }
 
 export type ConvertResult<
-  TOutput = string | JsonOutput | JsonSchemaOutput | OpenApiOutput,
+  TOutput = string | BuiltinGeneratorOutputs[keyof BuiltinGeneratorOutputs],
 > = ConvertSuccessResult<TOutput> | ConvertFailureResult;

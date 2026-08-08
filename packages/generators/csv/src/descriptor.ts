@@ -1,5 +1,7 @@
+import { isIrBundle } from "@schema-transformation-toolkit/core";
 import type {
   GeneratorDescriptor,
+  IrBundle,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
 import { tryGenerateCsv } from "./api.js";
@@ -7,14 +9,18 @@ import { csvGeneratorCapabilities } from "./capabilities.js";
 import { csvGeneratorOptionCatalog } from "./option-metadata.js";
 import type { CsvGeneratorOptions } from "./options.js";
 
-export const csvGeneratorDescriptor: GeneratorDescriptor<string> = {
+export const csvGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string,
+  CsvGeneratorOptions
+> = {
   kind: "generator",
   descriptorVersion: "0.1",
   format: "csv",
   capabilities: csvGeneratorCapabilities,
   options: csvGeneratorOptionCatalog,
-  generate(document, context) {
-    if (document.kind !== "value-document") {
+  generate(input: IrBundle<ValueDocument>, context) {
+    if (!isIrBundle(input) || input.document.kind !== "value-document") {
       return {
         ok: false,
         code: "invalid-generator-input",
@@ -29,9 +35,6 @@ export const csvGeneratorDescriptor: GeneratorDescriptor<string> = {
         ],
       };
     }
-    return tryGenerateCsv(
-      document as ValueDocument,
-      (context.options ?? {}) as CsvGeneratorOptions,
-    );
+    return tryGenerateCsv(input.document, context.options ?? {});
   },
 };

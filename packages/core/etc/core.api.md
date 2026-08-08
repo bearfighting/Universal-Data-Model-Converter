@@ -229,7 +229,7 @@ export interface OptionMetadata {
 }
 export interface OptionCatalog {
   format: string;
-  role: "parser" | "generator";
+  role: "parser" | "transformer" | "generator";
   options: OptionMetadata[];
 }
 ```
@@ -240,11 +240,24 @@ export interface OptionCatalog {
 import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
 import type { ConstraintDocument } from "../constraint/types.js";
 import type { SchemaDocument } from "../schema/types.js";
+import type { ValueDocument } from "../value/types.js";
+import type { IrTransformerDescriptor } from "./descriptor-contracts.js";
 export type IrKind = "value" | "shape" | "constraint";
 export type ValueRootKind = "scalar" | "object" | "array";
 export type EntryIrKind = Exclude<IrKind, "constraint">;
 export type OverlayIrKind = Extract<IrKind, "constraint">;
 export type ConversionIrPreference = "auto" | "value" | "shape";
+export type IrDocument = ValueDocument | SchemaDocument | ConstraintDocument;
+export interface IrArtifacts {
+  value?: ValueDocument;
+  shape?: SchemaDocument;
+  constraints?: ConstraintDocument;
+}
+export interface IrBundle<TDocument extends IrDocument = IrDocument> {
+  document: TDocument;
+  artifacts?: IrArtifacts;
+}
+export declare function isIrBundle(input: unknown): input is IrBundle;
 export interface ConversionIrSelection {
   requested: ConversionIrPreference;
   selected: Exclude<ConversionIrPreference, "auto">;
@@ -272,6 +285,7 @@ export interface SemanticLoss {
 }
 export interface ConversionReportStage<TFact> {
   parse?: TFact[];
+  transform?: TFact[];
   generate?: TFact[];
   all: TFact[];
 }
@@ -284,7 +298,7 @@ export interface ConversionEntrySelection {
   evidence?: unknown;
 }
 export interface ConversionPolicyDecision {
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   code: string;
   message: string;
   source?: string;
@@ -292,7 +306,7 @@ export interface ConversionPolicyDecision {
   evidence?: unknown;
 }
 export interface ConversionSemanticCaveat {
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   kind: Exclude<SchemaSemanticNote["kind"], "policy">;
   code: string;
   message: string;
@@ -320,12 +334,41 @@ export interface ConversionLossHotspot {
 export interface ParserCapabilities {
   format: string;
   producesIr: IrKind[];
+  outputs?: IrOutputContract[];
   capabilities: ConversionCapability[];
   valueRootKinds?: ValueRootKind[];
+}
+export interface IrInputContract {
+  ir: IrKind;
+  valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
+}
+export interface IrOutputContract {
+  ir: IrKind;
+  valueRootKinds?: ValueRootKind[];
+  artifacts?: IrKind[];
+}
+export interface IrCompatibilityRequest {
+  parserOutputs: IrOutputContract[];
+  generatorEntries: IrInputContract[];
+  transformers?: readonly IrTransformerDescriptor[];
+  preference?: ConversionIrPreference;
+}
+export interface IrPipelineStage {
+  kind: "transform";
+  transformerId: string;
+  from: IrKind;
+  to: IrKind;
+}
+export interface IrPipelinePlan {
+  selectedIr: IrKind;
+  stages: IrPipelineStage[];
+  requiredArtifacts?: IrKind[];
 }
 export interface GeneratorCapabilities {
   target: string;
   consumesIr: IrKind[];
+  entries?: IrInputContract[];
   entryIr?: EntryIrKind[];
   overlays?: OverlayIrKind[];
   supportsCapabilities: ConversionCapability[];
@@ -357,11 +400,86 @@ export interface ConversionReport {
   policyDecisions?: ConversionPolicyDecision[];
   entrySelection?: ConversionEntrySelection;
 }
+export type PipelineExecutionPhase = "parse" | "transform" | "generate";
+export interface PipelineExecutionDiagnostics {
+  parse?: SchemaDiagnostic[];
+  transform?: SchemaDiagnostic[];
+  generate?: SchemaDiagnostic[];
+  all: SchemaDiagnostic[];
+}
+export interface PipelineExecutionSemanticNotes {
+  parse?: SchemaSemanticNote[];
+  transform?: SchemaSemanticNote[];
+  generate?: SchemaSemanticNote[];
+  all: SchemaSemanticNote[];
+}
+export interface PipelineExecutionRequest<
+  TOutput = unknown,
+  TParserOptions = unknown,
+  TTransformerOptions = unknown,
+  TGeneratorOptions = unknown,
+> {
+  parser: import("./descriptor-contracts.js").ParserDescriptor<
+    IrDocument,
+    TParserOptions
+  >;
+  generator: import("./descriptor-contracts.js").GeneratorDescriptor<
+    IrDocument,
+    TOutput,
+    TGeneratorOptions
+  >;
+  transformers?: readonly import("./descriptor-contracts.js").IrTransformerDescriptor<
+    IrDocument,
+    IrDocument,
+    TTransformerOptions
+  >[];
+  plan: IrPipelinePlan;
+  input: string;
+  parserContext: import("./descriptor-contracts.js").ParserExecutionContext<TParserOptions>;
+  transformerContext?:
+    | import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>
+    | ((context: {
+        transformer: import("./descriptor-contracts.js").IrTransformerDescriptor<
+          IrDocument,
+          IrDocument,
+          TTransformerOptions
+        >;
+        stage: IrPipelineStage;
+        index: number;
+      }) => import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>);
+  generatorContext?: import("./descriptor-contracts.js").GeneratorExecutionContext<TGeneratorOptions>;
+  sourceFormat: string;
+  targetFormat: string;
+  routeCapabilities?: ConversionRouteCapabilities;
+  lossPlanner?: (context: SemanticLossAnalysisContext) => SemanticLoss[];
+}
+export interface PipelineExecutionSuccess<TOutput = unknown> {
+  ok: true;
+  output: TOutput;
+  bundle: IrBundle;
+  diagnostics?: PipelineExecutionDiagnostics;
+  semanticNotes?: PipelineExecutionSemanticNotes;
+  losses?: SemanticLoss[];
+}
+export interface PipelineExecutionFailure {
+  ok: false;
+  code: string;
+  message: string;
+  phase: PipelineExecutionPhase;
+  plan: IrPipelinePlan;
+  bundle?: IrBundle;
+  diagnostics?: PipelineExecutionDiagnostics;
+  semanticNotes?: PipelineExecutionSemanticNotes;
+  losses?: SemanticLoss[];
+}
+export type PipelineExecutionResult<TOutput = unknown> =
+  PipelineExecutionSuccess<TOutput> | PipelineExecutionFailure;
 export type PipelineStageKind =
   | "parse-source"
   | "lower-to-value"
   | "infer-shape"
   | "derive-constraints"
+  | "transform-ir"
   | "generate-target";
 export interface PipelineStage {
   kind: PipelineStageKind;
@@ -386,6 +504,150 @@ export interface ConversionRouteCapabilities {
 }
 ```
 
+## packages/core/src/pipeline/descriptor-contracts.d.ts
+
+```ts
+import type { OptionCatalog } from "../option-metadata.js";
+import type { SchemaDiagnostic, SchemaSemanticNote } from "../schema/types.js";
+import type {
+  IrArtifacts,
+  IrBundle,
+  IrDocument,
+  IrKind,
+  GeneratorCapabilities,
+  GeneratorAnalysisHooks,
+  ParserCapabilities,
+} from "./contracts.js";
+export interface ParseSuccessResult<TDocument extends IrDocument = IrDocument> {
+  ok: true;
+  document: TDocument;
+  artifacts?: IrArtifacts;
+  diagnostics?: SchemaDiagnostic[];
+  semanticNotes?: SchemaSemanticNote[];
+}
+export interface ParseFailureResult<TCode extends string = string> {
+  ok: false;
+  code: TCode;
+  message: string;
+  diagnostics?: SchemaDiagnostic[];
+}
+export type ParseResult<
+  TDocument extends IrDocument = IrDocument,
+  TCode extends string = string,
+> = ParseSuccessResult<TDocument> | ParseFailureResult<TCode>;
+export interface GenerateSuccessResult<TOutput = string> {
+  ok: true;
+  output: TOutput;
+  diagnostics?: SchemaDiagnostic[];
+  semanticNotes?: SchemaSemanticNote[];
+}
+export interface GenerateFailureResult<TCode extends string = string> {
+  ok: false;
+  code: TCode;
+  message: string;
+  diagnostics?: SchemaDiagnostic[];
+}
+export type GenerateResult<TOutput = string, TCode extends string = string> =
+  GenerateSuccessResult<TOutput> | GenerateFailureResult<TCode>;
+export interface ParserExecutionContext<TOptions = unknown> {
+  name: string;
+  requestedIr?: IrKind;
+  options?: TOptions;
+}
+export interface GeneratorExecutionContext<TOptions = unknown> {
+  options?: TOptions;
+}
+export interface TransformerExecutionContext<TOptions = unknown> {
+  options?: TOptions;
+}
+export type DescriptorVersion = "0.1";
+export interface ParserDescriptor<
+  TDocument extends IrDocument = IrDocument,
+  TOptions = unknown,
+> {
+  kind: "parser";
+  format: string;
+  descriptorVersion: DescriptorVersion;
+  capabilities: ParserCapabilities;
+  options: OptionCatalog;
+  parse(
+    input: string,
+    context: ParserExecutionContext<TOptions>,
+  ): ParseResult<TDocument>;
+}
+export interface GeneratorDescriptor<
+  TInput extends IrDocument = IrDocument,
+  TOutput = unknown,
+  TOptions = unknown,
+> {
+  kind: "generator";
+  format: string;
+  descriptorVersion: DescriptorVersion;
+  capabilities: GeneratorCapabilities;
+  options: OptionCatalog;
+  analysis?: GeneratorAnalysisHooks;
+  generate(
+    input: IrBundle<TInput>,
+    context: GeneratorExecutionContext<TOptions>,
+  ): GenerateResult<TOutput>;
+}
+export interface TransformSuccessResult<TDocument extends IrDocument> {
+  ok: true;
+  document: TDocument;
+  artifacts?: IrArtifacts;
+  diagnostics?: SchemaDiagnostic[];
+  semanticNotes?: SchemaSemanticNote[];
+}
+export type TransformResult<
+  TDocument extends IrDocument = IrDocument,
+  TCode extends string = string,
+> = TransformSuccessResult<TDocument> | ParseFailureResult<TCode>;
+export interface IrTransformerDescriptor<
+  TInput extends IrDocument = IrDocument,
+  TOutput extends IrDocument = IrDocument,
+  TOptions = unknown,
+> {
+  kind: "transformer";
+  id: string;
+  descriptorVersion: DescriptorVersion;
+  inputIr: IrKind;
+  outputIr: IrKind;
+  options?: OptionCatalog;
+  transform(
+    input: IrBundle<TInput>,
+    context: TransformerExecutionContext<TOptions>,
+  ): TransformResult<TOutput>;
+}
+```
+
+## packages/core/src/pipeline/execution.d.ts
+
+```ts
+import type {
+  GenerateResult,
+  GeneratorDescriptor,
+  GeneratorExecutionContext,
+  ParseResult,
+  ParserDescriptor,
+  ParserExecutionContext,
+} from "./descriptor-contracts.js";
+import type { IrBundle, IrDocument } from "./contracts.js";
+export declare function executeParser<TDocument extends IrDocument, TOptions>(
+  descriptor: ParserDescriptor<TDocument, TOptions>,
+  input: string,
+  context: ParserExecutionContext<TOptions>,
+): ParseResult<TDocument>;
+export declare function executeGenerator<
+  TInput extends IrDocument,
+  TOutput,
+  TOptions,
+>(
+  descriptor: GeneratorDescriptor<TInput, TOutput, TOptions>,
+  input: IrBundle<TInput>,
+  context: GeneratorExecutionContext<TOptions>,
+): GenerateResult<TOutput>;
+```
+
 ## packages/core/src/pipeline/index.d.ts
 
 ```ts
@@ -401,6 +663,14 @@ export type {
   ConversionSemanticCaveat,
   ConversionCapability,
   GeneratorCapabilities,
+  IrArtifacts,
+  IrBundle,
+  IrCompatibilityRequest,
+  IrDocument,
+  IrInputContract,
+  IrOutputContract,
+  IrPipelinePlan,
+  IrPipelineStage,
   OverlayIrKind,
   GeneratorAnalysisHooks,
   ParserCapabilities,
@@ -413,28 +683,196 @@ export type {
   SemanticLoss,
   SemanticLossPhase,
   SemanticLossAnalysisContext,
+  PipelineExecutionPhase,
+  PipelineExecutionDiagnostics,
+  PipelineExecutionSemanticNotes,
+  PipelineExecutionRequest,
+  PipelineExecutionSuccess,
+  PipelineExecutionFailure,
+  PipelineExecutionResult,
 } from "./contracts.js";
+export { isIrBundle } from "./contracts.js";
+export {
+  IrCompatibilityError,
+  generatorEntriesFromCapabilities,
+  parserOutputsFromCapabilities,
+  planIrPipeline,
+} from "./planner.js";
+export {
+  defaultIrTransformers,
+  valueToShapeTransformer,
+} from "./transformers.js";
+export { executeGenerator, executeParser } from "./execution.js";
+export { executePipeline } from "./pipeline.js";
+export {
+  executeIrTransformer,
+  tryValidateIrBundle,
+  tryValidateIrDocument,
+} from "./validation.js";
+export {
+  createDescriptorRegistry,
+  DescriptorLookupError,
+  DescriptorRegistryError,
+} from "./registry.js";
+export type {
+  DescriptorRegistry,
+  DescriptorRegistryErrorCode,
+} from "./registry.js";
+export type {
+  IrValidationFailure,
+  IrValidationResult,
+  IrValidationSuccess,
+} from "./validation.js";
 export type {
   DescriptorVersion,
+  GenerateFailureResult,
+  GenerateResult,
+  GenerateSuccessResult,
   GeneratorDescriptor,
   GeneratorExecutionContext,
+  IrTransformerDescriptor,
+  ParseFailureResult,
+  ParseResult,
+  ParseSuccessResult,
+  TransformResult,
+  TransformSuccessResult,
+  TransformerExecutionContext,
   ParserDescriptor,
   ParserExecutionContext,
-} from "../schema/contracts.js";
+} from "./descriptor-contracts.js";
+```
+
+## packages/core/src/pipeline/pipeline.d.ts
+
+```ts
+import type {
+  PipelineExecutionRequest,
+  PipelineExecutionResult,
+} from "./contracts.js";
+export declare function executePipeline<TOutput>(
+  request: PipelineExecutionRequest<TOutput>,
+): PipelineExecutionResult<TOutput>;
+```
+
+## packages/core/src/pipeline/planner.d.ts
+
+```ts
+import type {
+  GeneratorCapabilities,
+  IrCompatibilityRequest,
+  IrInputContract,
+  IrOutputContract,
+  IrPipelinePlan,
+  ParserCapabilities,
+} from "./contracts.js";
+export declare class IrCompatibilityError extends Error {
+  readonly code: "unsupported-route" | "unsupported-ir-preference";
+  constructor(
+    code: "unsupported-route" | "unsupported-ir-preference",
+    message: string,
+  );
+}
+export declare function planIrPipeline(
+  request: IrCompatibilityRequest,
+): IrPipelinePlan;
+export declare function parserOutputsFromCapabilities(
+  capabilities: ParserCapabilities,
+): IrOutputContract[];
+export declare function generatorEntriesFromCapabilities(
+  capabilities: GeneratorCapabilities,
+): IrInputContract[];
+```
+
+## packages/core/src/pipeline/registry.d.ts
+
+```ts
+import type {
+  GeneratorDescriptor,
+  IrTransformerDescriptor,
+  ParserDescriptor,
+} from "./descriptor-contracts.js";
+export type DescriptorRegistryErrorCode =
+  | "descriptor-invalid-version"
+  | "descriptor-format-mismatch"
+  | "descriptor-options-mismatch"
+  | "descriptor-missing-shape-ir"
+  | "descriptor-missing-ir"
+  | "descriptor-missing-handler"
+  | "descriptor-capability-mismatch"
+  | "descriptor-duplicate-format"
+  | "descriptor-duplicate-transformer";
+export declare class DescriptorRegistryError extends Error {
+  readonly code: DescriptorRegistryErrorCode;
+  constructor(code: DescriptorRegistryErrorCode, message: string);
+}
+export declare class DescriptorLookupError extends Error {
+  readonly code: "descriptor-not-found";
+  constructor(role: "parser" | "generator" | "transformer", id: string);
+}
+export interface DescriptorRegistry {
+  registerParser(descriptor: unknown): void;
+  registerGenerator(descriptor: unknown): void;
+  registerTransformer(descriptor: unknown): void;
+  listParsers(): ParserDescriptor[];
+  listGenerators(): GeneratorDescriptor[];
+  listTransformers(): IrTransformerDescriptor[];
+  parser(format: string): ParserDescriptor;
+  generator(format: string): GeneratorDescriptor;
+  transformer(id: string): IrTransformerDescriptor;
+}
+export declare function createDescriptorRegistry(): DescriptorRegistry;
+```
+
+## packages/core/src/pipeline/transformers.d.ts
+
+```ts
+import type { SchemaDocument } from "../schema/types.js";
+import type { ValueDocument } from "../value/types.js";
+import type { IrTransformerDescriptor } from "./descriptor-contracts.js";
+export declare const valueToShapeTransformer: IrTransformerDescriptor<
+  ValueDocument,
+  SchemaDocument
+>;
+export declare const defaultIrTransformers: readonly IrTransformerDescriptor[];
+```
+
+## packages/core/src/pipeline/validation.d.ts
+
+```ts
+import type { SchemaDiagnostic } from "../schema/types.js";
+import type { IrBundle, IrDocument } from "./contracts.js";
+import type {
+  IrTransformerDescriptor,
+  TransformResult,
+  TransformerExecutionContext,
+} from "./descriptor-contracts.js";
+export interface IrValidationSuccess {
+  ok: true;
+}
+export interface IrValidationFailure {
+  ok: false;
+  diagnostics: SchemaDiagnostic[];
+}
+export type IrValidationResult = IrValidationSuccess | IrValidationFailure;
+export declare function executeIrTransformer<
+  TInput extends IrDocument,
+  TOutput extends IrDocument,
+  TOptions,
+>(
+  descriptor: IrTransformerDescriptor<TInput, TOutput, TOptions>,
+  input: IrBundle<TInput>,
+  context: TransformerExecutionContext<TOptions>,
+): TransformResult<TOutput>;
+export declare function tryValidateIrBundle(input: unknown): IrValidationResult;
+export declare function tryValidateIrDocument(
+  input: unknown,
+): IrValidationResult;
 ```
 
 ## packages/core/src/schema/contracts.d.ts
 
 ```ts
-import type {
-  SchemaDiagnostic,
-  SchemaDocument,
-  SchemaSemanticNote,
-} from "./types.js";
-import type { ConstraintDocument } from "../constraint/types.js";
-import type { OptionCatalog } from "../option-metadata.js";
-import type { ValueDocument } from "../value/types.js";
-import type { IrKind } from "../pipeline/contracts.js";
+import type { SchemaDocument } from "./types.js";
 export interface ParseOptions {
   name?: string;
 }
@@ -450,31 +888,12 @@ export interface ConfiguredParser<
   parser: TParser;
   prepared: PreparedOptions<TResolved>;
 }
-export type ParseSuccessResult =
-  | {
-      ok: true;
-      document: SchemaDocument;
-      value?: ValueDocument;
-      constraints?: ConstraintDocument;
-      diagnostics?: SchemaDiagnostic[];
-      semanticNotes?: SchemaSemanticNote[];
-    }
-  | {
-      ok: true;
-      value: ValueDocument;
-      document?: never;
-      constraints?: never;
-      diagnostics?: SchemaDiagnostic[];
-      semanticNotes?: SchemaSemanticNote[];
-    };
-export interface ParseFailureResult<TCode extends string = string> {
-  ok: false;
-  code: TCode;
-  message: string;
-  diagnostics?: SchemaDiagnostic[];
-}
-export type ParseResult<TCode extends string = string> =
-  ParseSuccessResult | ParseFailureResult<TCode>;
+export type {
+  ParseFailureResult,
+  ParseResult,
+  ParseSuccessResult,
+} from "../pipeline/descriptor-contracts.js";
+import type { ParseResult } from "../pipeline/descriptor-contracts.js";
 export interface SchemaParser<
   TInput = string,
   TOptions extends ParseOptions = ParseOptions,
@@ -495,20 +914,12 @@ export interface ConfiguredGenerator<
   generator: TGenerator;
   prepared: PreparedOptions<TResolved>;
 }
-export interface GenerateSuccessResult<TOutput = string> {
-  ok: true;
-  output: TOutput;
-  diagnostics?: SchemaDiagnostic[];
-  semanticNotes?: SchemaSemanticNote[];
-}
-export interface GenerateFailureResult<TCode extends string = string> {
-  ok: false;
-  code: TCode;
-  message: string;
-  diagnostics?: SchemaDiagnostic[];
-}
-export type GenerateResult<TOutput = string, TCode extends string = string> =
-  GenerateSuccessResult<TOutput> | GenerateFailureResult<TCode>;
+export type {
+  GenerateFailureResult,
+  GenerateResult,
+  GenerateSuccessResult,
+} from "../pipeline/descriptor-contracts.js";
+import type { GenerateResult } from "../pipeline/descriptor-contracts.js";
 export interface SchemaGenerator<
   TOutput = string,
   TOptions extends GenerateOptions = GenerateOptions,
@@ -516,38 +927,6 @@ export interface SchemaGenerator<
 > {
   target: string;
   generate(document: SchemaDocument, options?: TOptions): TResult;
-}
-export interface ParserExecutionContext {
-  name: string;
-  targetFormat?: string;
-  requestedIr?: readonly IrKind[];
-  options?: unknown;
-}
-export interface GeneratorExecutionContext {
-  sourceFormat?: string;
-  options?: unknown;
-  constraints?: ConstraintDocument;
-}
-export type DescriptorVersion = "0.1";
-export interface ParserDescriptor {
-  kind: "parser";
-  format: string;
-  descriptorVersion: DescriptorVersion;
-  capabilities: import("../pipeline/contracts.js").ParserCapabilities;
-  options: OptionCatalog;
-  parse(input: string, context: ParserExecutionContext): ParseResult;
-}
-export interface GeneratorDescriptor<TOutput = unknown> {
-  kind: "generator";
-  format: string;
-  descriptorVersion: DescriptorVersion;
-  capabilities: import("../pipeline/contracts.js").GeneratorCapabilities;
-  options: OptionCatalog;
-  analysis?: import("../pipeline/contracts.js").GeneratorAnalysisHooks;
-  generate(
-    document: SchemaDocument | ValueDocument,
-    context: GeneratorExecutionContext,
-  ): GenerateResult<TOutput>;
 }
 ```
 

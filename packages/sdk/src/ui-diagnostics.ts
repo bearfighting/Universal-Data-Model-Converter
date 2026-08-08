@@ -29,19 +29,28 @@ export interface UserFacingDiagnostic {
   technicalDetails?: unknown;
 }
 
-export function collectUserFacingDiagnostics(
-  result: ConvertResult,
+export function collectUserFacingDiagnostics<TOutput>(
+  result: ConvertResult<TOutput>,
 ): UserFacingDiagnostic[] {
   if (!result.ok) {
     return [
       normalizeFailureResult(result),
       ...(result.diagnostics ?? []).map(normalizeSchemaDiagnostic),
+      ...(result.semanticNotes ?? []).map(normalizeSemanticNote),
+      ...(result.losses ?? []).map(normalizeSemanticLoss),
     ];
   }
 
+  const caveats = result.report?.semanticCaveats ?? [];
+  const caveatCodes = new Set(caveats.map((caveat) => caveat.code));
+  const transformNotes = (result.report?.semanticNotes?.transform ?? []).filter(
+    (note) => !caveatCodes.has(note.code),
+  );
+
   return [
     ...(result.diagnostics ?? []).map(normalizeSchemaDiagnostic),
-    ...(result.report?.semanticCaveats ?? []).map(normalizeSemanticCaveat),
+    ...caveats.map(normalizeSemanticCaveat),
+    ...transformNotes.map(normalizeSemanticNote),
     ...(result.losses ?? []).map(normalizeSemanticLoss),
   ];
 }
@@ -121,6 +130,29 @@ function normalizeSemanticLoss(loss: SemanticLoss): UserFacingDiagnostic {
       lostCapability: loss.lostCapability,
       ...(loss.targetFormat ? { targetFormat: loss.targetFormat } : {}),
       ...(loss.evidence ? { evidence: loss.evidence } : {}),
+    },
+  };
+}
+
+function normalizeSemanticNote(
+  note: NonNullable<ConvertFailureResult["semanticNotes"]>[number],
+): UserFacingDiagnostic {
+  const severity = note.kind === "policy" ? "info" : "warning";
+  const suggestion = suggestionFromCode(note.code);
+
+  return {
+    severity,
+    code: note.code,
+    title: titleFromCode(note.code),
+    message: note.message,
+    ...(note.path ? { path: note.path.join(".") } : {}),
+    ...(note.source ? { source: note.source } : {}),
+    ...(suggestion ? { suggestion } : {}),
+    technicalDetails: {
+      kind: note.kind,
+      ...(note.nodeKind ? { nodeKind: note.nodeKind } : {}),
+      ...(note.layer ? { layer: note.layer } : {}),
+      ...(note.evidence ? { evidence: note.evidence } : {}),
     },
   };
 }

@@ -7,8 +7,11 @@ surface. Install `@schema-transformation-toolkit/sdk` alone for the normal pipel
 `@schema-transformation-toolkit/parser-*` and `@schema-transformation-toolkit/generator-*` packages remain available for advanced,
 format-specific integrations.
 
-It is the intended downstream consumer boundary for Stage 1 product surfaces.
-Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
+It is the intended downstream consumer boundary for product surfaces.
+Project-level readiness and priorities live in [../../docs/development/progress.md](../../docs/development/progress.md), not in this package README.
+
+If you are using the toolkit rather than integrating the SDK itself, start with
+the [User Guide](../../docs/user-guide.md) and [Capability Matrix](../../docs/capability-matrix.md).
 
 The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
@@ -17,7 +20,7 @@ TypeScript with a `z.infer` type; pass
 runtime-schema module. The consuming project must install Zod 4.
 
 The OpenAPI schema boundary and unsupported-feature diagnostics are documented
-in [OpenAPI Schema Compatibility](../../docs/development/openapi-schema-compatibility.md).
+in the [project design](../../docs/development/design.md).
 
 Use it when you want to:
 
@@ -82,18 +85,18 @@ TOML uses a strict TOML v1 Value profile. Date/time values, non-finite numbers,
 and unsafe integers are rejected. TOML generation consumes object-root Value IR;
 comments and source formatting are not preserved.
 
-## Stage 1 Contract
+## Public Compatibility Contract
 
-For downstream product surfaces, the intended Stage 1 contract is:
+For downstream product surfaces, the public compatibility contract is:
 
 - call `convert(...)` for conversion execution
 - validate cross-boundary payloads with `publicConvertResultSchema` when runtime checking is useful
 - branch on `result.ok` for ordinary success or failure handling
-- treat `result.phase` on failures as the current public failure taxonomy: `parse | generate`
+- treat `result.phase` on failures as the current public failure taxonomy: `parse | transform | generate`
 
 The most stable result fields for consumers to build on are:
 
-- failure: `code`, `message`, `phase`, `plan`, optional `diagnostics`
+- failure: `code`, `message`, `phase`, `plan`, optional `diagnostics`, retained `artifacts`, `losses`, and `semanticNotes`
 - success: `output`, `plan`, optional `report`
 - report core: `irSelection`, `semanticCaveats`, `losses`, `capabilityRequirements`, `lossHotspots`, `entrySelection`, `policyDecisions`
 - diagnostic core: `severity`, `code`, `message`, optional `path`, optional `source`
@@ -102,9 +105,9 @@ The scenario-matrix tests in [../../tests/sdk/scenario-matrix.test.ts](../../tes
 
 Consumers should not rely on:
 
-- thrown exception strings for expected parse or generate failures
+- thrown exception strings for expected parse, transform, or generate failures
 - undocumented `evidence` payload details remaining byte-for-byte stable
-- lower-level parser or generator internals as part of this Stage 1 consumer boundary
+- lower-level parser or generator internals as part of this public consumer boundary
 
 ## How To Read `result.report`
 
@@ -178,6 +181,8 @@ The public helpers are:
 - `describeParserOptions(format)`
 - `describeGeneratorOptions(format)`
 - `describeConversionOptions(sourceFormat, targetFormat)`
+- `describeTransformerOptions(id)`
+- `listTransformerOptions()`
 - `listOptionCatalogs()`
 
 Conversion-level route selection is controlled with `irPreference` on
@@ -252,7 +257,7 @@ Each returned item follows one stable presentation-oriented shape:
 - optional `suggestion`
 - optional `technicalDetails`
 
-For Stage 1 consumers, the most stable expectations are:
+The most stable expectations are:
 
 - always branch on `severity`, `code`, `title`, and `message`
 - use `path` and `source` when present for grouping or attribution
@@ -285,7 +290,7 @@ Each summary includes:
 - notable limitations
 - experimental areas
 
-For Stage 1 consumers, the most stable expectations are:
+The most stable expectations are:
 
 - use `listFormatSupports()` to drive format pickers without hard-coding format names
 - use `describeFormatSupport(...)` for per-format help text, badges, and limitation copy
@@ -330,6 +335,30 @@ The default `convert(...)` keeps the existing built-in output types. For a
 custom target, pass an output map to `createConverter<TOutputs>(...)`; targets
 not present in that map are typed as `unknown` rather than being coerced to a
 built-in string or JSON Schema output.
+
+The registry-safe type aliases `RegistryOutputMap` and
+`RegistryConversionOutput` are available for generic integrations. Builtin
+format and output aliases remain supported as compatibility types; custom
+registries should use descriptor identities and `createConverter(registry)` as
+the extension boundary rather than depending on builtin format unions.
+
+### Custom Registry Compatibility
+
+The SDK now separates generic registry execution from builtin compatibility
+types. Existing `ConvertOptions`, builtin format aliases, builtin output types,
+and advanced option keys remain supported. New integrations should prefer:
+
+- `createConverter(registry)` for custom parser, generator, and transformer
+  registration;
+- descriptor format identities instead of a builtin format union;
+- `RegistryOutputMap` and `RegistryConversionOutput` for custom target typing;
+- `genericConversionOptionCatalogsSchema` when option catalogs may contain
+  custom source or target formats.
+
+Builtin parser and generator implementations are injected through the generated
+registry boundary. They are not dependencies of the SDK conversion
+orchestration modules. Legacy builtin aliases remain supported until a
+separately documented breaking-change release.
 
 Each descriptor owns its format identifier, capabilities, option catalog, and
 execution function. Registration rejects duplicate identifiers and descriptors
@@ -376,14 +405,16 @@ Use `planConversion(...)` or `describeConversionRouteCapabilities(...)` when you
 
 ## More Detail
 
+For task-oriented usage and common failure-handling patterns, see:
+
+- [../../docs/user-guide.md](../../docs/user-guide.md)
+- [../../docs/capability-matrix.md](../../docs/capability-matrix.md)
+
 For deeper report interpretation, see:
 
-- [../../docs/development/sdk-report-analysis.md](../../docs/development/sdk-report-analysis.md)
-- [../../docs/development/capabilities-and-loss.md](../../docs/development/capabilities-and-loss.md)
+- [../../docs/development/design.md](../../docs/development/design.md)
 
 For project-level readiness status and remaining downstream-consumer work, see:
 
-- [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md)
 - [../../docs/development/progress.md](../../docs/development/progress.md)
-- [../../docs/development/release-process.md](../../docs/development/release-process.md)
-- [../../docs/development/web-integration-notes.md](../../docs/development/web-integration-notes.md)
+- [../../docs/development/standards.md](../../docs/development/standards.md)

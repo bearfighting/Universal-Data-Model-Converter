@@ -54,11 +54,14 @@ describe("integration: openapi -> ir -> openapi", () => {
       options: { entry: "User" },
     });
     expectOk(firstParsed, "Expected the first OpenAPI parse to succeed.");
-    if (!firstParsed.document) throw new Error("Expected a Shape IR document.");
+    if (firstParsed.document.kind !== "document")
+      throw new Error("Expected a Shape IR document.");
 
     const firstGenerated = openApiGenerator.generate(
       firstParsed.document,
-      firstParsed.constraints ? { constraints: firstParsed.constraints } : {},
+      firstParsed.artifacts?.constraints
+        ? { constraints: firstParsed.artifacts.constraints }
+        : {},
     );
     expectOk(
       firstGenerated,
@@ -79,15 +82,19 @@ describe("integration: openapi -> ir -> openapi", () => {
       },
     );
     expectOk(secondParsed, "Expected the generated OpenAPI to reparse.");
-    if (!secondParsed.document)
+    if (secondParsed.document.kind !== "document")
       throw new Error("Expected a Shape IR document.");
 
     expect(secondParsed.document).toEqual(firstParsed.document);
-    expect(secondParsed.constraints).toEqual(firstParsed.constraints);
+    expect(secondParsed.artifacts?.constraints).toEqual(
+      firstParsed.artifacts?.constraints,
+    );
 
     const secondGenerated = openApiGenerator.generate(
       secondParsed.document,
-      secondParsed.constraints ? { constraints: secondParsed.constraints } : {},
+      secondParsed.artifacts?.constraints
+        ? { constraints: secondParsed.artifacts.constraints }
+        : {},
     );
     expectOk(
       secondGenerated,

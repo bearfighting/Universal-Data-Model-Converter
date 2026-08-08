@@ -1,16 +1,24 @@
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
+import {
+  isIrBundle,
+  type GeneratorDescriptor,
+  type IrBundle,
+  type ValueDocument,
+} from "@schema-transformation-toolkit/core";
 import { tryGenerateYaml } from "./api.js";
 import { yamlGeneratorCapabilities } from "./capabilities.js";
 import { yamlGeneratorOptionCatalog } from "./option-metadata.js";
 
-export const yamlGeneratorDescriptor: GeneratorDescriptor<string> = {
+export const yamlGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string
+> = {
   kind: "generator",
   descriptorVersion: "0.1",
   format: "yaml",
   capabilities: yamlGeneratorCapabilities,
   options: yamlGeneratorOptionCatalog,
-  generate(document) {
-    if (document.kind !== "value-document") {
+  generate(input: IrBundle<ValueDocument>) {
+    if (!isIrBundle(input) || input.document.kind !== "value-document") {
       return {
         ok: false,
         code: "invalid-generator-input",
@@ -25,6 +33,6 @@ export const yamlGeneratorDescriptor: GeneratorDescriptor<string> = {
         ],
       };
     }
-    return tryGenerateYaml(document);
+    return tryGenerateYaml(input.document);
   },
 };

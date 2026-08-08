@@ -1,6 +1,6 @@
 {
   "name": "schema-transformation-toolkit",
-  "version": "0.2.0-beta.6",
+  "version": "0.2.0-beta.9",
   "private": false,
   "description": "Deterministic schema transformation across programming languages and schema formats.",
   "license": "Apache-2.0",
@@ -15,7 +15,11 @@
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:public-api": "pnpm check:boundaries && pnpm check:api",
     "check:sdk-package": "node scripts/check-sdk-package.mjs",
-    "build": "pnpm -r --workspace-concurrency=1 --if-present build",
+    "check:capability-matrix": "node scripts/check-capability-matrix.mjs",
+    "check:third-party-fixture": "node scripts/check-third-party-fixture.mjs",
+    "registry:generate": "node scripts/generate-builtin-registry.mjs",
+    "registry:check": "node scripts/generate-builtin-registry.mjs --check",
+    "build": "node scripts/build-workspace.mjs",
     "clean": "pnpm -r --if-present clean",
     "dev": "pnpm -r --if-present dev",
     "check": "pnpm format:check && pnpm lint && pnpm check:public-api && pnpm typecheck && pnpm test",
@@ -33,6 +37,7 @@
     "verify": "pnpm check"
   },
   "devDependencies": {
+    "@schema-transformation-toolkit/core": "workspace:*",
     "@eslint/js": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.63.0",
     "@typescript-eslint/parser": "^8.63.0",

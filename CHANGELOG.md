@@ -10,6 +10,48 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.9
+
+This prerelease fixes clean-install workspace resolution for the registry build.
+
+### Fixes
+
+- Declare the core package as a root workspace development dependency so
+  registry generation resolves correctly in CI and other clean checkouts.
+- Keep the workspace lockfile aligned with the root build-script dependency.
+
+## 0.2.0-beta.8
+
+This prerelease fixes the CI and release validation order for clean workspace
+checkouts.
+
+### Fixes
+
+- Build all workspace packages before registry discovery, tests, coverage, and
+  release validation so package root exports are available in CI.
+- Keep release artifact generation after the complete repository validation
+  baseline.
+
+## 0.2.0-beta.7
+
+This prerelease hardens the public conversion boundary for downstream Web, CLI,
+and custom registry consumers.
+
+### Features and fixes
+
+- Keep ordinary conversion failures structured across route planning,
+  descriptor resolution, options adaptation, pipeline execution, and report
+  analysis.
+- Add transform-stage diagnostics, semantic notes, policy decisions, and
+  transformer option discovery to the public contract.
+- Add transformer-specific options through the advanced SDK request envelope,
+  including custom registry fallback behavior.
+- Complete the `createConverter(registry)` discovery facade for format support,
+  route-scoped options, component options, and user-facing diagnostics.
+- Preserve pipeline evidence when post-generation analysis or report wrapping
+  fails.
+- Add capability matrix validation and update the user-facing documentation.
+
 ## 0.2.0-beta.6
 
 This prerelease adds the TOML Value format and hardens Value IR route

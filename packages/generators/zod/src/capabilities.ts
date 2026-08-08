@@ -4,6 +4,7 @@ export const zodGeneratorCapabilities: GeneratorCapabilities = {
   target: "zod",
   consumesIr: ["shape", "constraint"],
   entryIr: ["shape"],
+  entries: [{ ir: "shape" }],
   overlays: ["constraint"],
   supportsCapabilities: [
     "shape-ir",

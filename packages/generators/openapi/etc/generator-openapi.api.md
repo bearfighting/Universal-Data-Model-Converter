@@ -47,9 +47,16 @@ export declare const openApiGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/openapi/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-import type { OpenApiOutput } from "./options.js";
-export declare const openApiGeneratorDescriptor: GeneratorDescriptor<OpenApiOutput>;
+import type {
+  GeneratorDescriptor,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
+import type { OpenApiGeneratorOptions, OpenApiOutput } from "./options.js";
+export declare const openApiGeneratorDescriptor: GeneratorDescriptor<
+  SchemaDocument,
+  OpenApiOutput,
+  OpenApiGeneratorOptions
+>;
 ```
 
 ## packages/generators/openapi/src/failure.d.ts

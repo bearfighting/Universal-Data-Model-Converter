@@ -169,6 +169,46 @@ describe("format descriptor contracts", () => {
     expect(JSON.stringify(result)).not.toContain("internal analysis detail");
   });
 
+  it("does not leak SDK capability analysis hook exceptions", () => {
+    const failingGenerator = {
+      ...typeScriptGeneratorDescriptor,
+      format: "capability-analysis-failure",
+      capabilities: {
+        ...typeScriptGeneratorDescriptor.capabilities,
+        target: "capability-analysis-failure",
+      },
+      options: {
+        ...typeScriptGeneratorDescriptor.options,
+        format: "capability-analysis-failure",
+      },
+      analysis: {
+        collectCapabilityRequirements() {
+          throw new Error("internal capability detail");
+        },
+      },
+    };
+    const converter = createConverter(
+      createConversionRegistry({
+        parsers: [jsonParserDescriptor],
+        generators: [failingGenerator],
+      }),
+    );
+
+    const result = converter.convert({
+      sourceFormat: "json",
+      targetFormat: "capability-analysis-failure",
+      input: '{"id":1}',
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "generator-analysis-failed",
+      phase: "generate",
+    });
+    expect(JSON.stringify(result)).not.toContain("internal capability detail");
+    expect(result).toHaveProperty("artifacts.shape");
+  });
+
   it("rejects invalid Shape IR returned by a parser at runtime", () => {
     const invalidParser = {
       ...jsonParserDescriptor,
@@ -228,23 +268,13 @@ describe("format descriptor contracts", () => {
         };
       },
     };
-    const converter = createConverter(
-      createConversionRegistry({
-        parsers: [mismatchedParser],
-        generators: [jsonGeneratorDescriptor],
-      }),
+    expectDescriptorRegistrationFailure(
+      () =>
+        createConversionRegistry({
+          parsers: [mismatchedParser],
+          generators: [jsonGeneratorDescriptor],
+        }),
+      "descriptor-capability-mismatch",
     );
-
-    expect(
-      converter.convert({
-        sourceFormat: "mismatched-shape-source",
-        targetFormat: "json",
-        input: "ignored",
-      }),
-    ).toMatchObject({
-      ok: false,
-      code: "parser-capability-mismatch",
-      phase: "parse",
-    });
   });
 });

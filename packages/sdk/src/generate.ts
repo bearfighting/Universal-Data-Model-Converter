@@ -1,10 +1,13 @@
+import { executeGenerator } from "@schema-transformation-toolkit/core";
 import type {
   ConstraintDocument,
+  IrBundle,
   SchemaDocument,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
-import { resolveGeneratorDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
+import { generatorOptionsFor } from "./component-options.js";
+import { resolveGeneratorFromRegistry } from "./registry-client.js";
 import type {
   ConvertOptions,
   ConversionRegistry,
@@ -20,34 +23,16 @@ export function generateTarget<TOutput = unknown>(
   constraints: ConstraintDocument | undefined,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): import("@schema-transformation-toolkit/core").GenerateResult<TOutput> {
-  const descriptor = resolveGeneratorDescriptor<TOutput>(
+  const descriptor = resolveGeneratorFromRegistry<TOutput>(
     targetFormat,
     registry,
   );
-  const context = {
-    sourceFormat: options.sourceFormat,
-    options: generatorOptionsFor(targetFormat, options),
-    ...(constraints ? { constraints } : {}),
+  const input: IrBundle = {
+    document,
+    ...(constraints ? { artifacts: { constraints } } : {}),
   };
-  const result = descriptor.generate(document, context);
-  return result;
-}
-
-function generatorOptionsFor(
-  targetFormat: ConversionTargetFormat,
-  options: ConvertOptions,
-): unknown {
-  if (targetFormat === "json-schema") {
-    return options.advanced?.generator?.jsonSchema ?? {};
-  }
-  if (targetFormat === "typescript") {
-    return options.advanced?.generator?.typeScript ?? {};
-  }
-  if (targetFormat === "zod") return options.advanced?.generator?.zod ?? {};
-  if (targetFormat === "openapi")
-    return options.advanced?.generator?.openapi ?? {};
-  if (targetFormat === "yaml") return options.advanced?.generator?.yaml ?? {};
-  if (targetFormat === "csv") return options.advanced?.generator?.csv ?? {};
-  if (targetFormat === "toml") return options.advanced?.generator?.toml ?? {};
-  return options.extension?.generator ?? {};
+  const result = executeGenerator(descriptor, input, {
+    options: generatorOptionsFor(descriptor, options),
+  });
+  return result as import("@schema-transformation-toolkit/core").GenerateResult<TOutput>;
 }

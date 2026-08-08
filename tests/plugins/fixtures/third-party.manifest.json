@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "package": "@example/fixture-parser",
+      "entry": "./third-party-component.mjs",
+      "role": "parser",
+      "export": "fixtureParserDescriptor"
+    }
+  ]
+}

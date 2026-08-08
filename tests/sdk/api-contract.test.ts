@@ -75,12 +75,15 @@ describe("sdk api contract", () => {
       "describeFormatSupport",
       "describeGeneratorOptions",
       "describeParserOptions",
+      "describeTransformerOptions",
+      "genericConversionOptionCatalogsSchema",
       "inspectTypeScriptImplicitEntry",
       "listConversionRoutes",
       "listFormatSupports",
       "listOptionCatalogs",
       "listSourceFormatSupports",
       "listTargetFormatSupports",
+      "listTransformerOptions",
       "optionCatalogSchema",
       "optionMetadataCategorySchema",
       "optionMetadataExampleSchema",
@@ -105,21 +108,30 @@ describe("sdk api contract", () => {
     ).toThrow();
   });
 
+  it("accepts custom format names through the generic option contract", () => {
+    const catalogs = sdkModule.describeConversionOptions("json", "json");
+    expect(
+      sdkModule.genericConversionOptionCatalogsSchema.safeParse({
+        ...catalogs,
+        sourceFormat: "custom-source",
+        targetFormat: "custom-target",
+      }).success,
+    ).toBe(true);
+  });
+
   it("plans the explicit json to typescript route", () => {
     expect(sdkModule.planConversion("json", "typescript")).toEqual({
       sourceFormat: "json",
       targetFormat: "typescript",
       irSequence: ["value", "shape"],
       stages: [
-        { kind: "parse-source", from: "json", to: "json-value" },
+        { kind: "parse-source", from: "json", to: "shape", ir: "shape" },
         {
-          kind: "lower-to-value",
-          from: "json-value",
-          to: "value",
-          ir: "value",
+          kind: "generate-target",
+          from: "shape",
+          to: "typescript",
+          ir: "shape",
         },
-        { kind: "infer-shape", from: "value", to: "shape", ir: "shape" },
-        { kind: "generate-target", from: "shape", to: "typescript" },
       ],
     });
   });
@@ -195,6 +207,33 @@ describe("sdk api contract", () => {
     });
   });
 
+  it("accepts transform failures and retained pipeline fields in the public contract", () => {
+    expect(
+      sdkModule.convertFailureResultSchema.parse({
+        ok: false,
+        code: "transformer-failed",
+        message: "The transformer failed.",
+        phase: "transform",
+        plan: {
+          sourceFormat: "json",
+          targetFormat: "typescript",
+          irSequence: ["value", "shape"],
+          stages: [],
+        },
+        artifacts: {
+          value: { kind: "value-document" },
+        },
+        semanticNotes: [
+          {
+            kind: "normalization",
+            code: "fixture-note",
+            message: "A normalization occurred.",
+          },
+        ],
+      }),
+    ).toMatchObject({ phase: "transform" });
+  });
+
   it("plans the json-schema to json-schema route with constraint ir when both sides declare it", () => {
     expect(sdkModule.planConversion("json-schema", "json-schema")).toEqual({
       sourceFormat: "json-schema",
@@ -202,7 +241,12 @@ describe("sdk api contract", () => {
       irSequence: ["shape", "constraint"],
       stages: [
         { kind: "parse-source", from: "json-schema", to: "shape", ir: "shape" },
-        { kind: "generate-target", from: "shape", to: "json-schema" },
+        {
+          kind: "generate-target",
+          from: "shape",
+          to: "json-schema",
+          ir: "shape",
+        },
       ],
     });
   });

@@ -87,8 +87,15 @@ export declare const typeScriptParserCapabilities: ParserCapabilities;
 ## packages/parsers/typescript/src/descriptor.d.ts
 
 ```ts
-import type { ParserDescriptor } from "@schema-transformation-toolkit/core";
-export declare const typeScriptParserDescriptor: ParserDescriptor;
+import type {
+  SchemaDocument,
+  ParserDescriptor,
+} from "@schema-transformation-toolkit/core";
+import type { TypeScriptParseOptions } from "./options.js";
+export declare const typeScriptParserDescriptor: ParserDescriptor<
+  SchemaDocument,
+  TypeScriptParseOptions
+>;
 ```
 
 ## packages/parsers/typescript/src/errors.d.ts

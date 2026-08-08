@@ -31,8 +31,16 @@ export declare const tomlGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/toml/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
-export declare const tomlGeneratorDescriptor: GeneratorDescriptor<string>;
+import type {
+  GeneratorDescriptor,
+  ValueDocument,
+} from "@schema-transformation-toolkit/core";
+import type { TomlGeneratorOptions } from "./options.js";
+export declare const tomlGeneratorDescriptor: GeneratorDescriptor<
+  ValueDocument,
+  string,
+  TomlGeneratorOptions
+>;
 ```
 
 ## packages/generators/toml/src/index.d.ts

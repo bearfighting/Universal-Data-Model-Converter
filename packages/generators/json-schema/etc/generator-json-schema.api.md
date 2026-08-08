@@ -60,9 +60,17 @@ export declare const jsonSchemaGeneratorCapabilities: GeneratorCapabilities;
 ## packages/generators/json-schema/src/descriptor.d.ts
 
 ```ts
-import type { GeneratorDescriptor } from "@schema-transformation-toolkit/core";
+import type {
+  GeneratorDescriptor,
+  SchemaDocument,
+} from "@schema-transformation-toolkit/core";
+import type { JsonSchemaGeneratorOptions } from "./options.js";
 import type { JsonSchemaOutput } from "./options.js";
-export declare const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<JsonSchemaOutput>;
+export declare const jsonSchemaGeneratorDescriptor: GeneratorDescriptor<
+  SchemaDocument,
+  JsonSchemaOutput,
+  JsonSchemaGeneratorOptions
+>;
 ```
 
 ## packages/generators/json-schema/src/failure.d.ts

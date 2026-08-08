@@ -1,6 +1,6 @@
 {
   "name": "@schema-transformation-toolkit/sdk",
-  "version": "0.2.0-beta.6",
+  "version": "0.2.0-beta.9",
   "private": false,
   "license": "Apache-2.0",
   "type": "module",
@@ -45,6 +45,7 @@
     "zod": "^4.4.3"
   },
   "scripts": {
+    "prebuild": "node ../../scripts/generate-builtin-registry.mjs",
     "build": "tsup --config ../../tsup.config.ts",
     "clean": "rm -rf dist"
   }
