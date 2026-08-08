@@ -10,6 +10,18 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.8
+
+This prerelease fixes the CI and release validation order for clean workspace
+checkouts.
+
+### Fixes
+
+- Build all workspace packages before registry discovery, tests, coverage, and
+  release validation so package root exports are available in CI.
+- Keep release artifact generation after the complete repository validation
+  baseline.
+
 ## 0.2.0-beta.7
 
 This prerelease hardens the public conversion boundary for downstream Web, CLI,
