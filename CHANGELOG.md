@@ -10,6 +10,16 @@ when a release is prepared.
 
 No unreleased changes.
 
+## 0.2.0-beta.9
+
+This prerelease fixes clean-install workspace resolution for the registry build.
+
+### Fixes
+
+- Declare the core package as a root workspace development dependency so
+  registry generation resolves correctly in CI and other clean checkouts.
+- Keep the workspace lockfile aligned with the root build-script dependency.
+
 ## 0.2.0-beta.8
 
 This prerelease fixes the CI and release validation order for clean workspace
