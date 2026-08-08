@@ -8,18 +8,27 @@ when a release is prepared.
 
 ## Unreleased
 
-### Phase 6 and Phase 7 refactor
+No unreleased changes.
 
-- Move SDK conversion orchestration behind the generic core pipeline and
-  registry descriptor boundary.
-- Add registry-safe custom output/options contracts while retaining builtin
-  aliases for compatibility.
-- Make the workspace build deterministic: core, format components, generated
-  registry, then SDK.
-- Add third-party parser, transformer, and generator manifest fixtures with
-  custom registry conversion smoke coverage.
-- Expand SDK package smoke coverage to all eight builtin format families and
-  validate clean-install ESM package behavior.
+## 0.2.0-beta.7
+
+This prerelease hardens the public conversion boundary for downstream Web, CLI,
+and custom registry consumers.
+
+### Features and fixes
+
+- Keep ordinary conversion failures structured across route planning,
+  descriptor resolution, options adaptation, pipeline execution, and report
+  analysis.
+- Add transform-stage diagnostics, semantic notes, policy decisions, and
+  transformer option discovery to the public contract.
+- Add transformer-specific options through the advanced SDK request envelope,
+  including custom registry fallback behavior.
+- Complete the `createConverter(registry)` discovery facade for format support,
+  route-scoped options, component options, and user-facing diagnostics.
+- Preserve pipeline evidence when post-generation analysis or report wrapping
+  fails.
+- Add capability matrix validation and update the user-facing documentation.
 
 ## 0.2.0-beta.6
 
