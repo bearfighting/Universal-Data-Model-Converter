@@ -272,22 +272,22 @@ import { z } from "zod";
 export declare const conversionSourceFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
-  csv: "csv";
   json: "json";
-  toml: "toml";
   typescript: "typescript";
-  yaml: "yaml";
   zod: "zod";
+  yaml: "yaml";
+  csv: "csv";
+  toml: "toml";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
-  csv: "csv";
   json: "json";
-  toml: "toml";
   typescript: "typescript";
-  yaml: "yaml";
   zod: "zod";
+  yaml: "yaml";
+  csv: "csv";
+  toml: "toml";
 }>;
 export declare const conversionIrPreferenceSchema: z.ZodEnum<{
   value: "value";
@@ -503,22 +503,22 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
     sourceFormat: z.ZodEnum<{
       "json-schema": "json-schema";
       openapi: "openapi";
-      csv: "csv";
       json: "json";
-      toml: "toml";
       typescript: "typescript";
-      yaml: "yaml";
       zod: "zod";
+      yaml: "yaml";
+      csv: "csv";
+      toml: "toml";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
       openapi: "openapi";
-      csv: "csv";
       json: "json";
-      toml: "toml";
       typescript: "typescript";
-      yaml: "yaml";
       zod: "zod";
+      yaml: "yaml";
+      csv: "csv";
+      toml: "toml";
     }>;
     parser: z.ZodObject<
       {
@@ -2238,6 +2238,7 @@ import type {
   GeneratorDescriptor,
   IrDocument,
   IrKind,
+  IrPipelinePlan,
   IrTransformerDescriptor,
   OverlayIrKind,
   ParserCapabilities,
@@ -2288,6 +2289,7 @@ export declare function planConversion(
 ): ConversionRoute;
 export interface ConversionExecutionPlan {
   route: ConversionRoute;
+  pipelinePlan: IrPipelinePlan;
   selectedIr: Exclude<ConversionIrPreference, "auto">;
   requestedIr: ConversionIrPreference;
   fallback: boolean;

@@ -262,6 +262,7 @@ export function planConversion(
 
 export interface ConversionExecutionPlan {
   route: ConversionRoute;
+  pipelinePlan: IrPipelinePlan;
   selectedIr: Exclude<ConversionIrPreference, "auto">;
   requestedIr: ConversionIrPreference;
   fallback: boolean;
@@ -509,6 +510,7 @@ function resolveConversionRoute(
     };
     return {
       route,
+      pipelinePlan: genericPlan,
       selectedIr,
       requestedIr: irPreference,
       fallback: irPreference === "auto" && !canUseValue,
@@ -551,6 +553,7 @@ function resolveConversionRoute(
   };
   return {
     route,
+    pipelinePlan: genericPlan,
     selectedIr,
     requestedIr: irPreference,
     fallback: irPreference === "auto" && !canUseValue,

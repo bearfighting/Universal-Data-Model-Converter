@@ -78,14 +78,19 @@ describe("sdk product scenario matrix", () => {
   });
 
   it("does not mask an unsupported format route as an IR preference failure", () => {
-    expect(() =>
+    expect(
       convert({
         sourceFormat: "missing",
         targetFormat: "json",
         input: "{}",
         irPreference: "value",
       }),
-    ).toThrow(/Unsupported source format/);
+    ).toMatchObject({
+      ok: false,
+      code: "unsupported-route",
+      phase: "parse",
+      message: "Unsupported source format: missing",
+    });
   });
 
   it("covers a stable success conversion flow", () => {

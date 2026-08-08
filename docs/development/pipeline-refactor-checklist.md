@@ -158,12 +158,12 @@ Exit criteria:
 
 ## Phase 4 — Two-stage execution pipeline
 
-- [ ] Implement standalone `parse(...)` execution.
-- [ ] Implement standalone `generate(...)` execution.
-- [ ] Implement generic transformer execution between them.
-- [ ] Move diagnostics, semantic notes, artifacts, and losses into pipeline results.
-- [ ] Ensure parser and generator packages do not call each other.
-- [ ] Add direct parser-to-IR and IR-to-generator contract tests.
+- [x] Implement standalone descriptor execution through core `executeParser(...)`.
+- [x] Implement standalone descriptor execution through core `executeGenerator(...)`.
+- [x] Implement generic transformer execution between them.
+- [x] Move diagnostics, semantic notes, artifacts, and losses into pipeline results.
+- [x] Ensure parser and generator packages do not call each other.
+- [x] Add direct parser-to-IR and IR-to-generator contract tests.
 
 Validation gate:
 
@@ -175,8 +175,36 @@ Validation gate:
 
 Exit criteria:
 
-- Every existing successful route can be executed through the generic pipeline.
-- Every expected parser and generator failure retains its component diagnostic code.
+- [x] Every existing successful route can be executed through the generic pipeline.
+- [x] Every expected parser and generator failure retains its component diagnostic code.
+
+Phase 4 verification record (2026-08-08):
+
+- Core exposes `executePipeline(...)` with stage-grouped diagnostics and
+  semantic notes, artifact-preserving failures, and generator semantic-loss
+  collection.
+- SDK `convert(...)` now delegates parse, transformer, and generator execution
+  to the generic pipeline while preserving the existing public result facade.
+- 74 test files and 859 tests pass, including direct core pipeline contracts,
+  custom registries, custom transformers, Value-only routes, Shape routes,
+  Constraint overlays, and semantic-loss scenarios.
+
+Phase 4 hardening follow-up (2026-08-08):
+
+- `ConversionExecutionPlan` now carries the complete core `IrPipelinePlan`,
+  including required supplementary artifacts; SDK conversion no longer
+  reconstructs the plan from route summaries.
+- The core executor validates transformer stage contracts, stage continuity,
+  selected IR, and required artifact kinds before execution.
+- Pipeline boundary failures now produce stage diagnostics, including missing
+  transformers, missing artifacts, plan mismatches, parser-only IR, and
+  generator analysis failures.
+- Direct tests cover multi-transformer chains, custom supplementary artifacts,
+  plan mismatch rejection, and analysis failure diagnostics.
+- Descriptor exceptions now receive stage diagnostics, parse-to-transform input
+  mismatches are rejected before transformer execution, and analysis requests
+  without route capability context fail explicitly instead of skipping loss
+  analysis.
 
 ## Phase 5 — Format migration
 

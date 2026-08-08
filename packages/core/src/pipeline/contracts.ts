@@ -195,6 +195,77 @@ export interface ConversionReport {
   entrySelection?: ConversionEntrySelection;
 }
 
+export type PipelineExecutionPhase = "parse" | "transform" | "generate";
+
+export interface PipelineExecutionDiagnostics {
+  parse?: SchemaDiagnostic[];
+  transform?: SchemaDiagnostic[];
+  generate?: SchemaDiagnostic[];
+  all: SchemaDiagnostic[];
+}
+
+export interface PipelineExecutionSemanticNotes {
+  parse?: SchemaSemanticNote[];
+  transform?: SchemaSemanticNote[];
+  generate?: SchemaSemanticNote[];
+  all: SchemaSemanticNote[];
+}
+
+export interface PipelineExecutionRequest<
+  TOutput = unknown,
+  TParserOptions = unknown,
+  TTransformerOptions = unknown,
+  TGeneratorOptions = unknown,
+> {
+  parser: import("./descriptor-contracts.js").ParserDescriptor<
+    IrDocument,
+    TParserOptions
+  >;
+  generator: import("./descriptor-contracts.js").GeneratorDescriptor<
+    IrDocument,
+    TOutput,
+    TGeneratorOptions
+  >;
+  transformers?: readonly import("./descriptor-contracts.js").IrTransformerDescriptor<
+    IrDocument,
+    IrDocument,
+    TTransformerOptions
+  >[];
+  plan: IrPipelinePlan;
+  input: string;
+  parserContext: import("./descriptor-contracts.js").ParserExecutionContext<TParserOptions>;
+  transformerContext?: import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>;
+  generatorContext?: import("./descriptor-contracts.js").GeneratorExecutionContext<TGeneratorOptions>;
+  sourceFormat: string;
+  targetFormat: string;
+  routeCapabilities?: ConversionRouteCapabilities;
+  lossPlanner?: (context: SemanticLossAnalysisContext) => SemanticLoss[];
+}
+
+export interface PipelineExecutionSuccess<TOutput = unknown> {
+  ok: true;
+  output: TOutput;
+  bundle: IrBundle;
+  diagnostics?: PipelineExecutionDiagnostics;
+  semanticNotes?: PipelineExecutionSemanticNotes;
+  losses?: SemanticLoss[];
+}
+
+export interface PipelineExecutionFailure {
+  ok: false;
+  code: string;
+  message: string;
+  phase: PipelineExecutionPhase;
+  plan: IrPipelinePlan;
+  bundle?: IrBundle;
+  diagnostics?: PipelineExecutionDiagnostics;
+  semanticNotes?: PipelineExecutionSemanticNotes;
+  losses?: SemanticLoss[];
+}
+
+export type PipelineExecutionResult<TOutput = unknown> =
+  PipelineExecutionSuccess<TOutput> | PipelineExecutionFailure;
+
 export type PipelineStageKind =
   | "parse-source"
   | "lower-to-value"

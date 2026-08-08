@@ -59,9 +59,13 @@ name = "Ada"
     expect(
       convert({ sourceFormat: "yaml", targetFormat: "toml", input: "id: 1\n" }),
     ).toMatchObject({ ok: true });
-    expect(() =>
+    expect(
       convert({ sourceFormat: "csv", targetFormat: "toml", input: "id\n1\n" }),
-    ).toThrow(/Unsupported conversion route/);
+    ).toMatchObject({
+      ok: false,
+      code: "unsupported-route",
+      phase: "parse",
+    });
   });
 
   it("returns structured parser and generator failures", () => {
@@ -85,13 +89,17 @@ name = "Ada"
       code: "toml-invalid-root",
     });
 
-    expect(() =>
+    expect(
       convert({
         sourceFormat: "json-schema",
         targetFormat: "toml",
         input: '{"type":"object","properties":{"id":{"type":"string"}}}',
       }),
-    ).toThrow(/Unsupported conversion route/);
+    ).toMatchObject({
+      ok: false,
+      code: "unsupported-route",
+      phase: "parse",
+    });
   });
 
   it("returns Value and Shape artifacts for Shape routes", () => {

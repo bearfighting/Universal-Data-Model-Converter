@@ -1,19 +1,11 @@
 import type {
   ConversionCapabilityRequirement,
   ConversionLossHotspot,
-  ConstraintDocument,
-  IrDocument,
-  TransformResult,
-  SemanticLoss,
-  SchemaDiagnostic,
-  SchemaDocument,
-  SchemaSemanticNote,
-  ValueDocument,
+  PipelineExecutionResult,
 } from "@schema-transformation-toolkit/core";
-import { executeIrTransformer } from "@schema-transformation-toolkit/core";
+import { executePipeline } from "@schema-transformation-toolkit/core";
 import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
 import type { OpenApiOutput } from "@schema-transformation-toolkit/generator-openapi";
-import { generateTarget } from "./generate.js";
 import { planSemanticLosses } from "./losses.js";
 import {
   describeConversionRouteCapabilities,
@@ -31,9 +23,7 @@ import type { ConversionRegistry } from "./types.js";
 import {
   buildConversionReport,
   collectPreservedCapabilities,
-  combineDiagnostics,
 } from "./report.js";
-import { parseSource } from "./source.js";
 export type {
   ConvertAdvancedOptions,
   ConversionArtifacts,
@@ -115,12 +105,16 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
   } catch (error) {
     if (
       error instanceof ConversionRouteError &&
-      error.code === "unsupported-ir-preference"
+      (error.code === "unsupported-ir-preference" ||
+        error.code === "unsupported-route")
     ) {
       return {
         ok: false,
-        code: "unsupported-ir-preference",
-        message: `The requested IR preference "${options.irPreference}" is not available for ${options.sourceFormat} -> ${options.targetFormat}.`,
+        code: error.code,
+        message:
+          error.code === "unsupported-ir-preference"
+            ? `The requested IR preference "${options.irPreference}" is not available for ${options.sourceFormat} -> ${options.targetFormat}.`
+            : error.message,
         phase: "parse",
         plan: {
           sourceFormat: options.sourceFormat,
@@ -133,247 +127,83 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     throw error;
   }
   const name = options.name ?? defaultDocumentName(options.sourceFormat);
-  const diagnostics: SchemaDiagnostic[] = [];
-  const parseDiagnostics: SchemaDiagnostic[] = [];
-  const generateDiagnostics: SchemaDiagnostic[] = [];
-  const losses: SemanticLoss[] = [];
-  const semanticNotes: SchemaSemanticNote[] = [];
-  const parseSemanticNotes: SchemaSemanticNote[] = [];
-  const transformDiagnostics: SchemaDiagnostic[] = [];
-  const transformSemanticNotes: SchemaSemanticNote[] = [];
-  const generateSemanticNotes: SchemaSemanticNote[] = [];
   const capabilityRequirements: ConversionCapabilityRequirement[] = [];
   const lossHotspots: ConversionLossHotspot[] = [];
-  let valueArtifact: ValueDocument | undefined;
-  let shapeArtifact: SchemaDocument | undefined;
-  let constraintsArtifact: ConstraintDocument | undefined;
-
-  const parseResult = parseSource(
-    options.input,
-    options.sourceFormat,
-    options.targetFormat,
-    name,
-    options,
-    registry,
-    routeDecision.parserRequestedIr,
-  );
-
-  if (!parseResult.ok) {
-    return {
-      ...parseResult,
-      plan,
-    };
-  }
-
-  valueArtifact = parseResult.value;
-  shapeArtifact = parseResult.shape;
-  constraintsArtifact = parseResult.constraints;
-  diagnostics.push(...parseResult.diagnostics);
-  parseDiagnostics.push(...parseResult.diagnostics);
-  semanticNotes.push(...parseResult.semanticNotes);
-  parseSemanticNotes.push(...parseResult.semanticNotes);
-
-  let pipelineDocument: IrDocument | undefined = shapeArtifact ?? valueArtifact;
-  for (const transformerId of routeDecision.transformerIds) {
-    if (!pipelineDocument) break;
-    const transformer = resolveTransformerDescriptor(transformerId, registry);
-    const currentDocument: IrDocument = pipelineDocument;
-    const currentKind: string = (currentDocument as unknown as { kind: string })
-      .kind;
-    const transformed: TransformResult = executeIrTransformer(
-      transformer,
-      {
-        document: currentDocument,
-        artifacts: {
-          ...(valueArtifact && currentDocument !== valueArtifact
-            ? { value: valueArtifact }
-            : {}),
-          ...(shapeArtifact && currentDocument !== shapeArtifact
-            ? { shape: shapeArtifact }
-            : {}),
-          ...(constraintsArtifact && currentKind !== "constraint-document"
-            ? { constraints: constraintsArtifact }
-            : {}),
-        },
-      },
-      {},
-    );
-    if (!transformed.ok) {
-      const transformationDiagnostics = combineDiagnostics(
-        diagnostics,
-        transformed.diagnostics,
-      );
-      return {
-        ok: false,
-        code: transformed.code,
-        message: transformed.message,
-        phase: "transform",
-        plan,
-        ...(transformationDiagnostics
-          ? { diagnostics: transformationDiagnostics }
-          : {}),
-      };
-    }
-    const nextDocument: IrDocument = transformed.document;
-    if (transformed.diagnostics) {
-      diagnostics.push(...transformed.diagnostics);
-      transformDiagnostics.push(...transformed.diagnostics);
-    }
-    if (transformed.semanticNotes) {
-      semanticNotes.push(...transformed.semanticNotes);
-      transformSemanticNotes.push(...transformed.semanticNotes);
-    }
-    pipelineDocument = nextDocument;
-    if (nextDocument.kind === "value-document") valueArtifact = nextDocument;
-    if (nextDocument.kind === "document") shapeArtifact = nextDocument;
-    if (nextDocument.kind === "constraint-document") {
-      constraintsArtifact = nextDocument;
-    }
-    if (transformed.artifacts?.value)
-      valueArtifact = transformed.artifacts.value;
-    if (transformed.artifacts?.shape)
-      shapeArtifact = transformed.artifacts.shape;
-    if (transformed.artifacts?.constraints) {
-      constraintsArtifact = transformed.artifacts.constraints;
-    }
-  }
-
-  if (!shapeArtifact && !valueArtifact) {
-    return {
-      ok: false,
-      code: "parser-produced-no-ir",
-      message: "The source parser produced neither Value IR nor Shape IR.",
-      phase: "parse",
-      plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "parser-produced-no-ir",
-          message: "The source parser produced neither Value IR nor Shape IR.",
-          source: `parser-${options.sourceFormat}`,
-        },
-      ],
-    };
-  }
-
-  const targetDescriptor = resolveGeneratorDescriptor(
-    options.targetFormat,
-    registry,
-  );
-  const generationInput =
-    routeDecision.generatorInputIr === "shape" ? shapeArtifact : valueArtifact;
-
-  if (!generationInput) {
-    return {
-      ok: false,
-      code: "missing-generator-input",
-      message:
-        "The target generator requires an IR artifact the parser did not produce.",
-      phase: "generate",
-      plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "missing-generator-input",
-          message:
-            "The target generator requires an IR artifact the parser did not produce.",
-          source: `generator-${options.targetFormat}`,
-        },
-      ],
-    };
-  }
-
-  const generationResult = generateTarget<TOutput>(
-    generationInput,
-    options.targetFormat,
-    options,
-    constraintsArtifact,
-    registry,
-  );
-
-  if (!generationResult.ok) {
-    const failureDiagnostics = combineDiagnostics(
-      diagnostics,
-      generationResult.diagnostics,
-    );
-
-    return {
-      ok: false,
-      code: generationResult.code,
-      message: generationResult.message,
-      phase: "generate",
-      plan,
-      ...(failureDiagnostics ? { diagnostics: failureDiagnostics } : {}),
-    };
-  }
-
-  if (generationResult.diagnostics) {
-    diagnostics.push(...generationResult.diagnostics);
-    generateDiagnostics.push(...generationResult.diagnostics);
-  }
-  if (generationResult.semanticNotes) {
-    semanticNotes.push(...generationResult.semanticNotes);
-    generateSemanticNotes.push(...generationResult.semanticNotes);
-  }
-
   const routeCapabilities = describeConversionRouteCapabilities(
     options.sourceFormat,
     options.targetFormat,
     registry,
   );
 
-  try {
-    const generatorDescriptor = targetDescriptor;
-    if (shapeArtifact) {
-      const analysisContext = {
-        sourceFormat: options.sourceFormat,
-        targetFormat: options.targetFormat,
-        routeCapabilities,
-        document: shapeArtifact,
-        ...(constraintsArtifact ? { constraints: constraintsArtifact } : {}),
-      };
+  const parser = resolveParserDescriptorForPipeline(
+    options.sourceFormat,
+    registry,
+  );
+  const generatorDescriptor = resolveGeneratorDescriptor<TOutput>(
+    options.targetFormat,
+    registry,
+  );
+  const transformers = routeDecision.pipelinePlan.stages.map((stage) =>
+    resolveTransformerDescriptor(stage.transformerId, registry),
+  );
+  const pipelineResult = executePipeline<TOutput>({
+    parser,
+    generator: generatorDescriptor,
+    transformers,
+    plan: routeDecision.pipelinePlan,
+    input: options.input,
+    parserContext: {
+      name,
+      ...(routeDecision.parserRequestedIr[0]
+        ? { requestedIr: routeDecision.parserRequestedIr[0] }
+        : {}),
+      options: parserOptionsFor(options),
+    },
+    transformerContext: {},
+    generatorContext: { options: generatorOptionsFor(options) },
+    sourceFormat: options.sourceFormat,
+    targetFormat: options.targetFormat,
+    routeCapabilities,
+    lossPlanner: (context) =>
+      planSemanticLosses(
+        context.routeCapabilities,
+        context.constraints,
+        options.targetFormat,
+        options.sourceFormat,
+      ),
+  });
 
-      losses.push(
-        ...(generatorDescriptor.analysis?.planSemanticLosses
-          ? generatorDescriptor.analysis.planSemanticLosses(analysisContext)
-          : planSemanticLosses(
-              routeCapabilities,
-              constraintsArtifact,
-              options.targetFormat,
-              options.sourceFormat,
-            )),
-      );
-
-      if (generatorDescriptor.analysis?.collectCapabilityRequirements) {
-        capabilityRequirements.push(
-          ...generatorDescriptor.analysis.collectCapabilityRequirements(
-            shapeArtifact,
-          ),
-        );
-      }
-      if (generatorDescriptor.analysis?.collectLossHotspots) {
-        lossHotspots.push(
-          ...generatorDescriptor.analysis.collectLossHotspots(shapeArtifact),
-        );
-      }
-    }
-  } catch {
-    return {
-      ok: false,
-      code: "generator-analysis-failed",
-      message: "The target generator analysis failed.",
-      phase: "generate",
-      plan,
-      diagnostics: [
-        {
-          severity: "error",
-          code: "generator-analysis-failed",
-          message: "The target generator analysis failed.",
-          source: `generator-${options.targetFormat}`,
-        },
-      ],
-    };
+  if (!pipelineResult.ok) {
+    return pipelineFailureToConvertResult(pipelineResult, plan);
   }
+
+  const valueArtifact = pipelineResult.bundle.artifacts?.value;
+  const shapeArtifact = pipelineResult.bundle.artifacts?.shape;
+  const constraintsArtifact = pipelineResult.bundle.artifacts?.constraints;
+  if (shapeArtifact) {
+    if (generatorDescriptor.analysis?.collectCapabilityRequirements) {
+      capabilityRequirements.push(
+        ...generatorDescriptor.analysis.collectCapabilityRequirements(
+          shapeArtifact,
+        ),
+      );
+    }
+    if (generatorDescriptor.analysis?.collectLossHotspots) {
+      lossHotspots.push(
+        ...generatorDescriptor.analysis.collectLossHotspots(shapeArtifact),
+      );
+    }
+  }
+
+  const diagnostics = pipelineResult.diagnostics?.all ?? [];
+  const losses = pipelineResult.losses ?? [];
+  const semanticNotes = pipelineResult.semanticNotes?.all ?? [];
+  const parseDiagnostics = pipelineResult.diagnostics?.parse ?? [];
+  const transformDiagnostics = pipelineResult.diagnostics?.transform ?? [];
+  const generateDiagnostics = pipelineResult.diagnostics?.generate ?? [];
+  const parseSemanticNotes = pipelineResult.semanticNotes?.parse ?? [];
+  const transformSemanticNotes = pipelineResult.semanticNotes?.transform ?? [];
+  const generateSemanticNotes = pipelineResult.semanticNotes?.generate ?? [];
 
   const preservedCapabilities = collectPreservedCapabilities(
     options.sourceFormat,
@@ -404,7 +234,7 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
 
   return {
     ok: true,
-    output: generationResult.output,
+    output: pipelineResult.output,
     plan,
     ...(report ? { report } : {}),
     ...(options.includeArtifacts
@@ -423,6 +253,67 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     ...(preservedCapabilities.length > 0 ? { preservedCapabilities } : {}),
     ...(semanticNotes.length > 0 ? { semanticNotes } : {}),
   };
+}
+
+function pipelineFailureToConvertResult<TOutput>(
+  result: Exclude<PipelineExecutionResult<TOutput>, { ok: true }>,
+  plan: ReturnType<typeof planConversion>,
+): ConvertResult<TOutput> {
+  const diagnostics = result.diagnostics?.all;
+  return {
+    ok: false,
+    code:
+      result.code === "invalid-ir-document" ||
+      result.code === "invalid-shape-document"
+        ? "parser-invalid-shape"
+        : result.code,
+    message: result.message,
+    phase: result.phase,
+    plan,
+    ...(diagnostics && diagnostics.length > 0 ? { diagnostics } : {}),
+  };
+}
+
+function resolveParserDescriptorForPipeline(
+  sourceFormat: ConvertOptions["sourceFormat"],
+  registry: ConversionRegistry,
+) {
+  const descriptor = registry.parser
+    ? registry.parser(sourceFormat)
+    : registry
+        .listParsers()
+        .find((candidate) => candidate.format === sourceFormat);
+  if (!descriptor)
+    throw new ConversionRouteError(
+      "unsupported-route",
+      `Unsupported source format: ${sourceFormat}`,
+    );
+  return descriptor;
+}
+
+function parserOptionsFor(options: ConvertOptions): unknown {
+  const advanced = options.advanced?.parser;
+  if (options.sourceFormat === "json") return advanced?.json ?? {};
+  if (options.sourceFormat === "json-schema") return advanced?.jsonSchema ?? {};
+  if (options.sourceFormat === "typescript") return advanced?.typeScript ?? {};
+  if (options.sourceFormat === "openapi") return advanced?.openapi ?? {};
+  if (options.sourceFormat === "zod") return advanced?.zod ?? {};
+  if (options.sourceFormat === "yaml") return advanced?.yaml ?? {};
+  if (options.sourceFormat === "csv") return advanced?.csv ?? {};
+  if (options.sourceFormat === "toml") return advanced?.toml ?? {};
+  return options.extension?.parser ?? {};
+}
+
+function generatorOptionsFor(options: ConvertOptions): unknown {
+  const advanced = options.advanced?.generator;
+  if (options.targetFormat === "json-schema") return advanced?.jsonSchema ?? {};
+  if (options.targetFormat === "typescript") return advanced?.typeScript ?? {};
+  if (options.targetFormat === "zod") return advanced?.zod ?? {};
+  if (options.targetFormat === "openapi") return advanced?.openapi ?? {};
+  if (options.targetFormat === "yaml") return advanced?.yaml ?? {};
+  if (options.targetFormat === "csv") return advanced?.csv ?? {};
+  if (options.targetFormat === "toml") return advanced?.toml ?? {};
+  return options.extension?.generator ?? {};
 }
 
 function defaultDocumentName(

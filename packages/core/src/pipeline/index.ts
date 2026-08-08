@@ -30,6 +30,13 @@ export type {
   SemanticLoss,
   SemanticLossPhase,
   SemanticLossAnalysisContext,
+  PipelineExecutionPhase,
+  PipelineExecutionDiagnostics,
+  PipelineExecutionSemanticNotes,
+  PipelineExecutionRequest,
+  PipelineExecutionSuccess,
+  PipelineExecutionFailure,
+  PipelineExecutionResult,
 } from "./contracts.js";
 export { isIrBundle } from "./contracts.js";
 export {
@@ -43,6 +50,7 @@ export {
   valueToShapeTransformer,
 } from "./transformers.js";
 export { executeGenerator, executeParser } from "./execution.js";
+export { executePipeline } from "./pipeline.js";
 export {
   executeIrTransformer,
   tryValidateIrBundle,

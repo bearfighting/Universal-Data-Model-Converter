@@ -67,7 +67,7 @@ export function executeIrTransformer<
       `Transformer "${descriptor.id}" failed while producing its result.`,
     );
   }
-  if (!result.ok) return result;
+  if (!result.ok) return withTransformerDiagnostic(result, descriptor.id);
 
   const outputValidation = tryValidateIrBundle({
     document: result.document,
@@ -286,7 +286,32 @@ function failure(code: string, message: string): IrValidationFailure {
 }
 
 function transformerFailure(code: string, message: string) {
-  return { ok: false as const, code, message };
+  return {
+    ok: false as const,
+    code,
+    message,
+    diagnostics: [
+      { severity: "error" as const, code, message, source: "core-transformer" },
+    ],
+  };
+}
+
+function withTransformerDiagnostic(
+  result: Extract<TransformResult, { ok: false }>,
+  transformerId: string,
+): Extract<TransformResult, { ok: false }> {
+  if (result.diagnostics && result.diagnostics.length > 0) return result;
+  return {
+    ...result,
+    diagnostics: [
+      {
+        severity: "error",
+        code: result.code,
+        message: result.message,
+        source: `transformer-${transformerId}`,
+      },
+    ],
+  };
 }
 
 function matchesIrKind(document: IrDocument, kind: IrKind): boolean {

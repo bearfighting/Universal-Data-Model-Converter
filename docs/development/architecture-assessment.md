@@ -33,15 +33,15 @@ object routes now fail before parsing or generation, without implicit wrapping.
 
 ## Current Maturity
 
-| Area                        | Assessment            | Comment                                                                                       |
-| --------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
-| IR boundaries               | Strong                | The Value/Shape/Constraint split is explicit and documented.                                  |
-| Parser/generator separation | Strong                | Format packages mostly depend on core, not on each other.                                     |
-| Route planning              | Stronger              | Descriptor-driven planning now includes Value root-shape compatibility.                       |
-| Public SDK surface          | Beta-stable           | The main entry points are clear, but several contracts are duplicated manually.               |
-| Runtime input validation    | Improved              | Shared validation and TOML descriptor guards reject malformed runtime input structurally.     |
-| Diagnostics                 | Good foundation       | Structured diagnostics exist, but code and location contracts are not fully typed or uniform. |
-| Maintainability             | Good but concentrated | `registry.ts`, `convert.ts`, and core traversal/transform modules are hotspots.               |
+| Area                        | Assessment      | Comment                                                                                                                          |
+| --------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| IR boundaries               | Strong          | The Value/Shape/Constraint split is explicit and documented.                                                                     |
+| Parser/generator separation | Strong          | Format packages mostly depend on core, not on each other.                                                                        |
+| Route planning              | Stronger        | Descriptor-driven planning now includes Value root-shape compatibility.                                                          |
+| Public SDK surface          | Beta-stable     | The main entry points are clear, but several contracts are duplicated manually.                                                  |
+| Runtime input validation    | Improved        | Shared validation and TOML descriptor guards reject malformed runtime input structurally.                                        |
+| Diagnostics                 | Good foundation | Structured diagnostics exist, but code and location contracts are not fully typed or uniform.                                    |
+| Maintainability             | Improved        | `registry.ts` and core traversal/transform modules remain hotspots; conversion execution and plan validation are shared in core. |
 
 ## Priority Risks
 
@@ -71,11 +71,11 @@ Remaining direction:
 4. Add malformed-runtime-input tests that call the public `try*` APIs through
    `unknown` or JavaScript-shaped objects.
 
-### P1 — `convert()` does not consistently return structured route failures
+### Resolved — `convert()` returns structured route failures
 
-[`packages/sdk/src/convert.ts`](../../packages/sdk/src/convert.ts) handles an
-unsupported IR preference as a result, but an unknown source or target format
-can still escape as `ConversionRouteError`.
+[`packages/sdk/src/convert.ts`](../../packages/sdk/src/convert.ts) now maps
+unsupported IR preferences and unknown source or target formats to structured
+conversion failures.
 
 This is especially important because `ConversionFormat` intentionally accepts
 extension strings. The public execution API should have one predictable rule:
@@ -83,9 +83,8 @@ extension strings. The public execution API should have one predictable rule:
 - `planConversion()` may throw for an invalid planning request;
 - `convert()` should return a discriminated failure for an unsupported route.
 
-If throwing from `convert()` is retained, it must be documented as a stable
-exception contract and covered separately from parse/generate failures. The
-current mixed behavior is harder for SDK consumers to handle safely.
+The remaining throwing behavior is limited to explicit planning APIs such as
+`planConversion()`, which may reject invalid planning requests.
 
 ### P1 — Route capability field semantics are now aligned
 
@@ -189,7 +188,8 @@ that catalog where practical.
 [`packages/sdk/src/registry.ts`](../../packages/sdk/src/registry.ts) currently
 combines registration, descriptor validation, capability normalization,
 descriptor lookup, route planning, route stage construction, and capability
-summaries.
+summaries. Conversion execution itself now lives in core's generic
+`executePipeline(...)` boundary.
 
 The behavior is coherent, but the file is now large enough that unrelated
 changes compete in one module. A future refactor should split these concerns

@@ -25,6 +25,7 @@ The repository is past architecture validation and has a stable-enough conversio
 - a dedicated shape-normalization exit in `@schema-transformation-toolkit/core` built on top of the shared transform layer
 - a descriptor-driven SDK registry with isolated custom parser/generator registration
 - generic generator output typing, descriptor analysis hooks, versioned registration errors, and shared descriptor contract helpers
+- a generic core execution pipeline that owns parser, transformer, and generator orchestration with stage-grouped evidence and artifact-preserving failures
 
 Shared normalization coverage currently includes:
 
@@ -174,6 +175,7 @@ The resulting maturity is now:
 - transform: usable but intentionally narrow
 - normalization: real and already reused by test equivalence helpers, but still early enough that new rules should be added selectively
 - registry extensibility: built-in discovery is descriptor-driven; third-party registration is explicit and runtime package scanning remains intentionally deferred
+- two-stage execution pipeline: all current SDK conversion routes use the shared core executor; the SDK remains a compatibility and report-wrapping facade
 
 Phase 3 registry extraction is now implemented: core owns the generic
 descriptor registry, builtin packages declare versioned registry metadata, and
@@ -200,6 +202,22 @@ pipeline boundary, and registry capability registration rejects inconsistent
 legacy/new IR declarations before route planning. Core also owns generic parser
 and generator execution boundaries, including exception conversion and
 artifact-preserving SDK adaptation.
+
+Phase 4 two-stage execution is now implemented: core exposes a generic
+`executePipeline(...)` boundary that composes parser, transformer, and
+generator execution, groups diagnostics and semantic notes by stage, preserves
+IR artifacts across failures, and collects generator semantic losses. SDK
+`convert(...)` delegates the full route execution to this boundary while
+retaining the existing public result shape.
+
+The Phase 4 hardening follow-up is also complete: SDK route decisions now carry
+the planner's complete `IrPipelinePlan`, core validates plan/descriptor
+alignment before execution, and pipeline boundary failures consistently expose
+stage diagnostics. Custom supplementary artifacts and multi-transformer plan
+validation are covered by direct core tests.
+Descriptor exceptions now also produce stage diagnostics, and missing semantic
+analysis context is reported explicitly rather than silently omitting loss
+analysis.
 
 Phase 2 generic compatibility planning is now implemented: core owns IR-kind
 and Value root-shape compatibility, exposes the default Value-to-Shape

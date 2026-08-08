@@ -1,8 +1,10 @@
 import type {
   GenerateResult,
+  GenerateFailureResult,
   GeneratorDescriptor,
   GeneratorExecutionContext,
   ParseResult,
+  ParseFailureResult,
   ParserDescriptor,
   ParserExecutionContext,
 } from "./descriptor-contracts.js";
@@ -27,9 +29,10 @@ export function executeParser<TDocument extends IrDocument, TOptions>(
     return parserFailure(
       "parser-descriptor-failed",
       `Parser "${descriptor.format}" failed while producing its result.`,
+      `parser-${descriptor.format}`,
     );
   }
-  if (!result.ok) return result;
+  if (!result.ok) return withParserDiagnostic(result, descriptor.format);
 
   const bundle: IrBundle<TDocument> = {
     document: result.document,
@@ -40,6 +43,7 @@ export function executeParser<TDocument extends IrDocument, TOptions>(
     return parserFailure(
       validation.diagnostics[0]?.code ?? "invalid-parser-result",
       validation.diagnostics[0]?.message ?? "The parser produced invalid IR.",
+      `parser-${descriptor.format}`,
     );
   }
 
@@ -60,6 +64,7 @@ export function executeGenerator<TInput extends IrDocument, TOutput, TOptions>(
     return generatorFailure(
       "invalid-generator-input",
       validation.diagnostics[0]?.message ?? "The generator input is invalid.",
+      `generator-${descriptor.format}`,
     );
   }
 
@@ -70,11 +75,15 @@ export function executeGenerator<TInput extends IrDocument, TOutput, TOptions>(
   if (capabilityFailure) return capabilityFailure;
 
   try {
-    return descriptor.generate(input, context);
+    const result = descriptor.generate(input, context);
+    return result.ok
+      ? result
+      : withGeneratorDiagnostic(result, descriptor.format);
   } catch {
     return generatorFailure(
       "invalid-generator-input",
       `Generator "${descriptor.format}" failed while processing its IR input.`,
+      `generator-${descriptor.format}`,
     );
   }
 }
@@ -94,6 +103,7 @@ function validateParserOutput(
       return parserFailure(
         "parser-capability-mismatch",
         `Parser "${capabilities.format}" produced undeclared ${kind} IR.`,
+        `parser-${capabilities.format}`,
       );
     }
   }
@@ -116,6 +126,7 @@ function validateGeneratorInput(
     return generatorFailure(
       "invalid-generator-input",
       `Generator "${capabilities.target}" does not accept ${kind} IR as its primary input.`,
+      `generator-${capabilities.target}`,
     );
   }
 
@@ -131,13 +142,64 @@ function documentIrKind(document: IrDocument): IrKind {
 function parserFailure<TCode extends string>(
   code: TCode,
   message: string,
+  source: string,
 ): ParseResult<never, TCode> {
-  return { ok: false, code, message };
+  return {
+    ok: false,
+    code,
+    message,
+    diagnostics: [{ severity: "error", code, message, source }],
+  };
 }
 
 function generatorFailure<TCode extends string>(
   code: TCode,
   message: string,
+  source: string,
 ): GenerateResult<never, TCode> {
-  return { ok: false, code, message };
+  return {
+    ok: false,
+    code,
+    message,
+    diagnostics: [{ severity: "error", code, message, source }],
+  };
+}
+
+function withParserDiagnostic<
+  TDocument extends IrDocument,
+  TCode extends string,
+>(
+  result: ParseFailureResult<TCode>,
+  format: string,
+): ParseResult<TDocument, TCode> {
+  if (result.diagnostics && result.diagnostics.length > 0) return result;
+  return {
+    ...result,
+    diagnostics: [
+      {
+        severity: "error",
+        code: result.code,
+        message: result.message,
+        source: `parser-${format}`,
+      },
+    ],
+  };
+}
+
+function withGeneratorDiagnostic<TOutput, TCode extends string>(
+  result: GenerateFailureResult<TCode>,
+  format: string,
+): GenerateResult<TOutput, TCode> {
+  if (result.diagnostics && result.diagnostics.length > 0) return result;
+  return {
+    ...result,
+    diagnostics: [
+      {
+        severity: "error",
+        code: result.code,
+        message: result.message,
+        source: `generator-${format}`,
+      },
+    ],
+  };
 }
