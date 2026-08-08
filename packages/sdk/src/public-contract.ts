@@ -74,6 +74,15 @@ export const conversionOptionCatalogsSchema = z.object({
   irPreference: optionMetadataSchema,
 });
 
+/** Generic registry-aware option catalog contract for custom formats. */
+export const genericConversionOptionCatalogsSchema = z.object({
+  sourceFormat: z.string(),
+  targetFormat: z.string(),
+  parser: optionCatalogSchema,
+  generator: optionCatalogSchema,
+  irPreference: optionMetadataSchema,
+});
+
 export const schemaDiagnosticSchema = z.object({
   severity: z.enum(["error", "warning", "info"]),
   code: z.string(),
@@ -95,6 +104,17 @@ export const semanticLossSchema = z.object({
   evidence: z.unknown().optional(),
 });
 
+const semanticNoteSchema = z.object({
+  kind: z.enum(["normalization", "loss", "widening", "policy"]),
+  code: z.string(),
+  message: z.string(),
+  path: z.array(z.string()).optional(),
+  nodeKind: z.string().optional(),
+  source: z.string().optional(),
+  layer: z.enum(["value", "shape", "constraint", "target"]).optional(),
+  evidence: z.unknown().optional(),
+});
+
 export const conversionRouteSchema = z.object({
   sourceFormat: z.string(),
   targetFormat: z.string(),
@@ -106,6 +126,7 @@ export const conversionRouteSchema = z.object({
         "lower-to-value",
         "infer-shape",
         "derive-constraints",
+        "transform-ir",
         "generate-target",
       ]),
       from: z.string(),
@@ -118,6 +139,7 @@ export const conversionRouteSchema = z.object({
 const conversionReportStageSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
     parse: z.array(itemSchema).optional(),
+    transform: z.array(itemSchema).optional(),
     generate: z.array(itemSchema).optional(),
     all: z.array(itemSchema),
   });
@@ -226,29 +248,19 @@ export const convertSuccessResultSchema = z.object({
   diagnostics: z.array(schemaDiagnosticSchema).optional(),
   losses: z.array(semanticLossSchema).optional(),
   preservedCapabilities: z.array(z.string()).optional(),
-  semanticNotes: z
-    .array(
-      z.object({
-        kind: z.enum(["normalization", "loss", "widening", "policy"]),
-        code: z.string(),
-        message: z.string(),
-        path: z.array(z.string()).optional(),
-        nodeKind: z.string().optional(),
-        source: z.string().optional(),
-        layer: z.enum(["value", "shape", "constraint", "target"]).optional(),
-        evidence: z.unknown().optional(),
-      }),
-    )
-    .optional(),
+  semanticNotes: z.array(semanticNoteSchema).optional(),
 });
 
 export const convertFailureResultSchema = z.object({
   ok: z.literal(false),
   code: z.string(),
   message: z.string(),
-  phase: z.enum(["parse", "generate"]),
+  phase: z.enum(["parse", "transform", "generate"]),
   plan: conversionRouteSchema,
   diagnostics: z.array(schemaDiagnosticSchema).optional(),
+  artifacts: conversionArtifactsSchema.optional(),
+  losses: z.array(semanticLossSchema).optional(),
+  semanticNotes: z.array(semanticNoteSchema).optional(),
 });
 
 export const publicConvertResultSchema = z.discriminatedUnion("ok", [

@@ -29,6 +29,7 @@ export {
   schemaDiagnosticSchema,
   semanticLossSchema,
   conversionOptionCatalogsSchema,
+  genericConversionOptionCatalogsSchema,
   optionCatalogSchema,
   optionMetadataCategorySchema,
   optionMetadataExampleSchema,
@@ -76,6 +77,9 @@ export type {
   ConversionOutput,
   ConversionRegistry,
   ExtensionConversionOptions,
+  GenericConvertAdvancedOptions,
+  RegistryConversionOutput,
+  RegistryOutputMap,
 } from "./convert.js";
 export type {
   ConsumerSurfaceFormat,

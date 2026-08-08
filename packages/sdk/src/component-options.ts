@@ -37,16 +37,16 @@ export function generatorOptionsFor(
 
 function resolveComponentOptions(
   descriptor: ParserDescriptor | GeneratorDescriptor,
-  advanced: Record<string, unknown> | undefined,
+  advanced: unknown,
   extension: Record<string, unknown> | undefined,
 ): unknown {
-  if (advanced) {
+  if (typeof advanced === "object" && advanced !== null) {
     const optionKey = Object.keys(advanced).find(
       (key) =>
         normalizeOptionKey(key) === normalizeOptionKey(descriptor.format),
     );
     if (optionKey) {
-      return advanced[optionKey] ?? {};
+      return (advanced as Record<string, unknown>)[optionKey] ?? {};
     }
   }
   return isBuiltinFormat(descriptor.format) ? {} : (extension ?? {});

@@ -12,7 +12,9 @@ import {
   createConversionRegistry,
   createConverter,
   defaultConversionRegistry,
+  publicConvertResultSchema,
 } from "../../packages/sdk/src/index.js";
+import type { ConversionRegistry } from "../../packages/sdk/src/types.js";
 import { jsonParserDescriptor } from "../../packages/parsers/json/src/index.js";
 import { expectDescriptorRegistrationFailure } from "../helpers/descriptor-contract.js";
 
@@ -61,6 +63,26 @@ const extensionParser: ParserDescriptor = {
     return {
       ok: true,
       document: schemaDocument(context.name, schemaScalarNode("string")),
+    };
+  },
+};
+
+const failingExtensionGenerator: GeneratorDescriptor = {
+  ...extensionGenerator,
+  format: "fixture-failing-target",
+  capabilities: {
+    ...extensionGenerator.capabilities,
+    target: "fixture-failing-target",
+  },
+  options: {
+    ...extensionGenerator.options,
+    format: "fixture-failing-target",
+  },
+  generate() {
+    return {
+      ok: false,
+      code: "fixture-generator-failed",
+      message: "The fixture generator failed.",
     };
   },
 };
@@ -116,6 +138,48 @@ const valueToShapeFixture: IrTransformerDescriptor = {
 };
 
 describe("sdk extensible registry", () => {
+  it("resolves builtin transformers through a registry transformer lookup", () => {
+    const registry: ConversionRegistry = {
+      registerParser: defaultConversionRegistry.registerParser,
+      registerGenerator: defaultConversionRegistry.registerGenerator,
+      listParsers: defaultConversionRegistry.listParsers,
+      listGenerators: defaultConversionRegistry.listGenerators,
+      ...(defaultConversionRegistry.transformer
+        ? { transformer: defaultConversionRegistry.transformer }
+        : {}),
+    };
+
+    const result = createConverter(registry).convert({
+      sourceFormat: "json",
+      targetFormat: "typescript",
+      input: '{"id":1}',
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("retains pipeline artifacts when a generator fails", () => {
+    const registry = createConversionRegistry({
+      parsers: [extensionParser],
+      generators: [failingExtensionGenerator],
+    });
+
+    const result = createConverter(registry).convert({
+      sourceFormat: "fixture-source",
+      targetFormat: "fixture-failing-target",
+      input: "fixture",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      phase: "generate",
+      code: "fixture-generator-failed",
+      artifacts: {
+        shape: expect.objectContaining({ kind: "document" }),
+      },
+    });
+  });
+
   it("derives routes, support, and option catalogs from registered descriptors", () => {
     const registry = createConversionRegistry({
       parsers: [...defaultConversionRegistry.listParsers(), extensionParser],
@@ -147,6 +211,31 @@ describe("sdk extensible registry", () => {
     ).toMatchObject({ ok: true, output: "fixture:fixture_sourceDocument" });
   });
 
+  it("keeps custom registry output typing separate from builtin output aliases", () => {
+    interface FixtureOutputs {
+      "fixture-target": string;
+    }
+    const registry = createConversionRegistry({
+      parsers: [extensionParser],
+      generators: [extensionGenerator],
+    });
+    const converter = createConverter<FixtureOutputs>(registry);
+    const result = converter.convert({
+      sourceFormat: "fixture-source",
+      targetFormat: "fixture-target",
+      input: "ignored",
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      output: "fixture:fixture_sourceDocument",
+    });
+    if (result.ok) {
+      const typedOutput: string = result.output;
+      expect(typedOutput).toBe("fixture:fixture_sourceDocument");
+    }
+  });
+
   it("executes a registered transformer between parser and generator", () => {
     const registry = createConversionRegistry({
       parsers: [valueOnlyParser],
@@ -163,14 +252,14 @@ describe("sdk extensible registry", () => {
         { kind: "transform-ir", from: "value", to: "shape", ir: "shape" },
       ]),
     });
-    expect(
-      converter.convert({
-        sourceFormat: "value-source",
-        targetFormat: "fixture-target",
-        input: "ignored",
-        irPreference: "shape",
-      }),
-    ).toMatchObject({
+    const result = converter.convert({
+      sourceFormat: "value-source",
+      targetFormat: "fixture-target",
+      input: "ignored",
+      irPreference: "shape",
+    });
+
+    expect(result).toMatchObject({
       ok: true,
       output: "fixture:value_sourceDocument",
       report: {
@@ -186,6 +275,7 @@ describe("sdk extensible registry", () => {
         },
       },
     });
+    expect(() => publicConvertResultSchema.parse(result)).not.toThrow();
   });
 
   it("rejects duplicate and structurally invalid registrations", () => {

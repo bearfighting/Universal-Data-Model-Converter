@@ -89,11 +89,11 @@ For downstream product surfaces, the intended Stage 1 contract is:
 - call `convert(...)` for conversion execution
 - validate cross-boundary payloads with `publicConvertResultSchema` when runtime checking is useful
 - branch on `result.ok` for ordinary success or failure handling
-- treat `result.phase` on failures as the current public failure taxonomy: `parse | generate`
+- treat `result.phase` on failures as the current public failure taxonomy: `parse | transform | generate`
 
 The most stable result fields for consumers to build on are:
 
-- failure: `code`, `message`, `phase`, `plan`, optional `diagnostics`
+- failure: `code`, `message`, `phase`, `plan`, optional `diagnostics`, retained `artifacts`, `losses`, and `semanticNotes`
 - success: `output`, `plan`, optional `report`
 - report core: `irSelection`, `semanticCaveats`, `losses`, `capabilityRequirements`, `lossHotspots`, `entrySelection`, `policyDecisions`
 - diagnostic core: `severity`, `code`, `message`, optional `path`, optional `source`
@@ -102,7 +102,7 @@ The scenario-matrix tests in [../../tests/sdk/scenario-matrix.test.ts](../../tes
 
 Consumers should not rely on:
 
-- thrown exception strings for expected parse or generate failures
+- thrown exception strings for expected parse, transform, or generate failures
 - undocumented `evidence` payload details remaining byte-for-byte stable
 - lower-level parser or generator internals as part of this Stage 1 consumer boundary
 
@@ -330,6 +330,30 @@ The default `convert(...)` keeps the existing built-in output types. For a
 custom target, pass an output map to `createConverter<TOutputs>(...)`; targets
 not present in that map are typed as `unknown` rather than being coerced to a
 built-in string or JSON Schema output.
+
+The registry-safe type aliases `RegistryOutputMap` and
+`RegistryConversionOutput` are available for generic integrations. Builtin
+format and output aliases remain supported as compatibility types; custom
+registries should use descriptor identities and `createConverter(registry)` as
+the extension boundary rather than depending on builtin format unions.
+
+### Phase 6 migration notes
+
+The SDK now separates generic registry execution from builtin compatibility
+types. Existing `ConvertOptions`, builtin format aliases, builtin output types,
+and advanced option keys remain supported. New integrations should prefer:
+
+- `createConverter(registry)` for custom parser, generator, and transformer
+  registration;
+- descriptor format identities instead of a builtin format union;
+- `RegistryOutputMap` and `RegistryConversionOutput` for custom target typing;
+- `genericConversionOptionCatalogsSchema` when option catalogs may contain
+  custom source or target formats.
+
+Builtin parser and generator implementations are injected through the generated
+registry boundary. They are not dependencies of the SDK conversion
+orchestration modules. Further removal of legacy builtin aliases is deferred
+until a separately documented breaking-change release.
 
 Each descriptor owns its format identifier, capabilities, option catalog, and
 execution function. Registration rejects duplicate identifiers and descriptors

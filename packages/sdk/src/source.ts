@@ -7,9 +7,9 @@ import type {
 } from "@schema-transformation-toolkit/core";
 import type { IrKind } from "@schema-transformation-toolkit/core";
 import { executeParser } from "@schema-transformation-toolkit/core";
-import { resolveParserDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
 import { parserOptionsFor } from "./component-options.js";
+import { resolveParserFromRegistry } from "./registry-client.js";
 import type {
   ConvertFailureResult,
   ConvertOptions,
@@ -38,7 +38,7 @@ export function parseSource(
   registry: ConversionRegistry = defaultConversionRegistry,
   requestedIr?: readonly IrKind[],
 ): ParseSourceResult {
-  const descriptor = resolveParserDescriptor(sourceFormat, registry);
+  const descriptor = resolveParserFromRegistry(sourceFormat, registry);
   const parserRequestedIr = requestedIr?.includes("shape")
     ? "shape"
     : requestedIr?.length === 1

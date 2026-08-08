@@ -2,7 +2,7 @@ import {
   analyzeImplicitEntryFromSource,
   type TypeScriptImplicitEntryAmbiguityReason,
   type TypeScriptImplicitEntryAnalysis,
-} from "@schema-transformation-toolkit/parser-typescript";
+} from "./typescript-compatibility.js";
 
 export type {
   TypeScriptImplicitEntryAmbiguityReason,

@@ -1,11 +1,12 @@
 import type {
   ConversionCapabilityRequirement,
   ConversionLossHotspot,
+  IrArtifacts,
+  IrDocument,
   PipelineExecutionResult,
 } from "@schema-transformation-toolkit/core";
 import { executePipeline } from "@schema-transformation-toolkit/core";
-import type { JsonSchemaOutput } from "@schema-transformation-toolkit/generator-json-schema";
-import type { OpenApiOutput } from "@schema-transformation-toolkit/generator-openapi";
+import type { BuiltinGeneratorOutputs } from "./builtin-types.js";
 import { planSemanticLosses } from "./losses.js";
 import {
   describeConversionRouteCapabilities,
@@ -14,11 +15,15 @@ import {
   routeStages,
   routeUsesIr,
   defaultConversionRegistry,
-  resolveGeneratorDescriptor,
   resolveConversionRouteDecision,
-  resolveTransformerDescriptor,
   ConversionRouteError,
 } from "./registry.js";
+import {
+  resolveGeneratorFromRegistry,
+  resolveParserFromRegistry,
+  resolveTransformerFromRegistry,
+} from "./registry-client.js";
+import { defaultDocumentNameForFormat } from "./builtin-compatibility.js";
 import type { ConversionRegistry } from "./types.js";
 import {
   buildConversionReport,
@@ -42,13 +47,18 @@ export type {
   ConversionSourceFormat,
   ConversionTargetFormat,
   ExtensionConversionOptions,
+  GenericConvertAdvancedOptions,
+  RegistryConversionOutput,
+  RegistryOutputMap,
 } from "./types.js";
 import type {
+  ConversionArtifacts,
   ConvertOptions,
   ConvertResult,
   ConversionFormat,
   ConversionIrPreference,
   ConversionOutput,
+  RegistryOutputMap,
 } from "./types.js";
 
 export {
@@ -60,7 +70,7 @@ export {
 };
 
 export interface ConversionConverter<
-  TExtensions extends Record<string, unknown> = Record<never, never>,
+  TExtensions extends RegistryOutputMap = Record<never, never>,
 > {
   convert<TTarget extends ConversionFormat>(
     options: ConvertOptions & { targetFormat: TTarget },
@@ -75,7 +85,7 @@ export interface ConversionConverter<
 }
 
 export function createConverter<
-  TExtensions extends Record<string, unknown> = Record<never, never>,
+  TExtensions extends RegistryOutputMap = Record<never, never>,
 >(registry: ConversionRegistry): ConversionConverter<TExtensions> {
   return {
     convert: <TTarget extends ConversionFormat>(
@@ -89,7 +99,9 @@ export function createConverter<
   };
 }
 
-export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
+export function convert<
+  TOutput = string | BuiltinGeneratorOutputs[keyof BuiltinGeneratorOutputs],
+>(
   options: ConvertOptions,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): ConvertResult<TOutput> {
@@ -127,7 +139,8 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     }
     throw error;
   }
-  const name = options.name ?? defaultDocumentName(options.sourceFormat);
+  const name =
+    options.name ?? defaultDocumentNameForFormat(options.sourceFormat);
   const capabilityRequirements: ConversionCapabilityRequirement[] = [];
   const lossHotspots: ConversionLossHotspot[] = [];
   const routeCapabilities = describeConversionRouteCapabilities(
@@ -140,12 +153,12 @@ export function convert<TOutput = string | JsonSchemaOutput | OpenApiOutput>(
     options.sourceFormat,
     registry,
   );
-  const generatorDescriptor = resolveGeneratorDescriptor<TOutput>(
+  const generatorDescriptor = resolveGeneratorFromRegistry<TOutput>(
     options.targetFormat,
     registry,
   );
   const transformers = routeDecision.pipelinePlan.stages.map((stage) =>
-    resolveTransformerDescriptor(stage.transformerId, registry),
+    resolveTransformerFromRegistry(stage.transformerId, registry),
   );
   const pipelineResult = executePipeline<TOutput>({
     parser,
@@ -263,6 +276,10 @@ function pipelineFailureToConvertResult<TOutput>(
   plan: ReturnType<typeof planConversion>,
 ): ConvertResult<TOutput> {
   const diagnostics = result.diagnostics?.all;
+  const artifacts = result.bundle
+    ? conversionArtifactsFromBundle(result.bundle)
+    : undefined;
+  const semanticNotes = result.semanticNotes?.all;
   return {
     ok: false,
     code:
@@ -274,40 +291,40 @@ function pipelineFailureToConvertResult<TOutput>(
     phase: result.phase,
     plan,
     ...(diagnostics && diagnostics.length > 0 ? { diagnostics } : {}),
+    ...(artifacts ? { artifacts } : {}),
+    ...(result.losses && result.losses.length > 0
+      ? { losses: result.losses }
+      : {}),
+    ...(semanticNotes && semanticNotes.length > 0 ? { semanticNotes } : {}),
   };
+}
+
+function conversionArtifactsFromBundle(bundle: {
+  document: IrDocument;
+  artifacts?: IrArtifacts;
+}): ConversionArtifacts | undefined {
+  const artifacts = { ...(bundle.artifacts ?? {}) };
+  if (bundle.document.kind === "value-document") {
+    artifacts.value = bundle.document;
+  } else if (bundle.document.kind === "document") {
+    artifacts.shape = bundle.document;
+  } else if (bundle.document.kind === "constraint-document") {
+    artifacts.constraints = bundle.document;
+  }
+  return Object.keys(artifacts).length > 0
+    ? {
+        ...(artifacts.value ? { value: artifacts.value } : {}),
+        ...(artifacts.shape ? { shape: artifacts.shape } : {}),
+        ...(artifacts.constraints
+          ? { constraints: artifacts.constraints }
+          : {}),
+      }
+    : undefined;
 }
 
 function resolveParserDescriptorForPipeline(
   sourceFormat: ConvertOptions["sourceFormat"],
   registry: ConversionRegistry,
 ) {
-  const descriptor = registry.parser
-    ? registry.parser(sourceFormat)
-    : registry
-        .listParsers()
-        .find((candidate) => candidate.format === sourceFormat);
-  if (!descriptor)
-    throw new ConversionRouteError(
-      "unsupported-route",
-      `Unsupported source format: ${sourceFormat}`,
-    );
-  return descriptor;
-}
-
-function defaultDocumentName(
-  sourceFormat: ConvertOptions["sourceFormat"],
-): string {
-  if (sourceFormat === "json") {
-    return "JsonDocument";
-  }
-
-  if (sourceFormat === "json-schema") {
-    return "JsonSchemaDocument";
-  }
-
-  if (sourceFormat === "typescript") {
-    return "TypeScriptDocument";
-  }
-
-  return `${sourceFormat.replace(/[^a-zA-Z0-9]+/g, "_")}Document`;
+  return resolveParserFromRegistry(sourceFormat, registry);
 }

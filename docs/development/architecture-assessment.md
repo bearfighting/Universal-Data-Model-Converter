@@ -33,15 +33,15 @@ object routes now fail before parsing or generation, without implicit wrapping.
 
 ## Current Maturity
 
-| Area                        | Assessment      | Comment                                                                                                                                                                     |
-| --------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| IR boundaries               | Strong          | The Value/Shape/Constraint split is explicit and documented.                                                                                                                |
-| Parser/generator separation | Strong          | Format packages mostly depend on core, not on each other.                                                                                                                   |
-| Route planning              | Stronger        | Descriptor-driven planning now includes Value root-shape compatibility.                                                                                                     |
-| Public SDK surface          | Beta-stable     | The main entry points are clear, but several contracts are duplicated manually.                                                                                             |
-| Runtime input validation    | Improved        | Shared validation and TOML descriptor guards reject malformed runtime input structurally.                                                                                   |
-| Diagnostics                 | Good foundation | Structured diagnostics exist, but code and location contracts are not fully typed or uniform.                                                                               |
-| Maintainability             | Improved        | `registry.ts` and core traversal/transform modules remain hotspots; conversion execution, plan validation, and format option adaptation are shared below the public facade. |
+| Area                        | Assessment      | Comment                                                                                                                                                                                     |
+| --------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IR boundaries               | Strong          | The Value/Shape/Constraint split is explicit and documented.                                                                                                                                |
+| Parser/generator separation | Strong          | Format packages mostly depend on core, not on each other.                                                                                                                                   |
+| Route planning              | Stronger        | Descriptor-driven planning now includes Value root-shape compatibility.                                                                                                                     |
+| Public SDK surface          | Beta-stable     | The main entry points are clear, but several contracts are duplicated manually.                                                                                                             |
+| Runtime input validation    | Improved        | Shared validation and TOML descriptor guards reject malformed runtime input structurally.                                                                                                   |
+| Diagnostics                 | Good foundation | Structured diagnostics exist, but code and location contracts are not fully typed or uniform.                                                                                               |
+| Maintainability             | Improved        | `registry.ts` and core traversal/transform modules remain hotspots; conversion execution, plan validation, format option adaptation, and descriptor lookup now sit below the public facade. |
 
 ## Priority Risks
 
@@ -193,8 +193,10 @@ summaries. Conversion execution itself now lives in core's generic
 `executePipeline(...)` boundary.
 
 The behavior is coherent, but the file is now large enough that unrelated
-changes compete in one module. A future refactor should split these concerns
-without changing the public exports.
+changes compete in one module. Phase 6 has started isolating descriptor lookup
+behind `registry-client.ts`; registration, route planning, and capability
+summary extraction remain in this module until the compatibility exports are
+split without changing the public surface.
 
 Suggested internal split:
 

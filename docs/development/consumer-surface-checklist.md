@@ -52,7 +52,7 @@ These are important near-term improvements, but a downstream Web prototype or ea
 
 These are legitimate future improvements, but they should not delay the first downstream product surface.
 
-1. broader failure-phase taxonomy beyond the current public `parse | generate` split
+1. broader failure-phase taxonomy beyond the current public `parse | transform | generate` split
 2. package-scope or public naming migration
 3. broader capability ontologies or more generalized consumer summary layers
 4. more parser families or target families just to make the eventual Web surface look larger on day one
@@ -133,7 +133,7 @@ Important current note:
 
 - current failure `phase` values are intentionally narrow
 - that is acceptable as long as the public meaning is documented and tested
-- the current public failure contract is still `parse | generate`
+- the current public failure contract is `parse | transform | generate`
 - a broader future taxonomy such as `planning | parsing | analysis | generation` is reasonable, but it is not required before the first Web-facing consumer starts
 
 Fields that should be treated as especially important to freeze before serious Web work:

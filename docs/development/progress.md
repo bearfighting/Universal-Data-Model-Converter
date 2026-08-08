@@ -29,6 +29,9 @@ The repository is past architecture validation and has a stable-enough conversio
 - Phase 5 format adapter consolidation completed across JSON, YAML, CSV, TOML,
   JSON Schema, TypeScript, Zod, and OpenAPI; SDK component options now resolve
   from the selected descriptor without format-specific execution dispatch
+- Phase 6 SDK reduction is in progress: orchestration modules use a registry
+  client boundary, builtin type aliases are isolated for compatibility, and
+  registry-safe output/options contracts are available
 
 Shared normalization coverage currently includes:
 
@@ -182,6 +185,13 @@ The resulting maturity is now:
 - format pipeline readiness: all current parser/generator families are verified
   as descriptor-driven at the pipeline boundary; Phase 6 SDK public type and
   builtin-import reduction remains intentionally deferred
+- SDK extensibility: `createConverter(registry)` remains the primary custom
+  integration boundary; generic registry-safe types are additive while legacy
+  builtin aliases remain supported during migration
+- Phase 6 public contract migration: SDK orchestration no longer depends on
+  concrete format packages, custom registry output typing is covered, and
+  generic option catalog contracts are documented; build-order and packaging
+  validation remain Phase 7 work
 
 Phase 3 registry extraction is now implemented: core owns the generic
 descriptor registry, builtin packages declare versioned registry metadata, and
@@ -254,7 +264,7 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 The latest full local verification pass completed on August 8, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (76 test files, 876 passing tests)
+- `./node_modules/.bin/vitest run` (76 test files, 878 passing tests)
 - `./node_modules/.bin/tsc --noEmit`
 - `./node_modules/.bin/eslint .`
 - `./node_modules/.bin/prettier --check .`

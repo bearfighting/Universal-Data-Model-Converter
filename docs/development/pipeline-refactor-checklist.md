@@ -267,13 +267,33 @@ git diff --check
 
 ## Phase 6 — SDK reduction and public API migration
 
-- [ ] Remove concrete parser/generator imports from SDK source.
-- [ ] Remove format-specific route and dispatch switches from SDK.
-- [ ] Make `createConverter(registry)` the primary extensibility boundary.
-- [ ] Replace hardcoded builtin format unions with registry-driven discovery or generated types.
-- [ ] Replace hardcoded builtin output maps with registry-aware generic output typing.
-- [ ] Keep SDK responsible only for request normalization, pipeline invocation, and public result wrapping.
-- [ ] Update public API documentation, contracts, snapshots, and migration notes.
+- [x] Remove concrete parser/generator imports from SDK orchestration modules.
+- [x] Remove format-specific route and execution dispatch switches from SDK;
+      remaining format branches are report/presentation compatibility logic.
+- [x] Keep `createConverter(registry)` as the primary extensibility boundary and
+      add registry-safe output/option type aliases.
+- [x] Replace the core `ConversionFormat` dependency on builtin unions with a
+      registry-safe string identity while retaining builtin aliases for compatibility.
+- [x] Move builtin output and option types behind a compatibility-only module;
+      generic registry output typing is now unknown-safe.
+- [x] Keep conversion SDK responsible for request normalization, pipeline
+      invocation, and public result wrapping; report/support presentation remains a
+      documented consumer-facing layer.
+- [x] Update public API contracts and snapshots for the additive generic types.
+- [x] Complete public API documentation and migration notes.
+
+Phase 6 progress record (2026-08-08):
+
+- SDK orchestration modules now consume registry-client lookup helpers and no
+  longer import concrete parser/generator packages directly.
+- Builtin typed options/outputs remain available through a compatibility module;
+  `RegistryOutputMap`, `RegistryConversionOutput`, and generic advanced options
+  provide the registry-safe extension path.
+- The generic option catalog schema accepts custom source/target format names;
+  the legacy builtin schema remains unchanged for compatibility.
+- Remaining work is to decide whether the last presentation/compatibility
+  switches belong in a future report metadata migration and to complete the
+  Phase 7 packaging acceptance matrix.
 
 Validation gate:
 

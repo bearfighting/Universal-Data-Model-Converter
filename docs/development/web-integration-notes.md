@@ -76,7 +76,7 @@ When `convert(...)` fails:
 
 - show `result.code` and `result.message` as the primary failure summary
 - normalize the full list with `collectUserFacingDiagnostics(result)`
-- use `result.phase` to distinguish current public failure categories: `parse | generate`
+- use `result.phase` to distinguish current public failure categories: `parse | transform | generate`
 
 ## Recommended Picker Wiring
 

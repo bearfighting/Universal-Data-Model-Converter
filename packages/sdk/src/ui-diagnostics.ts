@@ -36,6 +36,8 @@ export function collectUserFacingDiagnostics(
     return [
       normalizeFailureResult(result),
       ...(result.diagnostics ?? []).map(normalizeSchemaDiagnostic),
+      ...(result.semanticNotes ?? []).map(normalizeSemanticNote),
+      ...(result.losses ?? []).map(normalizeSemanticLoss),
     ];
   }
 
@@ -121,6 +123,29 @@ function normalizeSemanticLoss(loss: SemanticLoss): UserFacingDiagnostic {
       lostCapability: loss.lostCapability,
       ...(loss.targetFormat ? { targetFormat: loss.targetFormat } : {}),
       ...(loss.evidence ? { evidence: loss.evidence } : {}),
+    },
+  };
+}
+
+function normalizeSemanticNote(
+  note: NonNullable<ConvertFailureResult["semanticNotes"]>[number],
+): UserFacingDiagnostic {
+  const severity = note.kind === "policy" ? "info" : "warning";
+  const suggestion = suggestionFromCode(note.code);
+
+  return {
+    severity,
+    code: note.code,
+    title: titleFromCode(note.code),
+    message: note.message,
+    ...(note.path ? { path: note.path.join(".") } : {}),
+    ...(note.source ? { source: note.source } : {}),
+    ...(suggestion ? { suggestion } : {}),
+    technicalDetails: {
+      kind: note.kind,
+      ...(note.nodeKind ? { nodeKind: note.nodeKind } : {}),
+      ...(note.layer ? { layer: note.layer } : {}),
+      ...(note.evidence ? { evidence: note.evidence } : {}),
     },
   };
 }

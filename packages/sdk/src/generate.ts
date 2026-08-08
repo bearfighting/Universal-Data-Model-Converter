@@ -5,9 +5,9 @@ import type {
   SchemaDocument,
   ValueDocument,
 } from "@schema-transformation-toolkit/core";
-import { resolveGeneratorDescriptor } from "./registry.js";
 import { defaultConversionRegistry } from "./registry.js";
 import { generatorOptionsFor } from "./component-options.js";
+import { resolveGeneratorFromRegistry } from "./registry-client.js";
 import type {
   ConvertOptions,
   ConversionRegistry,
@@ -23,7 +23,7 @@ export function generateTarget<TOutput = unknown>(
   constraints: ConstraintDocument | undefined,
   registry: ConversionRegistry = defaultConversionRegistry,
 ): import("@schema-transformation-toolkit/core").GenerateResult<TOutput> {
-  const descriptor = resolveGeneratorDescriptor<TOutput>(
+  const descriptor = resolveGeneratorFromRegistry<TOutput>(
     targetFormat,
     registry,
   );

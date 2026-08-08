@@ -75,6 +75,7 @@ describe("sdk api contract", () => {
       "describeFormatSupport",
       "describeGeneratorOptions",
       "describeParserOptions",
+      "genericConversionOptionCatalogsSchema",
       "inspectTypeScriptImplicitEntry",
       "listConversionRoutes",
       "listFormatSupports",
@@ -103,6 +104,17 @@ describe("sdk api contract", () => {
     expect(() =>
       sdkModule.conversionIrPreferenceSchema.parse("invalid"),
     ).toThrow();
+  });
+
+  it("accepts custom format names through the generic option contract", () => {
+    const catalogs = sdkModule.describeConversionOptions("json", "json");
+    expect(
+      sdkModule.genericConversionOptionCatalogsSchema.safeParse({
+        ...catalogs,
+        sourceFormat: "custom-source",
+        targetFormat: "custom-target",
+      }).success,
+    ).toBe(true);
   });
 
   it("plans the explicit json to typescript route", () => {
@@ -191,6 +203,33 @@ describe("sdk api contract", () => {
         }),
       ],
     });
+  });
+
+  it("accepts transform failures and retained pipeline fields in the public contract", () => {
+    expect(
+      sdkModule.convertFailureResultSchema.parse({
+        ok: false,
+        code: "transformer-failed",
+        message: "The transformer failed.",
+        phase: "transform",
+        plan: {
+          sourceFormat: "json",
+          targetFormat: "typescript",
+          irSequence: ["value", "shape"],
+          stages: [],
+        },
+        artifacts: {
+          value: { kind: "value-document" },
+        },
+        semanticNotes: [
+          {
+            kind: "normalization",
+            code: "fixture-note",
+            message: "A normalization occurred.",
+          },
+        ],
+      }),
+    ).toMatchObject({ phase: "transform" });
   });
 
   it("plans the json-schema to json-schema route with constraint ir when both sides declare it", () => {
