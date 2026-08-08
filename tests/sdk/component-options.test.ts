@@ -6,6 +6,7 @@ import type {
 import {
   generatorOptionsFor,
   parserOptionsFor,
+  transformerOptionsFor,
 } from "../../packages/sdk/src/component-options.js";
 import type { ConvertOptions } from "../../packages/sdk/src/types.js";
 import {
@@ -95,6 +96,20 @@ describe("component option adaptation", () => {
     expect(generatorOptionsFor(generator("json"), options)).toEqual({});
     expect(parserOptionsFor(parser("json"), baseOptions)).toEqual({});
     expect(generatorOptionsFor(generator("json"), baseOptions)).toEqual({});
+  });
+
+  it("falls back to extension transformer options when advanced options omit the id", () => {
+    const options = {
+      ...baseOptions,
+      advanced: { transformer: { "other-transformer": { mode: "advanced" } } },
+      extension: {
+        transformer: { "custom-transformer": { mode: "extension" } },
+      },
+    } as unknown as ConvertOptions;
+
+    expect(transformerOptionsFor("custom-transformer", options)).toEqual({
+      mode: "extension",
+    });
   });
 
   it("forwards extension options through the public custom converter path", () => {

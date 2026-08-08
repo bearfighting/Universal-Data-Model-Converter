@@ -1,8 +1,8 @@
 # Capability Matrix
 
 This document describes the current supported boundary for the public SDK. It
-is a compatibility guide, not a promise that every pair in the format list is
-available. Use `listConversionRoutes()` and
+is a human-readable compatibility guide, not a promise that every pair in the
+format list is available. Use `listConversionRoutes()` and
 `describeConversionRouteCapabilities(...)` for the runtime source of truth.
 
 ## Format capabilities

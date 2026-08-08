@@ -102,21 +102,27 @@ describe("sdk reporting helpers", () => {
         },
       },
     ];
-    const report = buildConversionReport(
-      [
-        {
-          code: "parse-warning",
-          message: "parse warning",
-          severity: "warning",
-          source: "sdk-test",
-        },
-      ],
-      [],
-      [],
-      ["shape-ir"],
-      parseSemanticNotes,
-      generateSemanticNotes,
-      [
+    const report = buildConversionReport({
+      diagnostics: {
+        parse: [
+          {
+            code: "parse-warning",
+            message: "parse warning",
+            severity: "warning",
+            source: "sdk-test",
+          },
+        ],
+        transform: [],
+        generate: [],
+      },
+      semanticNotes: {
+        parse: parseSemanticNotes,
+        transform: [],
+        generate: generateSemanticNotes,
+      },
+      losses: [],
+      preservedCapabilities: ["shape-ir"],
+      capabilityRequirements: [
         {
           feature: "tuple",
           path: ["root", "item"],
@@ -124,7 +130,7 @@ describe("sdk reporting helpers", () => {
           containingDefinitionName: "Pair",
         },
       ],
-      [
+      lossHotspots: [
         {
           code: "integer-widening",
           path: ["root", "item", "count"],
@@ -136,7 +142,7 @@ describe("sdk reporting helpers", () => {
           },
         },
       ],
-    );
+    });
 
     expect(report).toEqual({
       diagnostics: {
@@ -236,6 +242,55 @@ describe("sdk reporting helpers", () => {
       },
     });
 
-    expect(buildConversionReport([], [], [], [], [], [])).toBeUndefined();
+    expect(
+      buildConversionReport({
+        diagnostics: { parse: [], transform: [], generate: [] },
+        semanticNotes: { parse: [], transform: [], generate: [] },
+        losses: [],
+        preservedCapabilities: [],
+      }),
+    ).toBeUndefined();
+  });
+
+  it("includes transform caveats and policy decisions in the report", () => {
+    const transformNotes: SchemaSemanticNote[] = [
+      {
+        kind: "widening",
+        code: "fixture-transform-widening",
+        message: "The transform widened a value for the target.",
+        layer: "target",
+      },
+      {
+        kind: "policy",
+        code: "fixture-transform-policy",
+        message: "The transform applied a policy.",
+      },
+    ];
+
+    const report = buildConversionReport({
+      diagnostics: { parse: [], transform: [], generate: [] },
+      semanticNotes: { parse: [], transform: transformNotes, generate: [] },
+      losses: [],
+      preservedCapabilities: [],
+    });
+
+    expect(report).toMatchObject({
+      semanticCaveats: [
+        expect.objectContaining({
+          phase: "transform",
+          code: "fixture-transform-widening",
+        }),
+      ],
+      policyDecisions: [
+        expect.objectContaining({
+          phase: "transform",
+          code: "fixture-transform-policy",
+        }),
+      ],
+      semanticNotes: {
+        transform: transformNotes,
+        all: transformNotes,
+      },
+    });
   });
 });

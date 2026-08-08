@@ -7,7 +7,7 @@ surface. Install `@schema-transformation-toolkit/sdk` alone for the normal pipel
 `@schema-transformation-toolkit/parser-*` and `@schema-transformation-toolkit/generator-*` packages remain available for advanced,
 format-specific integrations.
 
-It is the intended downstream consumer boundary for Stage 1 product surfaces.
+It is the intended downstream consumer boundary for product surfaces.
 Project-level readiness and priorities live in [../../docs/development/progress.md](../../docs/development/progress.md), not in this package README.
 
 If you are using the toolkit rather than integrating the SDK itself, start with
@@ -85,9 +85,9 @@ TOML uses a strict TOML v1 Value profile. Date/time values, non-finite numbers,
 and unsafe integers are rejected. TOML generation consumes object-root Value IR;
 comments and source formatting are not preserved.
 
-## Stage 1 Contract
+## Public Compatibility Contract
 
-For downstream product surfaces, the intended Stage 1 contract is:
+For downstream product surfaces, the public compatibility contract is:
 
 - call `convert(...)` for conversion execution
 - validate cross-boundary payloads with `publicConvertResultSchema` when runtime checking is useful
@@ -107,7 +107,7 @@ Consumers should not rely on:
 
 - thrown exception strings for expected parse, transform, or generate failures
 - undocumented `evidence` payload details remaining byte-for-byte stable
-- lower-level parser or generator internals as part of this Stage 1 consumer boundary
+- lower-level parser or generator internals as part of this public consumer boundary
 
 ## How To Read `result.report`
 
@@ -181,6 +181,8 @@ The public helpers are:
 - `describeParserOptions(format)`
 - `describeGeneratorOptions(format)`
 - `describeConversionOptions(sourceFormat, targetFormat)`
+- `describeTransformerOptions(id)`
+- `listTransformerOptions()`
 - `listOptionCatalogs()`
 
 Conversion-level route selection is controlled with `irPreference` on
@@ -255,7 +257,7 @@ Each returned item follows one stable presentation-oriented shape:
 - optional `suggestion`
 - optional `technicalDetails`
 
-For Stage 1 consumers, the most stable expectations are:
+The most stable expectations are:
 
 - always branch on `severity`, `code`, `title`, and `message`
 - use `path` and `source` when present for grouping or attribution
@@ -288,7 +290,7 @@ Each summary includes:
 - notable limitations
 - experimental areas
 
-For Stage 1 consumers, the most stable expectations are:
+The most stable expectations are:
 
 - use `listFormatSupports()` to drive format pickers without hard-coding format names
 - use `describeFormatSupport(...)` for per-format help text, badges, and limitation copy
@@ -340,7 +342,7 @@ format and output aliases remain supported as compatibility types; custom
 registries should use descriptor identities and `createConverter(registry)` as
 the extension boundary rather than depending on builtin format unions.
 
-### Phase 6 migration notes
+### Custom Registry Compatibility
 
 The SDK now separates generic registry execution from builtin compatibility
 types. Existing `ConvertOptions`, builtin format aliases, builtin output types,
@@ -355,8 +357,8 @@ and advanced option keys remain supported. New integrations should prefer:
 
 Builtin parser and generator implementations are injected through the generated
 registry boundary. They are not dependencies of the SDK conversion
-orchestration modules. Further removal of legacy builtin aliases is deferred
-until a separately documented breaking-change release.
+orchestration modules. Legacy builtin aliases remain supported until a
+separately documented breaking-change release.
 
 Each descriptor owns its format identifier, capabilities, option catalog, and
 execution function. Registration rejects duplicate identifiers and descriptors

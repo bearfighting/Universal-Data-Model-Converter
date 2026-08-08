@@ -29,8 +29,8 @@ export interface UserFacingDiagnostic {
   technicalDetails?: unknown;
 }
 
-export function collectUserFacingDiagnostics(
-  result: ConvertResult,
+export function collectUserFacingDiagnostics<TOutput>(
+  result: ConvertResult<TOutput>,
 ): UserFacingDiagnostic[] {
   if (!result.ok) {
     return [
@@ -41,9 +41,16 @@ export function collectUserFacingDiagnostics(
     ];
   }
 
+  const caveats = result.report?.semanticCaveats ?? [];
+  const caveatCodes = new Set(caveats.map((caveat) => caveat.code));
+  const transformNotes = (result.report?.semanticNotes?.transform ?? []).filter(
+    (note) => !caveatCodes.has(note.code),
+  );
+
   return [
     ...(result.diagnostics ?? []).map(normalizeSchemaDiagnostic),
-    ...(result.report?.semanticCaveats ?? []).map(normalizeSemanticCaveat),
+    ...caveats.map(normalizeSemanticCaveat),
+    ...transformNotes.map(normalizeSemanticNote),
     ...(result.losses ?? []).map(normalizeSemanticLoss),
   ];
 }

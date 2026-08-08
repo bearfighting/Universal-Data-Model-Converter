@@ -123,6 +123,9 @@ import {
   routeUsesIr,
 } from "./registry.js";
 import type { ConversionRegistry } from "./types.js";
+import type { UserFacingDiagnostic } from "./ui-diagnostics.js";
+import type { ConversionOptionCatalogs } from "./options-metadata.js";
+import type { FormatSupportSummary } from "./support-matrix.js";
 export type {
   ConvertAdvancedOptions,
   ConversionArtifacts,
@@ -174,6 +177,28 @@ export interface ConversionConverter<
     irPreference?: ConversionIrPreference,
   ) => ReturnType<typeof planConversion>;
   describeConversionRouteCapabilities: typeof describeConversionRouteCapabilities;
+  listFormatSupports(): FormatSupportSummary[];
+  listSourceFormatSupports(): FormatSupportSummary[];
+  listTargetFormatSupports(): FormatSupportSummary[];
+  describeFormatSupport(format: ConversionFormat): FormatSupportSummary;
+  describeConversionOptions(
+    sourceFormat: ConversionFormat,
+    targetFormat: ConversionFormat,
+  ): ConversionOptionCatalogs;
+  describeParserOptions(
+    format: ConversionFormat,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog;
+  describeGeneratorOptions(
+    format: ConversionFormat,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog;
+  listOptionCatalogs(): import("@schema-transformation-toolkit/core").OptionCatalog[];
+  describeTransformerOptions(
+    id: string,
+  ): import("@schema-transformation-toolkit/core").OptionCatalog | undefined;
+  listTransformerOptions(): import("@schema-transformation-toolkit/core").OptionCatalog[];
+  collectUserFacingDiagnostics<TOutput>(
+    result: ConvertResult<TOutput>,
+  ): UserFacingDiagnostic[];
 }
 export declare function createConverter<
   TExtensions extends RegistryOutputMap = Record<never, never>,
@@ -233,6 +258,8 @@ export {
   describeConversionOptions,
   describeGeneratorOptions,
   describeParserOptions,
+  describeTransformerOptions,
+  listTransformerOptions,
   listOptionCatalogs,
 } from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";
@@ -314,6 +341,7 @@ export interface ConversionOptionCatalogs {
   targetFormat: ConversionTargetFormat;
   parser: OptionCatalog;
   generator: OptionCatalog;
+  transformers: OptionCatalog[];
   irPreference: OptionMetadata;
 }
 export declare const conversionIrPreferenceMetadata: OptionMetadata;
@@ -330,6 +358,13 @@ export declare function describeConversionOptions(
   targetFormat: ConversionTargetFormat,
   registry?: ConversionRegistry,
 ): ConversionOptionCatalogs;
+export declare function describeTransformerOptions(
+  id: string,
+  registry?: ConversionRegistry,
+): OptionCatalog | undefined;
+export declare function listTransformerOptions(
+  registry?: ConversionRegistry,
+): OptionCatalog[];
 export declare function listOptionCatalogs(
   registry?: ConversionRegistry,
 ): OptionCatalog[];
@@ -490,6 +525,7 @@ export declare const optionCatalogSchema: z.ZodObject<
     format: z.ZodString;
     role: z.ZodEnum<{
       parser: "parser";
+      transformer: "transformer";
       generator: "generator";
     }>;
     options: z.ZodArray<
@@ -595,6 +631,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
         format: z.ZodString;
         role: z.ZodEnum<{
           parser: "parser";
+          transformer: "transformer";
           generator: "generator";
         }>;
         options: z.ZodArray<
@@ -678,6 +715,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
         format: z.ZodString;
         role: z.ZodEnum<{
           parser: "parser";
+          transformer: "transformer";
           generator: "generator";
         }>;
         options: z.ZodArray<
@@ -755,6 +793,96 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
         >;
       },
       z.core.$strip
+    >;
+    transformers: z.ZodDefault<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            format: z.ZodString;
+            role: z.ZodEnum<{
+              parser: "parser";
+              transformer: "transformer";
+              generator: "generator";
+            }>;
+            options: z.ZodArray<
+              z.ZodObject<
+                {
+                  key: z.ZodString;
+                  label: z.ZodString;
+                  description: z.ZodString;
+                  category: z.ZodEnum<{
+                    diagnostics: "diagnostics";
+                    inference: "inference";
+                    selection: "selection";
+                    formatting: "formatting";
+                    output: "output";
+                    semantics: "semantics";
+                    extension: "extension";
+                  }>;
+                  defaultValue: z.ZodUnknown;
+                  valueDescriptions: z.ZodOptional<
+                    z.ZodArray<
+                      z.ZodObject<
+                        {
+                          value: z.ZodUnknown;
+                          label: z.ZodString;
+                          description: z.ZodString;
+                          semanticEffect: z.ZodOptional<z.ZodString>;
+                          diagnosticEffect: z.ZodOptional<z.ZodString>;
+                          example: z.ZodOptional<
+                            z.ZodObject<
+                              {
+                                title: z.ZodString;
+                                input: z.ZodOptional<z.ZodString>;
+                                options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                                output: z.ZodOptional<z.ZodString>;
+                                semanticChange: z.ZodOptional<z.ZodString>;
+                                diagnostics: z.ZodOptional<
+                                  z.ZodArray<z.ZodString>
+                                >;
+                                explanation: z.ZodString;
+                              },
+                              z.core.$strip
+                            >
+                          >;
+                        },
+                        z.core.$strip
+                      >
+                    >
+                  >;
+                  affectedStages: z.ZodArray<
+                    z.ZodEnum<{
+                      parse: "parse";
+                      transform: "transform";
+                      generate: "generate";
+                    }>
+                  >;
+                  semanticEffect: z.ZodString;
+                  diagnosticEffect: z.ZodString;
+                  examples: z.ZodArray<
+                    z.ZodObject<
+                      {
+                        title: z.ZodString;
+                        input: z.ZodOptional<z.ZodString>;
+                        options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                        output: z.ZodOptional<z.ZodString>;
+                        semanticChange: z.ZodOptional<z.ZodString>;
+                        diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                        explanation: z.ZodString;
+                      },
+                      z.core.$strip
+                    >
+                  >;
+                  supported: z.ZodBoolean;
+                  experimental: z.ZodOptional<z.ZodBoolean>;
+                },
+                z.core.$strip
+              >
+            >;
+          },
+          z.core.$strip
+        >
+      >
     >;
     irPreference: z.ZodObject<
       {
@@ -840,6 +968,7 @@ export declare const genericConversionOptionCatalogsSchema: z.ZodObject<
         format: z.ZodString;
         role: z.ZodEnum<{
           parser: "parser";
+          transformer: "transformer";
           generator: "generator";
         }>;
         options: z.ZodArray<
@@ -923,6 +1052,7 @@ export declare const genericConversionOptionCatalogsSchema: z.ZodObject<
         format: z.ZodString;
         role: z.ZodEnum<{
           parser: "parser";
+          transformer: "transformer";
           generator: "generator";
         }>;
         options: z.ZodArray<
@@ -1000,6 +1130,96 @@ export declare const genericConversionOptionCatalogsSchema: z.ZodObject<
         >;
       },
       z.core.$strip
+    >;
+    transformers: z.ZodDefault<
+      z.ZodArray<
+        z.ZodObject<
+          {
+            format: z.ZodString;
+            role: z.ZodEnum<{
+              parser: "parser";
+              transformer: "transformer";
+              generator: "generator";
+            }>;
+            options: z.ZodArray<
+              z.ZodObject<
+                {
+                  key: z.ZodString;
+                  label: z.ZodString;
+                  description: z.ZodString;
+                  category: z.ZodEnum<{
+                    diagnostics: "diagnostics";
+                    inference: "inference";
+                    selection: "selection";
+                    formatting: "formatting";
+                    output: "output";
+                    semantics: "semantics";
+                    extension: "extension";
+                  }>;
+                  defaultValue: z.ZodUnknown;
+                  valueDescriptions: z.ZodOptional<
+                    z.ZodArray<
+                      z.ZodObject<
+                        {
+                          value: z.ZodUnknown;
+                          label: z.ZodString;
+                          description: z.ZodString;
+                          semanticEffect: z.ZodOptional<z.ZodString>;
+                          diagnosticEffect: z.ZodOptional<z.ZodString>;
+                          example: z.ZodOptional<
+                            z.ZodObject<
+                              {
+                                title: z.ZodString;
+                                input: z.ZodOptional<z.ZodString>;
+                                options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                                output: z.ZodOptional<z.ZodString>;
+                                semanticChange: z.ZodOptional<z.ZodString>;
+                                diagnostics: z.ZodOptional<
+                                  z.ZodArray<z.ZodString>
+                                >;
+                                explanation: z.ZodString;
+                              },
+                              z.core.$strip
+                            >
+                          >;
+                        },
+                        z.core.$strip
+                      >
+                    >
+                  >;
+                  affectedStages: z.ZodArray<
+                    z.ZodEnum<{
+                      parse: "parse";
+                      transform: "transform";
+                      generate: "generate";
+                    }>
+                  >;
+                  semanticEffect: z.ZodString;
+                  diagnosticEffect: z.ZodString;
+                  examples: z.ZodArray<
+                    z.ZodObject<
+                      {
+                        title: z.ZodString;
+                        input: z.ZodOptional<z.ZodString>;
+                        options: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+                        output: z.ZodOptional<z.ZodString>;
+                        semanticChange: z.ZodOptional<z.ZodString>;
+                        diagnostics: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                        explanation: z.ZodString;
+                      },
+                      z.core.$strip
+                    >
+                  >;
+                  supported: z.ZodBoolean;
+                  experimental: z.ZodOptional<z.ZodBoolean>;
+                },
+                z.core.$strip
+              >
+            >;
+          },
+          z.core.$strip
+        >
+      >
     >;
     irPreference: z.ZodObject<
       {
@@ -1154,6 +1374,7 @@ export declare const conversionSemanticCaveatSchema: z.ZodObject<
   {
     phase: z.ZodEnum<{
       parse: "parse";
+      transform: "transform";
       generate: "generate";
     }>;
     kind: z.ZodEnum<{
@@ -1181,6 +1402,7 @@ export declare const conversionPolicyDecisionSchema: z.ZodObject<
   {
     phase: z.ZodEnum<{
       parse: "parse";
+      transform: "transform";
       generate: "generate";
     }>;
     code: z.ZodString;
@@ -1481,6 +1703,7 @@ export declare const conversionReportSchema: z.ZodObject<
           {
             phase: z.ZodEnum<{
               parse: "parse";
+              transform: "transform";
               generate: "generate";
             }>;
             kind: z.ZodEnum<{
@@ -1542,6 +1765,7 @@ export declare const conversionReportSchema: z.ZodObject<
           {
             phase: z.ZodEnum<{
               parse: "parse";
+              transform: "transform";
               generate: "generate";
             }>;
             code: z.ZodString;
@@ -1884,6 +2108,7 @@ export declare const convertSuccessResultSchema: z.ZodObject<
                 {
                   phase: z.ZodEnum<{
                     parse: "parse";
+                    transform: "transform";
                     generate: "generate";
                   }>;
                   kind: z.ZodEnum<{
@@ -1945,6 +2170,7 @@ export declare const convertSuccessResultSchema: z.ZodObject<
                 {
                   phase: z.ZodEnum<{
                     parse: "parse";
+                    transform: "transform";
                     generate: "generate";
                   }>;
                   code: z.ZodString;
@@ -2505,6 +2731,7 @@ export declare const publicConvertResultSchema: z.ZodDiscriminatedUnion<
                     {
                       phase: z.ZodEnum<{
                         parse: "parse";
+                        transform: "transform";
                         generate: "generate";
                       }>;
                       kind: z.ZodEnum<{
@@ -2566,6 +2793,7 @@ export declare const publicConvertResultSchema: z.ZodDiscriminatedUnion<
                     {
                       phase: z.ZodEnum<{
                         parse: "parse";
+                        transform: "transform";
                         generate: "generate";
                       }>;
                       code: z.ZodString;
@@ -3030,10 +3258,12 @@ export type ConversionOutput<
 > = RegistryConversionOutput<TTarget, BuiltinGeneratorOutputs & TExtensions>;
 export interface ExtensionConversionOptions {
   parser?: Record<string, unknown>;
+  transformer?: Record<string, unknown>;
   generator?: Record<string, unknown>;
 }
 export interface GenericConvertAdvancedOptions {
   parser?: unknown;
+  transformer?: Record<string, unknown>;
   generator?: unknown;
 }
 export interface ConversionRegistry {
@@ -3051,6 +3281,7 @@ export interface ConversionRegistry {
 }
 export interface ConvertAdvancedOptions {
   parser?: BuiltinParserOptions;
+  transformer?: Record<string, unknown>;
   generator?: BuiltinGeneratorOptions;
 }
 export interface ConvertOptions {
@@ -3132,7 +3363,7 @@ export interface UserFacingDiagnostic {
   suggestion?: string;
   technicalDetails?: unknown;
 }
-export declare function collectUserFacingDiagnostics(
-  result: ConvertResult,
+export declare function collectUserFacingDiagnostics<TOutput>(
+  result: ConvertResult<TOutput>,
 ): UserFacingDiagnostic[];
 ```

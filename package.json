@@ -15,6 +15,7 @@
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:public-api": "pnpm check:boundaries && pnpm check:api",
     "check:sdk-package": "node scripts/check-sdk-package.mjs",
+    "check:capability-matrix": "node scripts/check-capability-matrix.mjs",
     "check:third-party-fixture": "node scripts/check-third-party-fixture.mjs",
     "registry:generate": "node scripts/generate-builtin-registry.mjs",
     "registry:check": "node scripts/generate-builtin-registry.mjs --check",

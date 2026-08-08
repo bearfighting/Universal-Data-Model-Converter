@@ -15,6 +15,7 @@ import {
   publicConvertResultSchema,
 } from "../../packages/sdk/src/index.js";
 import type { ConversionRegistry } from "../../packages/sdk/src/types.js";
+import { resolveConversionRouteDecision } from "../../packages/sdk/src/registry.js";
 import { jsonParserDescriptor } from "../../packages/parsers/json/src/index.js";
 import { expectDescriptorRegistrationFailure } from "../helpers/descriptor-contract.js";
 
@@ -112,7 +113,40 @@ const valueToShapeFixture: IrTransformerDescriptor = {
   descriptorVersion: "0.1",
   inputIr: "value",
   outputIr: "shape",
-  transform(input) {
+  options: {
+    format: "value-to-shape-fixture",
+    role: "transformer",
+    options: [
+      {
+        key: "mode",
+        label: "Mode",
+        description: "Fixture transformer mode.",
+        category: "semantics",
+        defaultValue: "default",
+        affectedStages: ["transform"],
+        semanticEffect: "Controls the fixture transform behavior.",
+        diagnosticEffect: "No diagnostic effect.",
+        examples: [
+          {
+            title: "Fixture mode",
+            options: { mode: "configured" },
+            explanation: "Uses the configured fixture mode.",
+          },
+        ],
+        supported: true,
+      },
+    ],
+  },
+  transform(input, context) {
+    if (
+      (context.options as { mode?: string } | undefined)?.mode !== "configured"
+    ) {
+      return {
+        ok: false,
+        code: "fixture-transform-options-missing",
+        message: "The configured transformer mode was not passed.",
+      };
+    }
     return {
       ok: true,
       document: schemaDocument(input.document.name, schemaScalarNode("string")),
@@ -202,6 +236,21 @@ describe("sdk extensible registry", () => {
     expect(registry.listGenerators().map((item) => item.format)).toContain(
       "fixture-target",
     );
+    expect(converter.listOptionCatalogs()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ format: "fixture-source", role: "parser" }),
+        expect.objectContaining({
+          format: "fixture-target",
+          role: "generator",
+        }),
+      ]),
+    );
+    expect(converter.describeParserOptions("fixture-source").format).toBe(
+      "fixture-source",
+    );
+    expect(converter.describeGeneratorOptions("fixture-target").format).toBe(
+      "fixture-target",
+    );
     expect(
       converter.convert({
         sourceFormat: "fixture-source",
@@ -257,6 +306,11 @@ describe("sdk extensible registry", () => {
       targetFormat: "fixture-target",
       input: "ignored",
       irPreference: "shape",
+      advanced: {
+        transformer: {
+          "value-to-shape-fixture": { mode: "configured" },
+        },
+      },
     });
 
     expect(result).toMatchObject({
@@ -276,6 +330,129 @@ describe("sdk extensible registry", () => {
       },
     });
     expect(() => publicConvertResultSchema.parse(result)).not.toThrow();
+    expect(converter.collectUserFacingDiagnostics(result)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "fixture-transform-note" }),
+      ]),
+    );
+  });
+
+  it("does not leak route-planning registry exceptions", () => {
+    const registry: ConversionRegistry = {
+      ...defaultConversionRegistry,
+      listTransformers() {
+        throw new Error("internal registry detail");
+      },
+    };
+
+    const result = createConverter(registry).convert({
+      sourceFormat: "json",
+      targetFormat: "typescript",
+      input: '{"id":1}',
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "conversion-orchestration-failed",
+      phase: "parse",
+      message: "Conversion orchestration failed.",
+    });
+    expect(JSON.stringify(result)).not.toContain("internal registry detail");
+  });
+
+  it("keeps the public route view aligned with the core pipeline plan", () => {
+    const registry = createConversionRegistry({
+      parsers: [valueOnlyParser],
+      generators: [extensionGenerator],
+      transformers: [valueToShapeFixture],
+    });
+    const decision = resolveConversionRouteDecision(
+      "value-source",
+      "fixture-target",
+      "shape",
+      registry,
+    );
+    const routeTransformStages = decision.route.stages.filter(
+      (stage) => stage.kind === "transform-ir",
+    );
+
+    expect(routeTransformStages.map((stage) => [stage.from, stage.to])).toEqual(
+      decision.pipelinePlan.stages.map((stage) => [stage.from, stage.to]),
+    );
+    expect(decision.pipelinePlan.selectedIr).toBe("shape");
+  });
+
+  it("exposes transformer options through the converter facade", () => {
+    const unusedTransformer: IrTransformerDescriptor = {
+      ...valueToShapeFixture,
+      id: "unused-transformer",
+      inputIr: "shape",
+      outputIr: "shape",
+      options: {
+        ...valueToShapeFixture.options!,
+        format: "unused-transformer",
+      },
+    };
+    const registry = createConversionRegistry({
+      parsers: [valueOnlyParser],
+      generators: [extensionGenerator],
+      transformers: [valueToShapeFixture, unusedTransformer],
+    });
+    const converter = createConverter(registry);
+
+    expect(
+      converter.describeConversionOptions("value-source", "fixture-target")
+        .transformers,
+    ).toEqual([expect.objectContaining({ format: "value-to-shape-fixture" })]);
+    expect(converter.listTransformerOptions()).toEqual([
+      expect.objectContaining({ format: "unused-transformer" }),
+      expect.objectContaining({ format: "value-to-shape-fixture" }),
+    ]);
+    expect(converter.listSourceFormatSupports()).toEqual([
+      expect.objectContaining({ format: "value-source" }),
+    ]);
+    expect(converter.listTargetFormatSupports()).toEqual([
+      expect.objectContaining({ format: "fixture-target" }),
+    ]);
+    expect(converter.describeFormatSupport("fixture-target")).toMatchObject({
+      format: "fixture-target",
+    });
+  });
+
+  it("uses advanced transformer options first and extension options as fallback", () => {
+    const registry = createConversionRegistry({
+      parsers: [valueOnlyParser],
+      generators: [extensionGenerator],
+      transformers: [valueToShapeFixture],
+    });
+    const converter = createConverter(registry);
+
+    expect(
+      converter.convert({
+        sourceFormat: "value-source",
+        targetFormat: "fixture-target",
+        input: "ignored",
+        irPreference: "shape",
+        extension: {
+          transformer: { "value-to-shape-fixture": { mode: "configured" } },
+        },
+      }),
+    ).toMatchObject({ ok: true, output: "fixture:value_sourceDocument" });
+
+    expect(
+      converter.convert({
+        sourceFormat: "value-source",
+        targetFormat: "fixture-target",
+        input: "ignored",
+        irPreference: "shape",
+        advanced: {
+          transformer: { "value-to-shape-fixture": { mode: "configured" } },
+        },
+        extension: {
+          transformer: { "value-to-shape-fixture": { mode: "wrong" } },
+        },
+      }),
+    ).toMatchObject({ ok: true, output: "fixture:value_sourceDocument" });
   });
 
   it("rejects duplicate and structurally invalid registrations", () => {

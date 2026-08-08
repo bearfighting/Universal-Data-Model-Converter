@@ -43,11 +43,13 @@ export type ConversionOutput<
 
 export interface ExtensionConversionOptions {
   parser?: Record<string, unknown>;
+  transformer?: Record<string, unknown>;
   generator?: Record<string, unknown>;
 }
 
 export interface GenericConvertAdvancedOptions {
   parser?: unknown;
+  transformer?: Record<string, unknown>;
   generator?: unknown;
 }
 
@@ -67,6 +69,7 @@ export interface ConversionRegistry {
 
 export interface ConvertAdvancedOptions {
   parser?: BuiltinParserOptions;
+  transformer?: Record<string, unknown>;
   generator?: BuiltinGeneratorOptions;
 }
 

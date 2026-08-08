@@ -27,19 +27,44 @@ type TargetSemanticCaveatNote = SchemaSemanticNote & {
   layer: "target";
 };
 
+export interface ConversionReportEvidence {
+  diagnostics: {
+    parse: SchemaDiagnostic[];
+    transform: SchemaDiagnostic[];
+    generate: SchemaDiagnostic[];
+  };
+  semanticNotes: {
+    parse: SchemaSemanticNote[];
+    transform: SchemaSemanticNote[];
+    generate: SchemaSemanticNote[];
+  };
+  losses: SemanticLoss[];
+  preservedCapabilities: ConversionCapability[];
+  capabilityRequirements?: ConversionCapabilityRequirement[];
+  lossHotspots?: ConversionLossHotspot[];
+  irSelection?: ConversionIrSelection;
+}
+
 export function buildConversionReport(
-  parseDiagnostics: SchemaDiagnostic[],
-  generateDiagnostics: SchemaDiagnostic[],
-  losses: SemanticLoss[],
-  preservedCapabilities: ConversionCapability[],
-  parseSemanticNotes: SchemaSemanticNote[],
-  generateSemanticNotes: SchemaSemanticNote[],
-  capabilityRequirements: ConversionCapabilityRequirement[] = [],
-  lossHotspots: ConversionLossHotspot[] = [],
-  irSelection?: ConversionIrSelection,
-  transformDiagnostics: SchemaDiagnostic[] = [],
-  transformSemanticNotes: SchemaSemanticNote[] = [],
+  evidence: ConversionReportEvidence,
 ): ConversionReport | undefined {
+  const {
+    diagnostics: {
+      parse: parseDiagnostics,
+      transform: transformDiagnostics,
+      generate: generateDiagnostics,
+    },
+    semanticNotes: {
+      parse: parseSemanticNotes,
+      transform: transformSemanticNotes,
+      generate: generateSemanticNotes,
+    },
+    losses,
+    preservedCapabilities,
+    capabilityRequirements = [],
+    lossHotspots = [],
+    irSelection,
+  } = evidence;
   const allDiagnostics = [
     ...parseDiagnostics,
     ...transformDiagnostics,
@@ -52,10 +77,12 @@ export function buildConversionReport(
   ];
   const policyDecisions = extractPolicyDecisions(
     parseSemanticNotes,
+    transformSemanticNotes,
     generateSemanticNotes,
   );
   const semanticCaveats = extractSemanticCaveats(
     parseSemanticNotes,
+    transformSemanticNotes,
     generateSemanticNotes,
   );
   const entrySelection = extractEntrySelection(policyDecisions);
@@ -178,6 +205,7 @@ export function extractEntrySelection(
 
 export function extractPolicyDecisions(
   parseSemanticNotes: SchemaSemanticNote[],
+  transformSemanticNotes: SchemaSemanticNote[] = [],
   generateSemanticNotes: SchemaSemanticNote[] = [],
 ): ConversionPolicyDecision[] {
   return [
@@ -185,6 +213,16 @@ export function extractPolicyDecisions(
       .filter((note) => note.kind === "policy")
       .map((note) => ({
         phase: "parse" as const,
+        code: note.code,
+        message: note.message,
+        ...(note.source ? { source: note.source } : {}),
+        ...(note.path ? { path: note.path } : {}),
+        ...(note.evidence ? { evidence: note.evidence } : {}),
+      })),
+    ...transformSemanticNotes
+      .filter((note) => note.kind === "policy")
+      .map((note) => ({
+        phase: "transform" as const,
         code: note.code,
         message: note.message,
         ...(note.source ? { source: note.source } : {}),
@@ -206,12 +244,16 @@ export function extractPolicyDecisions(
 
 export function extractSemanticCaveats(
   parseSemanticNotes: SchemaSemanticNote[],
+  transformSemanticNotes: SchemaSemanticNote[] = [],
   generateSemanticNotes: SchemaSemanticNote[] = [],
 ): ConversionSemanticCaveat[] {
   return [
     ...parseSemanticNotes
       .filter(isTargetSemanticCaveatNote)
       .map((note) => toSemanticCaveat("parse", note)),
+    ...transformSemanticNotes
+      .filter(isTargetSemanticCaveatNote)
+      .map((note) => toSemanticCaveat("transform", note)),
     ...generateSemanticNotes
       .filter(isTargetSemanticCaveatNote)
       .map((note) => toSemanticCaveat("generate", note)),
@@ -219,7 +261,7 @@ export function extractSemanticCaveats(
 }
 
 function toSemanticCaveat(
-  phase: "parse" | "generate",
+  phase: "parse" | "transform" | "generate",
   note: TargetSemanticCaveatNote,
 ): ConversionSemanticCaveat {
   return {

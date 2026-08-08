@@ -254,6 +254,23 @@ function validateTransformerDescriptor(
       "Invalid transformer descriptor.",
     );
   }
+  if (input.options !== undefined) {
+    if (!isRecord(input.options)) {
+      throw new DescriptorRegistryError(
+        "descriptor-options-mismatch",
+        `Transformer "${input.id}" options metadata must be an object.`,
+      );
+    }
+    if (
+      input.options.format !== input.id ||
+      input.options.role !== "transformer"
+    ) {
+      throw new DescriptorRegistryError(
+        "descriptor-options-mismatch",
+        `Transformer "${input.id}" options metadata does not match its descriptor.`,
+      );
+    }
+  }
 }
 
 function validateParserCapabilities(

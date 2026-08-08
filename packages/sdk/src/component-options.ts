@@ -35,6 +35,19 @@ export function generatorOptionsFor(
   );
 }
 
+export function transformerOptionsFor(
+  transformerId: string,
+  options: ConvertOptions,
+): unknown {
+  const advanced = options.advanced?.transformer;
+  if (advanced && typeof advanced === "object") {
+    if (Object.prototype.hasOwnProperty.call(advanced, transformerId)) {
+      return advanced[transformerId] ?? {};
+    }
+  }
+  return options.extension?.transformer?.[transformerId] ?? {};
+}
+
 function resolveComponentOptions(
   descriptor: ParserDescriptor | GeneratorDescriptor,
   advanced: unknown,

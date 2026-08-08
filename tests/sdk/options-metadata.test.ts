@@ -130,6 +130,12 @@ describe("SDK option metadata", () => {
       defaultValue: "auto",
       supported: true,
     });
+    const legacyCatalogs = Object.fromEntries(
+      Object.entries(catalogs).filter(([key]) => key !== "transformers"),
+    );
+    expect(
+      conversionOptionCatalogsSchema.safeParse(legacyCatalogs).success,
+    ).toBe(true);
   });
 
   it("does not expose unsupported source-location preservation as supported", () => {

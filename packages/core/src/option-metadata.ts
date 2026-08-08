@@ -45,6 +45,6 @@ export interface OptionMetadata {
 
 export interface OptionCatalog {
   format: string;
-  role: "parser" | "generator";
+  role: "parser" | "transformer" | "generator";
   options: OptionMetadata[];
 }

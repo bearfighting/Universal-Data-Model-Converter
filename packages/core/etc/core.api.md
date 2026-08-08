@@ -229,7 +229,7 @@ export interface OptionMetadata {
 }
 export interface OptionCatalog {
   format: string;
-  role: "parser" | "generator";
+  role: "parser" | "transformer" | "generator";
   options: OptionMetadata[];
 }
 ```
@@ -298,7 +298,7 @@ export interface ConversionEntrySelection {
   evidence?: unknown;
 }
 export interface ConversionPolicyDecision {
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   code: string;
   message: string;
   source?: string;
@@ -306,7 +306,7 @@ export interface ConversionPolicyDecision {
   evidence?: unknown;
 }
 export interface ConversionSemanticCaveat {
-  phase: "parse" | "generate";
+  phase: "parse" | "transform" | "generate";
   kind: Exclude<SchemaSemanticNote["kind"], "policy">;
   code: string;
   message: string;
@@ -436,7 +436,17 @@ export interface PipelineExecutionRequest<
   plan: IrPipelinePlan;
   input: string;
   parserContext: import("./descriptor-contracts.js").ParserExecutionContext<TParserOptions>;
-  transformerContext?: import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>;
+  transformerContext?:
+    | import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>
+    | ((context: {
+        transformer: import("./descriptor-contracts.js").IrTransformerDescriptor<
+          IrDocument,
+          IrDocument,
+          TTransformerOptions
+        >;
+        stage: IrPipelineStage;
+        index: number;
+      }) => import("./descriptor-contracts.js").TransformerExecutionContext<TTransformerOptions>);
   generatorContext?: import("./descriptor-contracts.js").GeneratorExecutionContext<TGeneratorOptions>;
   sourceFormat: string;
   targetFormat: string;

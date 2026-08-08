@@ -42,6 +42,8 @@ export {
   describeConversionOptions,
   describeGeneratorOptions,
   describeParserOptions,
+  describeTransformerOptions,
+  listTransformerOptions,
   listOptionCatalogs,
 } from "./options-metadata.js";
 export { inspectTypeScriptImplicitEntry } from "./inspect.js";

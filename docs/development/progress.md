@@ -53,7 +53,7 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 ## Next Priorities
 
-1. Freeze the small Stage 1 SDK consumer contract and keep the consumer
+1. Keep the public SDK contract, user guide, capability matrix, and consumer
    scenario matrix aligned with actual published behavior.
 2. Decide whether the current builtin registry bundle should remain fully
    bundled or gain a measured tree-shaking strategy for downstream products.
@@ -90,7 +90,7 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 Latest completed baseline:
 
-- 76 test files, 881 tests passing.
+- 76 test files, 888 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.

@@ -97,7 +97,7 @@ export function executePipeline<TOutput>(
       transformer,
     ]),
   );
-  for (const stage of request.plan.stages) {
+  for (const [index, stage] of request.plan.stages.entries()) {
     const transformer = transformerById.get(stage.transformerId);
     if (!transformer) {
       const message = `Transformer "${stage.transformerId}" is not available for the planned pipeline.`;
@@ -116,10 +116,36 @@ export function executePipeline<TOutput>(
       );
     }
 
+    let transformerContext;
+    try {
+      transformerContext =
+        typeof request.transformerContext === "function"
+          ? request.transformerContext({
+              transformer,
+              stage,
+              index,
+            })
+          : request.transformerContext;
+    } catch {
+      const message = `Transformer "${transformer.id}" options could not be resolved.`;
+      addStageDiagnostics(diagnostics, "transform", [
+        pipelineDiagnostic("transformer-options-failed", message, "transform"),
+      ]);
+      return failure(
+        request,
+        "transform",
+        "transformer-options-failed",
+        message,
+        {
+          bundle,
+          ...stageExtras(diagnostics, semanticNotes),
+        },
+      );
+    }
     const result = executeIrTransformer(
       transformer,
       withoutPrimaryArtifact(bundle),
-      request.transformerContext ?? {},
+      transformerContext ?? {},
     );
     if (!result.ok) {
       addStageDiagnostics(diagnostics, "transform", result.diagnostics);

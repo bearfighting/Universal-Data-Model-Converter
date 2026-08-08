@@ -153,11 +153,32 @@ import { describeConversionOptions } from "@schema-transformation-toolkit/sdk";
 
 const options = describeConversionOptions("json", "typescript");
 console.log(options.parser.options, options.generator.options);
+console.log(options.transformers);
 ```
 
 Use `advanced` only when the default behavior is insufficient. Option metadata
 describes semantic and diagnostic effects; it is not a ready-made UI form
 schema.
+
+Transformer-specific configuration is keyed by transformer id:
+
+```ts
+const result = convert({
+  sourceFormat: "json",
+  targetFormat: "typescript",
+  input: '{"id":1}',
+  advanced: {
+    transformer: {
+      "value-to-shape": {
+        // transformer-specific options, when exposed by the route
+      },
+    },
+  },
+});
+```
+
+Use `describeTransformerOptions(...)` or the `transformers` catalog returned
+by `describeConversionOptions(...)` to discover supported transformer options.
 
 ### Choose the IR preference
 

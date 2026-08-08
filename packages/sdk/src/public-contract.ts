@@ -62,7 +62,7 @@ export const optionMetadataSchema = z.object({
 
 export const optionCatalogSchema = z.object({
   format: z.string(),
-  role: z.enum(["parser", "generator"]),
+  role: z.enum(["parser", "transformer", "generator"]),
   options: z.array(optionMetadataSchema),
 });
 
@@ -71,6 +71,7 @@ export const conversionOptionCatalogsSchema = z.object({
   targetFormat: conversionTargetFormatSchema,
   parser: optionCatalogSchema,
   generator: optionCatalogSchema,
+  transformers: z.array(optionCatalogSchema).default([]),
   irPreference: optionMetadataSchema,
 });
 
@@ -80,6 +81,7 @@ export const genericConversionOptionCatalogsSchema = z.object({
   targetFormat: z.string(),
   parser: optionCatalogSchema,
   generator: optionCatalogSchema,
+  transformers: z.array(optionCatalogSchema).default([]),
   irPreference: optionMetadataSchema,
 });
 
@@ -145,7 +147,7 @@ const conversionReportStageSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   });
 
 export const conversionSemanticCaveatSchema = z.object({
-  phase: z.enum(["parse", "generate"]),
+  phase: z.enum(["parse", "transform", "generate"]),
   kind: z.enum(["normalization", "loss", "widening"]),
   code: z.string(),
   message: z.string(),
@@ -156,7 +158,7 @@ export const conversionSemanticCaveatSchema = z.object({
 });
 
 export const conversionPolicyDecisionSchema = z.object({
-  phase: z.enum(["parse", "generate"]),
+  phase: z.enum(["parse", "transform", "generate"]),
   code: z.string(),
   message: z.string(),
   source: z.string().optional(),
