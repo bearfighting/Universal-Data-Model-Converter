@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "role": "parser",
+      "package": "@schema-transformation-toolkit/fixture-third-party",
+      "entry": "./dist/index.js",
+      "export": "fixtureParserDescriptor"
+    },
+    {
+      "role": "generator",
+      "package": "@schema-transformation-toolkit/fixture-third-party",
+      "entry": "./dist/index.js",
+      "export": "fixtureGeneratorDescriptor"
+    },
+    {
+      "role": "transformer",
+      "package": "@schema-transformation-toolkit/fixture-third-party",
+      "entry": "./dist/index.js",
+      "export": "fixtureTransformerDescriptor"
+    }
+  ]
+}

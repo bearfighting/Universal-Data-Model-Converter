@@ -8,7 +8,18 @@ when a release is prepared.
 
 ## Unreleased
 
-No unreleased changes.
+### Phase 6 and Phase 7 refactor
+
+- Move SDK conversion orchestration behind the generic core pipeline and
+  registry descriptor boundary.
+- Add registry-safe custom output/options contracts while retaining builtin
+  aliases for compatibility.
+- Make the workspace build deterministic: core, format components, generated
+  registry, then SDK.
+- Add third-party parser, transformer, and generator manifest fixtures with
+  custom registry conversion smoke coverage.
+- Expand SDK package smoke coverage to all eight builtin format families and
+  validate clean-install ESM package behavior.
 
 ## 0.2.0-beta.6
 

@@ -81,32 +81,44 @@ try {
         dependencies: {
           "@schema-transformation-toolkit/sdk": `file:${tarballPath}`,
         },
-        pnpm: {
-          overrides: Object.fromEntries(
-            [
-              "@schema-transformation-toolkit/core",
-              "@schema-transformation-toolkit/generator-json",
-              "@schema-transformation-toolkit/generator-json-schema",
-              "@schema-transformation-toolkit/generator-openapi",
-              "@schema-transformation-toolkit/generator-typescript",
-              "@schema-transformation-toolkit/generator-zod",
-              "@schema-transformation-toolkit/generator-yaml",
-              "@schema-transformation-toolkit/parser-json",
-              "@schema-transformation-toolkit/parser-json-schema",
-              "@schema-transformation-toolkit/parser-openapi",
-              "@schema-transformation-toolkit/parser-typescript",
-              "@schema-transformation-toolkit/parser-zod",
-              "@schema-transformation-toolkit/parser-yaml",
-            ].map((name) => [
-              name,
-              `file:${path.join(repoRoot, "packages", packageDirectoryFor(name))}`,
-            ]),
-          ),
-        },
       },
       null,
       2,
     )}\n`,
+  );
+
+  const workspaceOverrideNames = [
+    "@schema-transformation-toolkit/core",
+    "@schema-transformation-toolkit/generator-csv",
+    "@schema-transformation-toolkit/generator-json",
+    "@schema-transformation-toolkit/generator-json-schema",
+    "@schema-transformation-toolkit/generator-openapi",
+    "@schema-transformation-toolkit/generator-toml",
+    "@schema-transformation-toolkit/generator-typescript",
+    "@schema-transformation-toolkit/generator-zod",
+    "@schema-transformation-toolkit/generator-yaml",
+    "@schema-transformation-toolkit/parser-csv",
+    "@schema-transformation-toolkit/parser-json",
+    "@schema-transformation-toolkit/parser-json-schema",
+    "@schema-transformation-toolkit/parser-openapi",
+    "@schema-transformation-toolkit/parser-toml",
+    "@schema-transformation-toolkit/parser-typescript",
+    "@schema-transformation-toolkit/parser-zod",
+    "@schema-transformation-toolkit/parser-yaml",
+  ];
+  const workspaceOverrides = workspaceOverrideNames
+    .map((name) => {
+      const localPackage = `file:${path.join(
+        repoRoot,
+        "packages",
+        packageDirectoryFor(name),
+      )}`;
+      return `  ${JSON.stringify(name)}: ${JSON.stringify(localPackage)}`;
+    })
+    .join("\n");
+  writeFileSync(
+    path.join(tempRoot, "pnpm-workspace.yaml"),
+    `overrides:\n${workspaceOverrides}\n`,
   );
 
   execFileSync("pnpm", ["install", "--ignore-scripts", "--lockfile=false"], {
@@ -114,6 +126,7 @@ try {
     stdio: "inherit",
   });
 
+  const tomlSmokeInput = JSON.stringify('id = 1\nname = "Ada"\n');
   const smokeScript = `
     import {
       convert,
@@ -127,10 +140,10 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "json,json-schema,openapi,typescript,yaml,zod") {
+    if (sources.join(",") !== "csv,json,json-schema,openapi,toml,typescript,yaml,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "json,json-schema,openapi,typescript,yaml,zod") {
+    if (targets.join(",") !== "csv,json,json-schema,openapi,toml,typescript,yaml,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 
@@ -141,6 +154,10 @@ try {
       { sourceFormat: "openapi", targetFormat: "openapi", input: JSON.stringify({ openapi: "3.1.0", info: { title: "Smoke", version: "1.0.0" }, paths: {}, components: { schemas: { User: { type: "object" } } } }) },
       { sourceFormat: "yaml", targetFormat: "typescript", input: "id: 1\\nname: Ada\\n" },
       { sourceFormat: "json", targetFormat: "yaml", input: "{\\"id\\":1}" },
+      { sourceFormat: "csv", targetFormat: "json", input: "id,name\\n1,Ada\\n" },
+      { sourceFormat: "toml", targetFormat: "json", input: ${tomlSmokeInput} },
+      { sourceFormat: "json", targetFormat: "csv", input: "[{\\"id\\":1,\\"name\\":\\"Ada\\"}]" },
+      { sourceFormat: "json", targetFormat: "toml", input: "{\\"id\\":1,\\"name\\":\\"Ada\\"}" },
     ];
     for (const item of cases) {
       const result = convert(item);

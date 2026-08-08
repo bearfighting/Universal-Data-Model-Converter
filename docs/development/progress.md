@@ -29,9 +29,12 @@ The repository is past architecture validation and has a stable-enough conversio
 - Phase 5 format adapter consolidation completed across JSON, YAML, CSV, TOML,
   JSON Schema, TypeScript, Zod, and OpenAPI; SDK component options now resolve
   from the selected descriptor without format-specific execution dispatch
-- Phase 6 SDK reduction is in progress: orchestration modules use a registry
+- Phase 6 SDK reduction is complete: orchestration modules use a registry
   client boundary, builtin type aliases are isolated for compatibility, and
   registry-safe output/options contracts are available
+- Phase 7 build and third-party integration is complete: the repository has an
+  explicit core → components → generated registry → SDK build, a third-party
+  descriptor fixture, and clean-install SDK package smoke.
 
 Shared normalization coverage currently includes:
 
@@ -190,8 +193,11 @@ The resulting maturity is now:
   builtin aliases remain supported during migration
 - Phase 6 public contract migration: SDK orchestration no longer depends on
   concrete format packages, custom registry output typing is covered, and
-  generic option catalog contracts are documented; build-order and packaging
-  validation remain Phase 7 work
+  generic option catalog contracts are documented; Phase 6 was committed in
+  `6144b9c`.
+- Phase 7 build and third-party integration: the explicit workspace build,
+  generated registry packaging, third-party fixture, and SDK tarball smoke
+  all pass.
 
 Phase 3 registry extraction is now implemented: core owns the generic
 descriptor registry, builtin packages declare versioned registry metadata, and

@@ -193,10 +193,10 @@ summaries. Conversion execution itself now lives in core's generic
 `executePipeline(...)` boundary.
 
 The behavior is coherent, but the file is now large enough that unrelated
-changes compete in one module. Phase 6 has started isolating descriptor lookup
-behind `registry-client.ts`; registration, route planning, and capability
-summary extraction remain in this module until the compatibility exports are
-split without changing the public surface.
+changes compete in one module. Phase 6 isolated descriptor lookup behind
+`registry-client.ts`; registration, route planning, and capability summary
+extraction remain in this module until the compatibility exports are split
+without changing the public surface.
 
 Suggested internal split:
 
@@ -298,16 +298,18 @@ has its own validation gate and must be completed before the next phase begins.
 
 ## Verification Baseline
 
-The assessment was performed against the current workspace after the CSV
-parser/generator work. The current validation baseline is green:
+The assessment was performed against the current workspace after the Phase 7
+build and packaging work. The current validation baseline is green:
 
-- 809 tests;
+- 881 tests;
 - TypeScript typecheck;
 - ESLint;
 - Prettier check;
 - package boundary check;
 - API snapshot check;
-- workspace build.
+- explicit workspace build;
+- third-party manifest and custom registry smoke;
+- SDK tarball clean-install smoke across all eight format families.
 
 Passing validation does not eliminate the risks above; it confirms that the
 current behavior is internally consistent enough to refactor incrementally.

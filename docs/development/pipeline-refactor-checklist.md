@@ -312,13 +312,32 @@ Exit criteria:
 
 ## Phase 7 — Build and third-party integration
 
-- [ ] Make build ordering explicit: core, components, generated registry, SDK.
-- [ ] Run registry generation before SDK compilation.
-- [ ] Include generated registry output in distributable artifacts.
-- [ ] Add a third-party parser/generator/transformer fixture package.
-- [ ] Build the fixture through the same manifest path as builtin components.
-- [ ] Verify tree-shaking and ESM package resolution for the generated registry.
-- [ ] Verify a clean checkout can regenerate identical registry output.
+- [x] Make build ordering explicit: core, components, generated registry, SDK.
+- [x] Run registry generation before SDK compilation.
+- [x] Include generated registry output in distributable artifacts.
+- [x] Add a third-party parser/generator/transformer fixture package.
+- [x] Build the fixture through the same manifest path as builtin components.
+- [x] Verify tree-shaking and ESM package resolution for the generated registry.
+- [x] Verify a clean checkout can regenerate identical registry output.
+
+Phase 7 execution record (2026-08-08):
+
+- SDK package smoke coverage was expanded to include CSV and TOML, which
+  are already supported by the builtin registry but were absent from the
+  package-level format matrix.
+- The completed build, registry, fixture, and packaging gates are recorded
+  below.
+
+Phase 7 completed execution record (2026-08-08):
+
+- `node scripts/build-workspace.mjs` passed in the explicit order core,
+  components, generated registry, SDK.
+- SDK bundle checks passed for ESM output and absence of dynamic require
+  wrappers; generated registry output is included in the SDK bundle.
+- The third-party fixture built successfully, passed manifest validation, and
+  executed a custom parser → transformer → generator conversion.
+- SDK package smoke passed with all eight builtin format families, including
+  CSV and TOML.
 
 Validation gate:
 
@@ -334,13 +353,13 @@ passing workspace build.
 
 ## Final acceptance
 
-- [ ] Full test suite passes.
-- [ ] Typecheck, lint, formatting, boundaries, and API snapshots pass.
-- [ ] No parser/generator package imports another format package for conversion.
-- [ ] SDK has no format-pair compatibility rules.
-- [ ] Registry core has no builtin component imports.
-- [ ] Builtin and third-party registration use the same descriptor contract.
-- [ ] Static IR incompatibility fails during planning.
-- [ ] Dynamic input incompatibility fails during runtime IR validation.
-- [ ] Public API migration notes are complete.
-- [ ] Release notes describe the refactor and any breaking changes.
+- [x] Full test suite passes.
+- [x] Typecheck, lint, formatting, boundaries, and API snapshots pass.
+- [x] No parser/generator package imports another format package for conversion.
+- [x] SDK has no format-pair compatibility rules.
+- [x] Registry core has no builtin component imports.
+- [x] Builtin and third-party registration use the same descriptor contract.
+- [x] Static IR incompatibility fails during planning.
+- [x] Dynamic input incompatibility fails during runtime IR validation.
+- [x] Public API migration notes are complete.
+- [x] Release notes describe the refactor and any breaking changes.
