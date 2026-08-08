@@ -2,13 +2,38 @@
 
 All notable changes to this project are documented here.
 
-The repository is currently in prerelease development. Workspace packages use
-one shared version. The `Unreleased` section is moved into a versioned section
-when a release is prepared.
+Workspace packages use one shared version. The `Unreleased` section is moved
+into a versioned section when a release is prepared.
 
 ## Unreleased
 
 No unreleased changes.
+
+## 0.2.0
+
+This release establishes the stable SDK boundary for deterministic,
+registry-driven schema and data conversion across eight builtin format
+families.
+
+### Highlights
+
+- Route all SDK conversions through the shared core pipeline with structured
+  parse, transform, and generate evidence.
+- Support Value IR, Shape IR, Constraint IR, transformer chains, artifacts,
+  diagnostics, semantic notes, and semantic-loss reporting.
+- Provide registry-driven format discovery, route planning, option metadata,
+  custom parser/generator/transformer registration, and the
+  `createConverter(registry)` facade.
+- Preserve compatibility APIs and stable public result schemas while making
+  ordinary conversion failures structured and safe for downstream consumers.
+- Validate clean workspace builds, generated registries, third-party custom
+  registries, and SDK package installation in CI.
+
+### Compatibility
+
+- Existing beta package names, route behavior, output structures, diagnostic
+  codes, artifacts, notes, losses, and compatibility entry points remain
+  supported for the 0.2 release line.
 
 ## 0.2.0-beta.9
 
