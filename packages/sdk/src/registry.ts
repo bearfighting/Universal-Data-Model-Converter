@@ -5,6 +5,9 @@ import {
   parserOutputsFromCapabilities,
   defaultIrTransformers,
   valueToShapeTransformer,
+  createDescriptorRegistry,
+  DescriptorLookupError,
+  DescriptorRegistryError as DescriptorRegistrationError,
 } from "@schema-transformation-toolkit/core";
 import type {
   ConversionRoute,
@@ -21,38 +24,17 @@ import type {
   ParserDescriptor,
   PipelineStage,
   ValueRootKind,
+  DescriptorRegistry,
+  DescriptorRegistryErrorCode,
 } from "@schema-transformation-toolkit/core";
-import { typeScriptGeneratorDescriptor } from "@schema-transformation-toolkit/generator-typescript";
-import { jsonGeneratorDescriptor } from "@schema-transformation-toolkit/generator-json";
-import { csvGeneratorDescriptor } from "@schema-transformation-toolkit/generator-csv";
-import { tomlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-toml";
-import { jsonSchemaGeneratorDescriptor as jsonSchemaDescriptor } from "@schema-transformation-toolkit/generator-json-schema";
-import { openApiGeneratorDescriptor } from "@schema-transformation-toolkit/generator-openapi";
-import { zodGeneratorDescriptor } from "@schema-transformation-toolkit/generator-zod";
-import { yamlGeneratorDescriptor } from "@schema-transformation-toolkit/generator-yaml";
-import { jsonParserDescriptor } from "@schema-transformation-toolkit/parser-json";
-import { csvParserDescriptor } from "@schema-transformation-toolkit/parser-csv";
-import { tomlParserDescriptor } from "@schema-transformation-toolkit/parser-toml";
-import { jsonSchemaParserDescriptor } from "@schema-transformation-toolkit/parser-json-schema";
-import { typeScriptParserDescriptor } from "@schema-transformation-toolkit/parser-typescript";
-import { openApiParserDescriptor } from "@schema-transformation-toolkit/parser-openapi";
-import { zodParserDescriptor } from "@schema-transformation-toolkit/parser-zod";
-import { yamlParserDescriptor } from "@schema-transformation-toolkit/parser-yaml";
+import { createBuiltinRegistry } from "./generated/builtin-registry.js";
 import type {
   ConversionFormat,
   ConversionIrPreference,
   ConversionRegistry,
 } from "./types.js";
 
-export type DescriptorRegistrationErrorCode =
-  | "descriptor-invalid-version"
-  | "descriptor-format-mismatch"
-  | "descriptor-options-mismatch"
-  | "descriptor-missing-shape-ir"
-  | "descriptor-missing-ir"
-  | "descriptor-missing-handler"
-  | "descriptor-capability-mismatch"
-  | "descriptor-duplicate-format";
+export type { DescriptorRegistryErrorCode as DescriptorRegistrationErrorCode };
 
 export type ConversionRouteErrorCode =
   "unsupported-route" | "unsupported-ir-preference";
@@ -67,15 +49,7 @@ export class ConversionRouteError extends Error {
   }
 }
 
-export class DescriptorRegistrationError extends Error {
-  readonly code: DescriptorRegistrationErrorCode;
-
-  constructor(code: DescriptorRegistrationErrorCode, message: string) {
-    super(message);
-    this.name = "DescriptorRegistrationError";
-    this.code = code;
-  }
-}
+export { DescriptorRegistrationError };
 
 export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
@@ -96,117 +70,6 @@ const normalizedCapabilities = new WeakMap<
   NormalizedGeneratorCapabilities
 >();
 
-class MutableConversionRegistry implements ConversionRegistry {
-  private readonly parsers = new Map<string, ParserDescriptor>();
-  private readonly generators = new Map<
-    string,
-    RegisteredGeneratorDescriptor
-  >();
-  private readonly transformers = new Map<
-    string,
-    RegisteredTransformerDescriptor
-  >();
-
-  registerParser(descriptor: ParserDescriptor): void {
-    validateParserDescriptor(descriptor);
-    if (this.parsers.has(descriptor.format)) {
-      throw new DescriptorRegistrationError(
-        "descriptor-duplicate-format",
-        `A parser is already registered for "${descriptor.format}".`,
-      );
-    }
-    this.parsers.set(descriptor.format, descriptor);
-  }
-
-  registerGenerator(descriptor: RegisteredGeneratorDescriptor): void {
-    validateGeneratorDescriptor(descriptor);
-    if (this.generators.has(descriptor.format)) {
-      throw new DescriptorRegistrationError(
-        "descriptor-duplicate-format",
-        `A generator is already registered for "${descriptor.format}".`,
-      );
-    }
-    normalizedCapabilities.set(
-      descriptor,
-      normalizeGeneratorCapabilities(descriptor.capabilities),
-    );
-    this.generators.set(descriptor.format, descriptor);
-  }
-
-  registerTransformer(descriptor: RegisteredTransformerDescriptor): void {
-    if (
-      descriptor.kind !== "transformer" ||
-      descriptor.descriptorVersion !== "0.1" ||
-      descriptor.id.trim().length === 0 ||
-      !isIrKind(descriptor.inputIr) ||
-      !isIrKind(descriptor.outputIr)
-    ) {
-      throw new DescriptorRegistrationError(
-        "descriptor-missing-handler",
-        "Invalid transformer descriptor.",
-      );
-    }
-    if (typeof descriptor.transform !== "function") {
-      throw new DescriptorRegistrationError(
-        "descriptor-missing-handler",
-        `Transformer "${descriptor.id}" must provide transform().`,
-      );
-    }
-    if (this.transformers.has(descriptor.id)) {
-      throw new DescriptorRegistrationError(
-        "descriptor-duplicate-format",
-        `A transformer is already registered for "${descriptor.id}".`,
-      );
-    }
-    this.transformers.set(descriptor.id, descriptor);
-  }
-
-  listParsers(): ParserDescriptor[] {
-    return [...this.parsers.values()];
-  }
-
-  listGenerators(): RegisteredGeneratorDescriptor[] {
-    return [...this.generators.values()];
-  }
-
-  listTransformers(): RegisteredTransformerDescriptor[] {
-    return [...this.transformers.values()];
-  }
-
-  transformer(id: string): RegisteredTransformerDescriptor {
-    const descriptor = this.transformers.get(id);
-    if (!descriptor) {
-      throw new ConversionRouteError(
-        "unsupported-route",
-        `Unsupported transformer: ${id}`,
-      );
-    }
-    return descriptor;
-  }
-
-  parser(format: string): ParserDescriptor {
-    const descriptor = this.parsers.get(format);
-    if (!descriptor) {
-      throw new ConversionRouteError(
-        "unsupported-route",
-        `Unsupported source format: ${format}`,
-      );
-    }
-    return descriptor;
-  }
-
-  generator(format: string): RegisteredGeneratorDescriptor {
-    const descriptor = this.generators.get(format);
-    if (!descriptor) {
-      throw new ConversionRouteError(
-        "unsupported-route",
-        `Unsupported target format: ${format}`,
-      );
-    }
-    return descriptor;
-  }
-}
-
 export function createConversionRegistry(
   options: {
     parsers?: ParserDescriptor[];
@@ -214,39 +77,120 @@ export function createConversionRegistry(
     transformers?: RegisteredTransformerDescriptor[];
   } = {},
 ): ConversionRegistry {
-  const registry = new MutableConversionRegistry();
-  for (const parser of options.parsers ?? []) registry.registerParser(parser);
-  for (const generator of options.generators ?? []) {
-    registry.registerGenerator(generator);
-  }
-  for (const transformer of options.transformers ?? []) {
-    registry.registerTransformer(transformer);
-  }
-  return registry;
+  const registry = createDescriptorRegistry();
+  const customTransformerIds = new Set(
+    (options.transformers ?? []).map((descriptor) => descriptor.id),
+  );
+  return adaptDescriptorRegistry(registry, {
+    ...options,
+    transformers: [
+      ...defaultIrTransformers.filter(
+        (descriptor) => !customTransformerIds.has(descriptor.id),
+      ),
+      ...(options.transformers ?? []),
+    ],
+  });
 }
 
-export const defaultConversionRegistry = createConversionRegistry({
-  parsers: [
-    jsonParserDescriptor,
-    csvParserDescriptor,
-    tomlParserDescriptor,
-    jsonSchemaParserDescriptor,
-    typeScriptParserDescriptor,
-    openApiParserDescriptor,
-    zodParserDescriptor,
-    yamlParserDescriptor,
-  ],
-  generators: [
-    jsonGeneratorDescriptor,
-    csvGeneratorDescriptor,
-    tomlGeneratorDescriptor,
-    jsonSchemaDescriptor,
-    typeScriptGeneratorDescriptor,
-    zodGeneratorDescriptor,
-    yamlGeneratorDescriptor,
-    openApiGeneratorDescriptor,
-  ],
-});
+export const defaultConversionRegistry = adaptDescriptorRegistry(
+  createBuiltinRegistry(),
+);
+
+function adaptDescriptorRegistry(
+  coreRegistry: DescriptorRegistry,
+  initial: {
+    parsers?: ParserDescriptor[];
+    generators?: RegisteredGeneratorDescriptor[];
+    transformers?: RegisteredTransformerDescriptor[];
+  } = {},
+): ConversionRegistry {
+  const registerParser = (descriptor: ParserDescriptor): void => {
+    try {
+      coreRegistry.registerParser(descriptor);
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+  const registerGenerator = (
+    descriptor: RegisteredGeneratorDescriptor,
+  ): void => {
+    try {
+      coreRegistry.registerGenerator(descriptor);
+      normalizedCapabilities.set(
+        descriptor,
+        normalizeGeneratorCapabilities(descriptor.capabilities),
+      );
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+  const registerTransformer = (
+    descriptor: RegisteredTransformerDescriptor,
+  ): void => {
+    try {
+      coreRegistry.registerTransformer(descriptor);
+    } catch (error) {
+      throw toSdkRegistrationError(error);
+    }
+  };
+
+  for (const parser of initial.parsers ?? []) registerParser(parser);
+  for (const generator of initial.generators ?? [])
+    registerGenerator(generator);
+  for (const transformer of initial.transformers ?? []) {
+    registerTransformer(transformer);
+  }
+
+  return {
+    registerParser,
+    registerGenerator,
+    registerTransformer,
+    listParsers: () => coreRegistry.listParsers(),
+    listGenerators: () =>
+      coreRegistry.listGenerators() as RegisteredGeneratorDescriptor[],
+    listTransformers: () => coreRegistry.listTransformers(),
+    parser(format) {
+      try {
+        return coreRegistry.parser(format);
+      } catch (error) {
+        throw toSdkLookupError(error, "source format", format);
+      }
+    },
+    generator(format) {
+      try {
+        return coreRegistry.generator(format) as RegisteredGeneratorDescriptor;
+      } catch (error) {
+        throw toSdkLookupError(error, "target format", format);
+      }
+    },
+    transformer(id) {
+      try {
+        return coreRegistry.transformer(id);
+      } catch (error) {
+        throw toSdkLookupError(error, "transformer", id);
+      }
+    },
+  };
+}
+
+function toSdkRegistrationError(error: unknown): DescriptorRegistrationError {
+  if (error instanceof DescriptorRegistrationError) return error;
+  throw error;
+}
+
+function toSdkLookupError(
+  error: unknown,
+  label: string,
+  id: string,
+): ConversionRouteError {
+  if (error instanceof DescriptorLookupError) {
+    return new ConversionRouteError(
+      "unsupported-route",
+      `Unsupported ${label}: ${id}`,
+    );
+  }
+  throw error;
+}
 
 export function listConversionRoutes(
   registry: ConversionRegistry = defaultConversionRegistry,
@@ -254,14 +198,37 @@ export function listConversionRoutes(
   const sources = registry.listParsers();
   const targets = registry.listGenerators();
 
-  return sources.flatMap((source) =>
-    targets.flatMap((target) => {
-      try {
-        return [planConversion(source.format, target.format, registry)];
-      } catch {
-        return [];
-      }
-    }),
+  return sources
+    .flatMap((source) =>
+      targets.flatMap((target) => {
+        try {
+          return [planConversion(source.format, target.format, registry)];
+        } catch {
+          return [];
+        }
+      }),
+    )
+    .sort(compareRoutes);
+}
+
+function compareRoutes(left: ConversionRoute, right: ConversionRoute): number {
+  return (
+    left.sourceFormat.localeCompare(right.sourceFormat) ||
+    left.targetFormat.localeCompare(right.targetFormat) ||
+    left.irSequence.join("\0").localeCompare(right.irSequence.join("\0")) ||
+    left.stages
+      .map(
+        (stage) => `${stage.kind}:${stage.from}:${stage.to}:${stage.ir ?? ""}`,
+      )
+      .join("\0")
+      .localeCompare(
+        right.stages
+          .map(
+            (stage) =>
+              `${stage.kind}:${stage.from}:${stage.to}:${stage.ir ?? ""}`,
+          )
+          .join("\0"),
+      )
   );
 }
 
@@ -748,7 +715,15 @@ function supportsConstraintIr(
 function resolveTransformerDescriptors(
   registry: ConversionRegistry,
 ): readonly IrTransformerDescriptor[] {
-  return [...(registry.listTransformers?.() ?? []), ...defaultIrTransformers];
+  const registered = registry.listTransformers?.();
+  if (!registered) return defaultIrTransformers;
+  const defaultIds = new Set(
+    defaultIrTransformers.map((descriptor) => descriptor.id),
+  );
+  return [
+    ...registered.filter((descriptor) => !defaultIds.has(descriptor.id)),
+    ...registered.filter((descriptor) => defaultIds.has(descriptor.id)),
+  ];
 }
 
 function sameIrKinds(
@@ -765,123 +740,4 @@ function sameValueRootKinds(
   return (
     left.length === right.length && left.every((kind) => right.includes(kind))
   );
-}
-
-function isIrKind(value: unknown): value is IrKind {
-  return value === "value" || value === "shape" || value === "constraint";
-}
-
-function validateParserDescriptor(descriptor: ParserDescriptor): void {
-  if (descriptor.descriptorVersion !== "0.1") {
-    throw new DescriptorRegistrationError(
-      "descriptor-invalid-version",
-      `Unsupported parser descriptor version: ${descriptor.descriptorVersion}.`,
-    );
-  }
-  if (descriptor.kind !== "parser" || descriptor.format.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      "Invalid parser descriptor: kind and format are required.",
-    );
-  }
-  if (descriptor.capabilities.format !== descriptor.format) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      `Parser descriptor format does not match its capabilities: ${descriptor.format}.`,
-    );
-  }
-  if (descriptor.capabilities.producesIr.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-ir",
-      `Parser "${descriptor.format}" must produce at least one IR kind.`,
-    );
-  }
-  if (descriptor.capabilities.outputs) {
-    const outputs = descriptor.capabilities.outputs;
-    if (
-      outputs.length === 0 ||
-      outputs.some((output) => !isIrKind(output.ir)) ||
-      !sameIrKinds(
-        outputs.map((output) => output.ir),
-        descriptor.capabilities.producesIr,
-      )
-    ) {
-      throw new DescriptorRegistrationError(
-        "descriptor-capability-mismatch",
-        `Parser "${descriptor.format}" has inconsistent producesIr and outputs fields.`,
-      );
-    }
-    const valueOutput = outputs.find((output) => output.ir === "value");
-    if (
-      valueOutput?.valueRootKinds &&
-      descriptor.capabilities.valueRootKinds &&
-      !sameValueRootKinds(
-        valueOutput.valueRootKinds,
-        descriptor.capabilities.valueRootKinds,
-      )
-    ) {
-      throw new DescriptorRegistrationError(
-        "descriptor-capability-mismatch",
-        `Parser "${descriptor.format}" has inconsistent Value root-shape fields.`,
-      );
-    }
-  }
-  if (typeof descriptor.parse !== "function") {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-handler",
-      `Parser "${descriptor.format}" must provide parse().`,
-    );
-  }
-  if (
-    descriptor.options.format !== descriptor.format ||
-    descriptor.options.role !== "parser"
-  ) {
-    throw new DescriptorRegistrationError(
-      "descriptor-options-mismatch",
-      `Parser "${descriptor.format}" options metadata does not match its descriptor.`,
-    );
-  }
-}
-
-function validateGeneratorDescriptor(descriptor: GeneratorDescriptor): void {
-  if (descriptor.descriptorVersion !== "0.1") {
-    throw new DescriptorRegistrationError(
-      "descriptor-invalid-version",
-      `Unsupported generator descriptor version: ${descriptor.descriptorVersion}.`,
-    );
-  }
-  if (descriptor.kind !== "generator" || descriptor.format.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      "Invalid generator descriptor: kind and format are required.",
-    );
-  }
-  if (descriptor.capabilities.target !== descriptor.format) {
-    throw new DescriptorRegistrationError(
-      "descriptor-format-mismatch",
-      `Generator descriptor format does not match its capabilities: ${descriptor.format}.`,
-    );
-  }
-  if (descriptor.capabilities.consumesIr.length === 0) {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-ir",
-      `Generator "${descriptor.format}" must consume at least one IR kind.`,
-    );
-  }
-  normalizeGeneratorCapabilities(descriptor.capabilities);
-  if (typeof descriptor.generate !== "function") {
-    throw new DescriptorRegistrationError(
-      "descriptor-missing-handler",
-      `Generator "${descriptor.format}" must provide generate().`,
-    );
-  }
-  if (
-    descriptor.options.format !== descriptor.format ||
-    descriptor.options.role !== "generator"
-  ) {
-    throw new DescriptorRegistrationError(
-      "descriptor-options-mismatch",
-      `Generator "${descriptor.format}" options metadata does not match its descriptor.`,
-    );
-  }
 }

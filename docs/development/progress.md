@@ -175,6 +175,16 @@ The resulting maturity is now:
 - normalization: real and already reused by test equivalence helpers, but still early enough that new rules should be added selectively
 - registry extensibility: built-in discovery is descriptor-driven; third-party registration is explicit and runtime package scanning remains intentionally deferred
 
+Phase 3 registry extraction is now implemented: core owns the generic
+descriptor registry, builtin packages declare versioned registry metadata, and
+the SDK consumes a deterministic generated builtin registry. Explicit
+third-party manifests use the same generator path. Malformed descriptors are
+rejected through the core registry contract, registry listings and SDK route
+lists use stable ordering, and package-root exports are validated before
+generation. The generated registry is checked with
+`node scripts/generate-builtin-registry.mjs --check`; runtime package scanning
+and full build-order integration remain deferred to Phase 7.
+
 The first pipeline-contract refactor slice is now implemented: core exposes
 typed `IrDocument`, `IrArtifacts`, `IrBundle`, parser/generator execution
 contexts, transformer descriptors, and generic parser/generator capability
@@ -199,11 +209,11 @@ declared array/object Value contracts do not intersect; the current builtin
 route count is 46. Shape-to-Constraint remains explicit rather than being
 invented by generic inference.
 
-The Phase 0 baseline is now recorded in
+The Phase 0 baseline is recorded in
 [pipeline-refactor-checklist.md](pipeline-refactor-checklist.md): 849 tests,
 46 builtin routes, passing package/API boundary checks, and the intentional
-beta contract changes for Phase 1/2. The current Phase 1/2 worktree must be
-committed as a clean boundary before Phase 3 generated-registry work begins.
+beta contract changes for Phase 1/2. Phase 3 now has its own clean generated
+registry boundary and verification record with 855 passing tests.
 
 This slice did not expose a blocking parser, IR, generator, or public-surface regression.
 It moved shared traversal extraction from the next refactor into implemented repository infrastructure.
@@ -212,7 +222,7 @@ It moved shared traversal extraction from the next refactor into implemented rep
 
 The latest full local verification pass completed on August 7, 2026 and included:
 
-- `./node_modules/.bin/vitest run` (71 test files, 849 passing tests)
+- `./node_modules/.bin/vitest run` (73 test files, 855 passing tests)
 - `./node_modules/.bin/tsc --noEmit`
 - `./node_modules/.bin/eslint .`
 - `./node_modules/.bin/prettier --check .`

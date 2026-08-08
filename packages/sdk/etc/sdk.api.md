@@ -272,22 +272,22 @@ import { z } from "zod";
 export declare const conversionSourceFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
-  typescript: "typescript";
-  json: "json";
   csv: "csv";
+  json: "json";
   toml: "toml";
-  zod: "zod";
+  typescript: "typescript";
   yaml: "yaml";
+  zod: "zod";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
   openapi: "openapi";
-  typescript: "typescript";
-  json: "json";
   csv: "csv";
+  json: "json";
   toml: "toml";
-  zod: "zod";
+  typescript: "typescript";
   yaml: "yaml";
+  zod: "zod";
 }>;
 export declare const conversionIrPreferenceSchema: z.ZodEnum<{
   value: "value";
@@ -503,22 +503,22 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
     sourceFormat: z.ZodEnum<{
       "json-schema": "json-schema";
       openapi: "openapi";
-      typescript: "typescript";
-      json: "json";
       csv: "csv";
+      json: "json";
       toml: "toml";
-      zod: "zod";
+      typescript: "typescript";
       yaml: "yaml";
+      zod: "zod";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
       openapi: "openapi";
-      typescript: "typescript";
-      json: "json";
       csv: "csv";
+      json: "json";
       toml: "toml";
-      zod: "zod";
+      typescript: "typescript";
       yaml: "yaml";
+      zod: "zod";
     }>;
     parser: z.ZodObject<
       {
@@ -2229,6 +2229,7 @@ export declare const publicConvertResultSchema: z.ZodDiscriminatedUnion<
 ## packages/sdk/src/registry.d.ts
 
 ```ts
+import { DescriptorRegistryError as DescriptorRegistrationError } from "@schema-transformation-toolkit/core";
 import type {
   ConversionRoute,
   ConversionRouteCapabilities,
@@ -2243,31 +2244,21 @@ import type {
   ParserDescriptor,
   PipelineStage,
   ValueRootKind,
+  DescriptorRegistryErrorCode,
 } from "@schema-transformation-toolkit/core";
 import type {
   ConversionFormat,
   ConversionIrPreference,
   ConversionRegistry,
 } from "./types.js";
-export type DescriptorRegistrationErrorCode =
-  | "descriptor-invalid-version"
-  | "descriptor-format-mismatch"
-  | "descriptor-options-mismatch"
-  | "descriptor-missing-shape-ir"
-  | "descriptor-missing-ir"
-  | "descriptor-missing-handler"
-  | "descriptor-capability-mismatch"
-  | "descriptor-duplicate-format";
+export type { DescriptorRegistryErrorCode as DescriptorRegistrationErrorCode };
 export type ConversionRouteErrorCode =
   "unsupported-route" | "unsupported-ir-preference";
 export declare class ConversionRouteError extends Error {
   readonly code: ConversionRouteErrorCode;
   constructor(code: ConversionRouteErrorCode, message: string);
 }
-export declare class DescriptorRegistrationError extends Error {
-  readonly code: DescriptorRegistrationErrorCode;
-  constructor(code: DescriptorRegistrationErrorCode, message: string);
-}
+export { DescriptorRegistrationError };
 export interface NormalizedGeneratorCapabilities {
   entryIr: EntryIrKind[];
   overlays: OverlayIrKind[];
@@ -2348,7 +2339,6 @@ export declare function resolveNormalizedGeneratorCapabilities(
   targetFormat: ConversionFormat,
   registry?: ConversionRegistry,
 ): NormalizedGeneratorCapabilities;
-export {};
 ```
 
 ## packages/sdk/src/support-matrix.d.ts

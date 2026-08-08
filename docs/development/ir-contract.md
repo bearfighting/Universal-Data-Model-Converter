@@ -99,6 +99,20 @@ Current normalization includes:
 - reference equivalence is based on reference name equality
 - unknown equivalence is based on semantic reason and nullable state rather than detailed evidence
 
+## Descriptor Registry Contract
+
+`core` owns the format-independent `DescriptorRegistry` contract. It registers
+and validates parser, generator, and transformer descriptors, enforces parser
+and generator format uniqueness plus transformer ID uniqueness, and resolves
+or lists registered descriptors. It does not import builtin packages, plan
+routes, or infer transformer edges.
+
+Builtin registration is a generated adapter assembled from package metadata.
+Component packages declare only their descriptor export and role; IR
+capabilities remain owned by the descriptor itself. Third-party registration
+uses the same manifest schema through an explicit build-time input, never
+runtime package discovery.
+
 `evidence` helps explain a result, but does not define a distinct schema.
 
 ## Parser Boundary

@@ -48,6 +48,15 @@ export {
   tryValidateIrBundle,
   tryValidateIrDocument,
 } from "./validation.js";
+export {
+  createDescriptorRegistry,
+  DescriptorLookupError,
+  DescriptorRegistryError,
+} from "./registry.js";
+export type {
+  DescriptorRegistry,
+  DescriptorRegistryErrorCode,
+} from "./registry.js";
 export type {
   IrValidationFailure,
   IrValidationResult,

@@ -7,6 +7,17 @@
   "publishConfig": {
     "access": "public"
   },
+  "schemaTransformationToolkit": {
+    "registry": {
+      "version": 1,
+      "entries": [
+        {
+          "role": "parser",
+          "export": "tomlParserDescriptor"
+        }
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

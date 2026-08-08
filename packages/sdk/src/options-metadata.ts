@@ -97,9 +97,14 @@ export function describeConversionOptions(
 export function listOptionCatalogs(
   registry: ConversionRegistry = defaultConversionRegistry,
 ): OptionCatalog[] {
-  return [...registry.listParsers(), ...registry.listGenerators()].map(
-    (descriptor) => cloneCatalog(descriptor.options),
-  );
+  return [...registry.listParsers(), ...registry.listGenerators()]
+    .sort(
+      (left, right) =>
+        (left.options.role === "parser" ? 0 : 1) -
+          (right.options.role === "parser" ? 0 : 1) ||
+        left.options.format.localeCompare(right.options.format),
+    )
+    .map((descriptor) => cloneCatalog(descriptor.options));
 }
 
 function cloneCatalog(catalog: OptionCatalog): OptionCatalog {

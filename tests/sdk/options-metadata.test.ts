@@ -27,22 +27,22 @@ describe("SDK option metadata", () => {
     expect(
       listOptionCatalogs().map(({ format, role }) => `${role}:${format}`),
     ).toEqual([
-      "parser:json",
       "parser:csv",
-      "parser:toml",
+      "parser:json",
       "parser:json-schema",
-      "parser:typescript",
       "parser:openapi",
-      "parser:zod",
+      "parser:toml",
+      "parser:typescript",
       "parser:yaml",
-      "generator:json",
+      "parser:zod",
       "generator:csv",
-      "generator:toml",
+      "generator:json",
       "generator:json-schema",
-      "generator:typescript",
-      "generator:zod",
-      "generator:yaml",
       "generator:openapi",
+      "generator:toml",
+      "generator:typescript",
+      "generator:yaml",
+      "generator:zod",
     ]);
   });
 

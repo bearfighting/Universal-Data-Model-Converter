@@ -62,7 +62,7 @@ describe("sdk registry", () => {
       planConversion("yaml", "yaml"),
       planConversion("yaml", "openapi"),
     ];
-    expect(listConversionRoutes()).toEqual(expectedRoutes);
+    expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
   });
 
   it("derives root-shape incompatibility without format-pair rules", () => {
@@ -227,3 +227,15 @@ describe("sdk registry", () => {
     });
   });
 });
+
+function compareRoutes(
+  left: ReturnType<typeof planConversion>,
+  right: ReturnType<typeof planConversion>,
+): number {
+  return (
+    left.sourceFormat.localeCompare(right.sourceFormat) ||
+    left.targetFormat.localeCompare(right.targetFormat) ||
+    left.irSequence.join("\0").localeCompare(right.irSequence.join("\0")) ||
+    JSON.stringify(left.stages).localeCompare(JSON.stringify(right.stages))
+  );
+}

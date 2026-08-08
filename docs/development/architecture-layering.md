@@ -118,6 +118,13 @@ interfaces through an explicit plugin/build manifest.
 The important modeling rule is to keep parser, transformer, and generator roles
 explicit and IR dependencies visible without encoding format-pair knowledge.
 
+The generic registry implementation now lives in core and has no knowledge of
+builtin packages. Builtin descriptor registration is generated into the SDK
+from explicit `schemaTransformationToolkit.registry` package metadata. The
+generated module is committed source, while `registry:check` prevents stale
+output. Third-party packages use an explicit manifest passed to the same
+generator; runtime package scanning is intentionally not part of the contract.
+
 ## Two-Stage Processing Boundary
 
 The stable processing API should expose two independent operations:

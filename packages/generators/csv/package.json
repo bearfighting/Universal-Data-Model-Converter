@@ -7,6 +7,17 @@
   "publishConfig": {
     "access": "public"
   },
+  "schemaTransformationToolkit": {
+    "registry": {
+      "version": 1,
+      "entries": [
+        {
+          "role": "generator",
+          "export": "csvGeneratorDescriptor"
+        }
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

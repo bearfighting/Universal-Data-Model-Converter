@@ -122,6 +122,10 @@
 - a deterministic build preprocess generates the built-in registry from explicit workspace component metadata
 - third-party parser, transformer, and generator packages may provide the same descriptor/plugin manifest and use the same registration API
 - runtime package scanning is not part of the registry contract
+- builtin manifests use the `schemaTransformationToolkit.registry` package.json
+  field with schema version `1` and descriptor role/export entries
+- generated builtin registry source is committed and checked byte-for-byte by
+  `registry:check`
 
 ## How To Add A Decision
 

@@ -627,6 +627,15 @@ export {
   tryValidateIrBundle,
   tryValidateIrDocument,
 } from "./validation.js";
+export {
+  createDescriptorRegistry,
+  DescriptorLookupError,
+  DescriptorRegistryError,
+} from "./registry.js";
+export type {
+  DescriptorRegistry,
+  DescriptorRegistryErrorCode,
+} from "./registry.js";
 export type {
   IrValidationFailure,
   IrValidationResult,
@@ -678,6 +687,46 @@ export declare function parserOutputsFromCapabilities(
 export declare function generatorEntriesFromCapabilities(
   capabilities: GeneratorCapabilities,
 ): IrInputContract[];
+```
+
+## packages/core/src/pipeline/registry.d.ts
+
+```ts
+import type {
+  GeneratorDescriptor,
+  IrTransformerDescriptor,
+  ParserDescriptor,
+} from "./descriptor-contracts.js";
+export type DescriptorRegistryErrorCode =
+  | "descriptor-invalid-version"
+  | "descriptor-format-mismatch"
+  | "descriptor-options-mismatch"
+  | "descriptor-missing-shape-ir"
+  | "descriptor-missing-ir"
+  | "descriptor-missing-handler"
+  | "descriptor-capability-mismatch"
+  | "descriptor-duplicate-format"
+  | "descriptor-duplicate-transformer";
+export declare class DescriptorRegistryError extends Error {
+  readonly code: DescriptorRegistryErrorCode;
+  constructor(code: DescriptorRegistryErrorCode, message: string);
+}
+export declare class DescriptorLookupError extends Error {
+  readonly code: "descriptor-not-found";
+  constructor(role: "parser" | "generator" | "transformer", id: string);
+}
+export interface DescriptorRegistry {
+  registerParser(descriptor: unknown): void;
+  registerGenerator(descriptor: unknown): void;
+  registerTransformer(descriptor: unknown): void;
+  listParsers(): ParserDescriptor[];
+  listGenerators(): GeneratorDescriptor[];
+  listTransformers(): IrTransformerDescriptor[];
+  parser(format: string): ParserDescriptor;
+  generator(format: string): GeneratorDescriptor;
+  transformer(id: string): IrTransformerDescriptor;
+}
+export declare function createDescriptorRegistry(): DescriptorRegistry;
 ```
 
 ## packages/core/src/pipeline/transformers.d.ts

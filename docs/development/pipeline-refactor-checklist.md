@@ -113,14 +113,33 @@ Phase 2 implementation notes:
 
 ## Phase 3 — Registry core and generated builtin registry
 
-- [ ] Remove builtin parser/generator imports from the registry core.
-- [ ] Keep registry responsibilities limited to registration, validation, lookup, and listing.
-- [ ] Define the component manifest format for parser, transformer, and generator packages.
-- [ ] Implement deterministic build-time registry generation.
-- [ ] Sort manifests and generated registrations deterministically.
-- [ ] Fail generation for duplicate roles, formats, IDs, or missing exports.
-- [ ] Support explicit third-party manifests without runtime package scanning.
-- [ ] Add `--check` mode to detect stale generated registry output.
+- [x] Remove builtin parser/generator imports from the registry core.
+- [x] Keep registry responsibilities limited to registration, validation, lookup, and listing.
+- [x] Define the component manifest format for parser, transformer, and generator packages.
+- [x] Implement deterministic build-time registry generation.
+- [x] Sort manifests and generated registrations deterministically.
+- [x] Fail generation for duplicate roles, formats, IDs, or missing exports.
+- [x] Support explicit third-party manifests without runtime package scanning.
+- [x] Add `--check` mode to detect stale generated registry output.
+
+Phase 3 implementation notes:
+
+- `@schema-transformation-toolkit/core` owns the format-independent
+  `DescriptorRegistry`; SDK keeps a compatibility adapter.
+- Builtin package metadata uses
+  `schemaTransformationToolkit.registry: { version: 1, entries: [...] }`.
+- `scripts/generate-builtin-registry.mjs` writes the committed
+  `packages/sdk/src/generated/builtin-registry.ts` artifact.
+- The generated registry explicitly registers the default Value-to-Shape
+  transformer. SDK fallback behavior remains only for legacy custom registries.
+- Third-party manifests are explicit inputs to the generator; no runtime
+  package scanning is used.
+
+Phase 3 verification record (2026-08-07):
+
+- 73 test files, 855 passing tests;
+- TypeScript, ESLint, Prettier, package boundaries, API snapshots, generated
+  registry `--check`, direct core/SDK builds, and `git diff --check` pass.
 
 Validation gate:
 
