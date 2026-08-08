@@ -2,7 +2,7 @@
 
 Shared IR, contracts, and cross-package naming utilities.
 
-For the current canonical IR contract, see [docs/development/ir-contract.md](../../docs/development/ir-contract.md).
+For the current canonical IR contract, see [docs/development/design.md](../../docs/development/design.md).
 
 ## Responsibilities
 
@@ -387,7 +387,7 @@ Project rule:
 
 ## Where To Look Next
 
-- see [docs/development/ir-contract.md](../../docs/development/ir-contract.md) for the canonical current contract
+- see [docs/development/design.md](../../docs/development/design.md) for the canonical current contract
 - see [docs/development/progress.md](../../docs/development/progress.md) for the unified current implementation summary
 - see [packages/parsers/json/README.md](../parsers/json/README.md) and [packages/parsers/typescript/README.md](../parsers/typescript/README.md) for current source-language boundaries
 - see [packages/generators/typescript/README.md](../generators/typescript/README.md) and [packages/generators/json-schema/README.md](../generators/json-schema/README.md) for target-output behavior

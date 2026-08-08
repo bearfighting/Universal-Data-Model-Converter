@@ -54,4 +54,4 @@ non-object compositions, and other unsupported compositions are reported
 through structured diagnostics.
 
 For the complete schema keyword matrix and diagnostic contract, see
-[OpenAPI Schema Compatibility](../../../docs/development/openapi-schema-compatibility.md).
+[the OpenAPI schema compatibility boundary](../../../docs/development/design.md).

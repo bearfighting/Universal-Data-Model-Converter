@@ -15,7 +15,7 @@ Use this example when you want to understand:
 - what reachable shape features the target needed to support
 - where widening-sensitive use sites appeared after reference expansion
 
-For the deeper interpretation model behind these fields, see [../docs/development/sdk-report-analysis.md](../docs/development/sdk-report-analysis.md).
+For the deeper interpretation model behind these fields, see [../docs/development/design.md](../docs/development/design.md).
 
 If you want a runnable version of this example after building the workspace, use:
 

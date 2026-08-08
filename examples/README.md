@@ -11,8 +11,10 @@ They are best read as:
 
 If you are starting from the higher-level pipeline API instead of individual parser or generator packages, also read:
 
+- [../docs/user-guide.md](../docs/user-guide.md): task-oriented installation and usage guide
+- [../docs/capability-matrix.md](../docs/capability-matrix.md): current support boundary and limitations
 - [../packages/sdk/README.md](../packages/sdk/README.md): quick `convert(...)` usage and report-reading entry point
-- [../docs/development/sdk-report-analysis.md](../docs/development/sdk-report-analysis.md): deeper interpretation of `semanticCaveats`, `capabilityRequirements`, and `lossHotspots`
+- [../docs/development/design.md](../docs/development/design.md): deeper interpretation of the SDK report and semantic-loss boundary
 - [consumer-golden-examples.md](consumer-golden-examples.md): smaller curated sample set for downstream consumer surfaces
 - [fixtures/consumer-golden-examples.ts](fixtures/consumer-golden-examples.ts): machine-readable consumer example data for sample pickers, smoke tests, and downstream apps
 

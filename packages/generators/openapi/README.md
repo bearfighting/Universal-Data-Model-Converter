@@ -32,5 +32,5 @@ const result = tryGenerateOpenApi(document);
 `generateOpenApi` throws on failure. `tryGenerateOpenApi` returns a structured
 success or failure result and may include diagnostics and semantic notes.
 
-See [OpenAPI Schema Compatibility](../../../docs/development/openapi-schema-compatibility.md)
+See [Project Design](../../../docs/development/design.md) for the OpenAPI schema compatibility boundary.
 for the supported schema subset and parser diagnostic codes.

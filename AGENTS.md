@@ -116,35 +116,13 @@ package catalogs and exposed through the SDK option metadata APIs.
 
 Read the development documentation in this order:
 
-1. [`docs/development/progress.md`](docs/development/progress.md) for current
-   repository status and priorities.
-2. [`docs/development/workflow.md`](docs/development/workflow.md) for the
-   implementation and validation loop.
-3. [`docs/development/scope.md`](docs/development/scope.md) for project
-   boundaries and non-goals.
-4. [`docs/development/acceptance.md`](docs/development/acceptance.md) for the
-   definition of done.
-5. [`docs/development/test_plan.md`](docs/development/test_plan.md) for testing
-   strategy and refactor guardrails.
-6. [`docs/development/consumer-surface-checklist.md`](docs/development/consumer-surface-checklist.md)
-   for downstream consumer readiness.
+1. [`docs/development/design.md`](docs/development/design.md) for architecture,
+   IR boundaries, and durable decisions.
+2. [`docs/development/progress.md`](docs/development/progress.md) for current
+   repository status, priorities, and intentional deferrals.
+3. [`docs/development/standards.md`](docs/development/standards.md) for the
+   implementation loop, acceptance, testing, release, and documentation rules.
 
-Read these specialized references when the task requires them:
-
-- IR boundaries and contracts:
-  [`ir-boundaries.md`](docs/development/ir-boundaries.md),
-  [`ir-contract.md`](docs/development/ir-contract.md)
-- Traversal, transform, and normalization:
-  [`schema-traversal.md`](docs/development/schema-traversal.md)
-- SDK report interpretation:
-  [`sdk-report-analysis.md`](docs/development/sdk-report-analysis.md)
-- Capabilities and semantic loss:
-  [`capabilities-and-loss.md`](docs/development/capabilities-and-loss.md)
-- TypeScript parser behavior:
-  [`typescript-parser-cases.md`](docs/development/typescript-parser-cases.md)
-- JSON Schema boundaries:
-  [`json-schema-shape-gap.md`](docs/development/json-schema-shape-gap.md)
-
-The development documentation has one status page, `progress.md`, and one
-testing-strategy page, `test_plan.md`. Prefer updating or linking those pages
-instead of creating duplicate planning or status documents.
+The development documentation intentionally has only these three durable
+documents. Prefer updating them instead of creating duplicate planning,
+status, test, or specialized design pages.

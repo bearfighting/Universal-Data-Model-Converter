@@ -8,7 +8,10 @@ surface. Install `@schema-transformation-toolkit/sdk` alone for the normal pipel
 format-specific integrations.
 
 It is the intended downstream consumer boundary for Stage 1 product surfaces.
-Project-level readiness planning lives in [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md), not in this package README.
+Project-level readiness and priorities live in [../../docs/development/progress.md](../../docs/development/progress.md), not in this package README.
+
+If you are using the toolkit rather than integrating the SDK itself, start with
+the [User Guide](../../docs/user-guide.md) and [Capability Matrix](../../docs/capability-matrix.md).
 
 The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
@@ -17,7 +20,7 @@ TypeScript with a `z.infer` type; pass
 runtime-schema module. The consuming project must install Zod 4.
 
 The OpenAPI schema boundary and unsupported-feature diagnostics are documented
-in [OpenAPI Schema Compatibility](../../docs/development/openapi-schema-compatibility.md).
+in the [project design](../../docs/development/design.md).
 
 Use it when you want to:
 
@@ -400,14 +403,16 @@ Use `planConversion(...)` or `describeConversionRouteCapabilities(...)` when you
 
 ## More Detail
 
+For task-oriented usage and common failure-handling patterns, see:
+
+- [../../docs/user-guide.md](../../docs/user-guide.md)
+- [../../docs/capability-matrix.md](../../docs/capability-matrix.md)
+
 For deeper report interpretation, see:
 
-- [../../docs/development/sdk-report-analysis.md](../../docs/development/sdk-report-analysis.md)
-- [../../docs/development/capabilities-and-loss.md](../../docs/development/capabilities-and-loss.md)
+- [../../docs/development/design.md](../../docs/development/design.md)
 
 For project-level readiness status and remaining downstream-consumer work, see:
 
-- [../../docs/development/consumer-surface-checklist.md](../../docs/development/consumer-surface-checklist.md)
 - [../../docs/development/progress.md](../../docs/development/progress.md)
-- [../../docs/development/release-process.md](../../docs/development/release-process.md)
-- [../../docs/development/web-integration-notes.md](../../docs/development/web-integration-notes.md)
+- [../../docs/development/standards.md](../../docs/development/standards.md)
