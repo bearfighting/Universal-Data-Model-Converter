@@ -41,11 +41,11 @@ jobs:
       - name: Verify release state
         run: pnpm release:check --version-from-tag "${GITHUB_REF_NAME}" --allow-dirty --no-tag-existence-check
 
-      - name: Run repository checks
-        run: pnpm check
-
       - name: Build artifacts
         run: pnpm build
+
+      - name: Run repository checks
+        run: pnpm check
 
       - name: Pack release artifacts
         run: pnpm release:pack
