@@ -38,6 +38,10 @@ export declare const BUILTIN_FORMAT_CATALOG: {
     readonly source: true;
     readonly target: true;
   };
+  readonly rust: {
+    readonly source: true;
+    readonly target: true;
+  };
 };
 type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;
 type NonEmptyFormatList = readonly [BuiltinFormat, ...BuiltinFormat[]];
@@ -383,6 +387,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   yaml: "yaml";
   csv: "csv";
   toml: "toml";
+  rust: "rust";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
@@ -393,6 +398,7 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   yaml: "yaml";
   csv: "csv";
   toml: "toml";
+  rust: "rust";
 }>;
 export declare const conversionIrPreferenceSchema: z.ZodEnum<{
   value: "value";
@@ -615,6 +621,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       yaml: "yaml";
       csv: "csv";
       toml: "toml";
+      rust: "rust";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
@@ -625,6 +632,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       yaml: "yaml";
       csv: "csv";
       toml: "toml";
+      rust: "rust";
     }>;
     parser: z.ZodObject<
       {

@@ -93,6 +93,7 @@ try {
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-openapi",
+    "@schema-transformation-toolkit/generator-rust",
     "@schema-transformation-toolkit/generator-toml",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",
@@ -101,6 +102,7 @@ try {
     "@schema-transformation-toolkit/parser-json",
     "@schema-transformation-toolkit/parser-json-schema",
     "@schema-transformation-toolkit/parser-openapi",
+    "@schema-transformation-toolkit/parser-rust",
     "@schema-transformation-toolkit/parser-toml",
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
@@ -140,10 +142,10 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "csv,json,json-schema,openapi,toml,typescript,yaml,zod") {
+    if (sources.join(",") !== "csv,json,json-schema,openapi,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "csv,json,json-schema,openapi,toml,typescript,yaml,zod") {
+    if (targets.join(",") !== "csv,json,json-schema,openapi,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 
@@ -156,6 +158,8 @@ try {
       { sourceFormat: "json", targetFormat: "yaml", input: "{\\"id\\":1}" },
       { sourceFormat: "csv", targetFormat: "json", input: "id,name\\n1,Ada\\n" },
       { sourceFormat: "toml", targetFormat: "json", input: ${tomlSmokeInput} },
+      { sourceFormat: "rust", targetFormat: "typescript", input: "struct User { id: u64 }" },
+      { sourceFormat: "typescript", targetFormat: "rust", input: "interface User { id: number }" },
       { sourceFormat: "json", targetFormat: "csv", input: "[{\\"id\\":1,\\"name\\":\\"Ada\\"}]" },
       { sourceFormat: "json", targetFormat: "toml", input: "{\\"id\\":1,\\"name\\":\\"Ada\\"}" },
     ];

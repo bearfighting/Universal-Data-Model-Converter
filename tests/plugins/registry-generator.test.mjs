@@ -10,10 +10,10 @@ describe("registry manifest generator", () => {
   it("discovers all workspace component manifests plus the default transformer", async () => {
     const entries = await collectEntries();
 
-    expect(entries).toHaveLength(17);
-    expect(entries.filter((entry) => entry.role === "parser")).toHaveLength(8);
+    expect(entries).toHaveLength(19);
+    expect(entries.filter((entry) => entry.role === "parser")).toHaveLength(9);
     expect(entries.filter((entry) => entry.role === "generator")).toHaveLength(
-      8,
+      9,
     );
     expect(entries.at(-1)).toMatchObject({
       role: "transformer",

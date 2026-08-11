@@ -7,6 +7,7 @@ export const BUILTIN_FORMAT_CATALOG = {
   zod: { source: true, target: true },
   yaml: { source: true, target: true },
   toml: { source: true, target: true },
+  rust: { source: true, target: true },
 } as const;
 
 type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;

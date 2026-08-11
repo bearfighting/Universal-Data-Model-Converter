@@ -19,7 +19,7 @@ planning, registry adaptation, report construction, and public result schemas.
 Current platform capabilities:
 
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
-  Schema, TypeScript, Zod, and OpenAPI.
+  Schema, TypeScript, Zod, OpenAPI, and the V1 Rust struct subset.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -39,6 +39,8 @@ Validated route families include:
 - Value routes: JSON, YAML, CSV, and TOML round trips where root constraints
   allow them.
 - Shape routes: JSON, JSON Schema, TypeScript, Zod, and OpenAPI conversions.
+- Rust routes: restricted Rust structs to/from Shape-compatible targets, with
+  representation hints and typed numeric constraints.
 - Constraint-preserving routes: JSON Schema, Zod, and OpenAPI routes where the
   descriptors declare Constraint IR support.
 - Transformer routes: Value-to-Shape inference and registered multi-stage
@@ -90,13 +92,15 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 Latest completed baseline:
 
-- 76 test files, 888 tests passing.
+- 81 test files, 914 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
 - Explicit workspace build passing.
 - Third-party manifest/custom registry smoke passing.
-- SDK tarball clean-install smoke passing for all eight builtin format families.
+- SDK tarball clean-install smoke is part of the acceptance path; in the
+  current environment its pnpm invocation is blocked by the local pnpm
+  database error and must be rerun in a normal workspace environment.
 
 Primary commands:
 
@@ -119,4 +123,4 @@ node scripts/check-sdk-package.mjs
 2. [standards.md](standards.md) for implementation and validation rules.
 3. Package `README`s and `examples/` for package-specific usage.
 
-Last verified: 2026-08-08.
+Last verified: 2026-08-11.

@@ -196,6 +196,9 @@ importers:
       "@schema-transformation-toolkit/generator-openapi":
         specifier: workspace:*
         version: link:../generators/openapi
+      "@schema-transformation-toolkit/generator-rust":
+        specifier: workspace:*
+        version: link:../generators/rust
       "@schema-transformation-toolkit/generator-toml":
         specifier: workspace:*
         version: link:../generators/toml
@@ -220,6 +223,9 @@ importers:
       "@schema-transformation-toolkit/parser-openapi":
         specifier: workspace:*
         version: link:../parsers/openapi
+      "@schema-transformation-toolkit/parser-rust":
+        specifier: workspace:*
+        version: link:../parsers/rust
       "@schema-transformation-toolkit/parser-toml":
         specifier: workspace:*
         version: link:../parsers/toml

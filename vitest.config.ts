@@ -22,6 +22,8 @@ export default defineConfig({
         "/packages/generators/yaml/src/index.ts",
       "@schema-transformation-toolkit/generator-zod":
         "/packages/generators/zod/src/index.ts",
+      "@schema-transformation-toolkit/generator-rust":
+        "/packages/generators/rust/src/index.ts",
       "@schema-transformation-toolkit/parser-json":
         "/packages/parsers/json/src/index.ts",
       "@schema-transformation-toolkit/parser-csv":
@@ -38,6 +40,8 @@ export default defineConfig({
         "/packages/parsers/zod/src/index.ts",
       "@schema-transformation-toolkit/parser-yaml":
         "/packages/parsers/yaml/src/index.ts",
+      "@schema-transformation-toolkit/parser-rust":
+        "/packages/parsers/rust/src/index.ts",
       "@schema-transformation-toolkit/sdk": "/packages/sdk/src/index.ts",
     },
   },
