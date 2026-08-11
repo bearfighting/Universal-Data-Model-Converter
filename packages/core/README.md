@@ -30,6 +30,17 @@ Today `@schema-transformation-toolkit/core` exposes:
 - combined `IrModel` and pipeline contracts for route planning and reporting
 - shared diagnostics, semantic-note, capability, and semantic-loss contracts
 
+Primitive representation is layered: `SchemaScalarNode` keeps the portable
+semantic scalar kind (`integer`, `number`, `string`, or `boolean`), numeric
+facets live in Constraint IR, and optional `ScalarRepresentationHint` metadata
+can preserve language-neutral width, signedness, or floating-point family
+without changing semantic equivalence.
+
+`DecimalValue` instances are canonical decimal strings: use `decimalValue()` to
+construct them. Numeric helpers reject malformed values and preserve exact
+integer boundaries without routing them through JavaScript floating-point
+conversion.
+
 The current `Shape IR` intentionally stays small:
 
 - `SchemaScalarNode`

@@ -1,4 +1,13 @@
 export type ScalarKind = "string" | "integer" | "number" | "boolean";
+export type ScalarRepresentationFamily = "integer" | "float" | "decimal";
+export type ScalarRepresentationSignedness = "signed" | "unsigned";
+export type ScalarRepresentationWidth = 8 | 16 | 32 | 64 | 128 | "pointer";
+
+export interface ScalarRepresentationHint {
+  family: ScalarRepresentationFamily;
+  signedness?: ScalarRepresentationSignedness;
+  widthBits?: ScalarRepresentationWidth;
+}
 export type SchemaLiteralValue = string | number | boolean;
 export type UnknownReason =
   | "no-evidence"
@@ -85,6 +94,7 @@ export interface IdentifierName {
 export interface SchemaScalarNode extends SchemaBaseNode {
   kind: "scalar";
   scalar: ScalarKind;
+  representation?: ScalarRepresentationHint;
 }
 
 export interface SchemaLiteralNode extends SchemaBaseNode {

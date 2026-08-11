@@ -9,6 +9,11 @@ import type {
   SchemaTupleNode,
   SchemaUnionNode,
 } from "@schema-transformation-toolkit/core";
+import {
+  isNumericValue,
+  getNumericConstraintsAtPath,
+  numericValueToSafeNumber,
+} from "@schema-transformation-toolkit/core";
 import type {
   JsonSchemaOutput,
   ResolvedJsonSchemaGeneratorOptions,
@@ -271,15 +276,19 @@ function decorateRenderedSchema(
   const pattern = getConstraintValue(options, path, "pattern");
   const minLength = getConstraintValue(options, path, "min-length");
   const maxLength = getConstraintValue(options, path, "max-length");
-  const minimum = getConstraintValue(options, path, "minimum");
-  const exclusiveMinimum = getConstraintValue(
+  const minimum = getJsonSchemaNumericConstraintValue(options, path, "minimum");
+  const exclusiveMinimum = getJsonSchemaNumericConstraintValue(
     options,
     path,
     "exclusive-minimum",
   );
-  const multipleOf = getConstraintValue(options, path, "multiple-of");
-  const maximum = getConstraintValue(options, path, "maximum");
-  const exclusiveMaximum = getConstraintValue(
+  const multipleOf = getJsonSchemaNumericConstraintValue(
+    options,
+    path,
+    "multiple-of",
+  );
+  const maximum = getJsonSchemaNumericConstraintValue(options, path, "maximum");
+  const exclusiveMaximum = getJsonSchemaNumericConstraintValue(
     options,
     path,
     "exclusive-maximum",
@@ -332,6 +341,19 @@ function getConstraintValue(
   return getConstraintsAtPath(options, path).find(
     (constraint) => constraint.kind === kind,
   )?.value;
+}
+
+function getJsonSchemaNumericConstraintValue(
+  options: ResolvedJsonSchemaGeneratorOptions,
+  path: string[],
+  kind: string,
+): number | undefined {
+  const value = options.constraints
+    ? getNumericConstraintsAtPath(options.constraints, path).find(
+        (constraint) => constraint.kind === kind,
+      )?.value
+    : undefined;
+  return isNumericValue(value) ? numericValueToSafeNumber(value) : undefined;
 }
 
 function getConstraintsAtPath(

@@ -1,6 +1,10 @@
 export type {
   IdentifierName,
   ScalarKind,
+  ScalarRepresentationFamily,
+  ScalarRepresentationHint,
+  ScalarRepresentationSignedness,
+  ScalarRepresentationWidth,
   SchemaArrayNode,
   SchemaBaseNode,
   SchemaDefinition,
@@ -51,6 +55,11 @@ export type {
   ConstraintClause,
   ConstraintDocument,
   ConstraintSeverity,
+  DecimalValue,
+  NumericConstraintKind,
+  NumericConstraint,
+  NumericConstraintSet,
+  NumericValue,
 } from "./constraint/index.js";
 
 export type { IrModel } from "./model/index.js";

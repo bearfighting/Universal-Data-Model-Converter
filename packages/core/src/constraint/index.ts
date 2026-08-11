@@ -6,6 +6,11 @@ export type {
   ConstraintSeverity,
   ConstraintTarget,
   ConstraintTargetKind,
+  DecimalValue,
+  NumericConstraintKind,
+  NumericConstraint,
+  NumericConstraintSet,
+  NumericValue,
 } from "./types.js";
 
 export {
@@ -14,6 +19,10 @@ export {
   constraintDocument,
   constraintEntry,
   constraintTarget,
+  decimalValue,
+  integerRangeConstraint,
+  numberRangeConstraint,
+  numericConstraint,
 } from "./factories.js";
 
 export {
@@ -22,4 +31,20 @@ export {
   isConstraintDocument,
   isConstraintEntry,
   isConstraintTarget,
+  isDecimalValue,
+  isNumericConstraint,
+  isNumericConstraintKind,
+  isNumericValue,
 } from "./guards.js";
+
+export {
+  areEquivalentNumericConstraintSets,
+  areEquivalentNumericConstraints,
+  compareNumericValues,
+  getNumericConstraintsAtPath,
+  mergeNumericConstraints,
+  numericValueToSafeNumber,
+  validateNumericConstraint,
+  validateIntegerNumericValue,
+  validateNumericValue,
+} from "./numeric.js";

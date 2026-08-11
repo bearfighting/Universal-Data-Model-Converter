@@ -63,6 +63,19 @@ general format-to-format dependency.
   numeric, collection, and object constraints. It is retained as an artifact
   when the target needs it and is never silently treated as shape structure.
 
+Primitive representation follows the same boundary: Shape IR keeps the
+portable scalar domain (`string`, `integer`, `number`, and `boolean`),
+Constraint IR carries portable numeric facets, and optional
+`ScalarRepresentationHint` metadata can preserve language-neutral integer or
+floating-point representation details. Semantic Shape equivalence ignores
+representation hints; representation-aware comparison is available when a
+language adapter needs to verify round trips.
+
+Numeric constraints may use finite JavaScript numbers or exact JSON-safe
+decimal values. A target must reject or report loss when it cannot emit an
+exact decimal value; it must not silently coerce large integers through an
+imprecise JavaScript number.
+
 Optional presence and nullable values are distinct. References and recursive
 structures remain explicit. Root-shape requirements are descriptor contracts,
 not ad-hoc format-pair checks.

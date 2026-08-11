@@ -74,6 +74,96 @@ export function areEquivalentSchemaNodes(
   }
 }
 
+/** Compares Shape IR including optional scalar representation hints. */
+export function areEquivalentSchemaNodesWithRepresentation(
+  left: SchemaNode,
+  right: SchemaNode,
+): boolean {
+  if (!areEquivalentSchemaNodes(left, right)) return false;
+
+  if (left.kind === "scalar" && right.kind === "scalar") {
+    const leftRepresentation = left.representation;
+    const rightRepresentation = right.representation;
+    return (
+      leftRepresentation?.family === rightRepresentation?.family &&
+      leftRepresentation?.signedness === rightRepresentation?.signedness &&
+      leftRepresentation?.widthBits === rightRepresentation?.widthBits
+    );
+  }
+
+  if (left.kind !== right.kind) return false;
+
+  switch (left.kind) {
+    case "array":
+      return (
+        right.kind === "array" &&
+        areEquivalentSchemaNodesWithRepresentation(
+          left.elementType,
+          right.elementType,
+        )
+      );
+    case "object":
+      return (
+        right.kind === "object" &&
+        left.fields.length === right.fields.length &&
+        left.fields.every((field, index) => {
+          const candidate = right.fields[index];
+          return (
+            candidate !== undefined &&
+            field.name.source === candidate.name.source &&
+            field.required === candidate.required &&
+            field.nullable === candidate.nullable &&
+            areEquivalentSchemaNodesWithRepresentation(
+              field.type,
+              candidate.type,
+            )
+          );
+        }) &&
+        (left.additionalProperties === undefined
+          ? right.additionalProperties === undefined
+          : right.additionalProperties !== undefined &&
+            areEquivalentSchemaNodesWithRepresentation(
+              left.additionalProperties,
+              right.additionalProperties,
+            ))
+      );
+    case "tuple":
+      return (
+        right.kind === "tuple" &&
+        left.elements.length === right.elements.length &&
+        left.elements.every((element, index) => {
+          const candidate = right.elements[index];
+          return (
+            candidate !== undefined &&
+            element.required === candidate.required &&
+            areEquivalentSchemaNodesWithRepresentation(
+              element.type,
+              candidate.type,
+            )
+          );
+        })
+      );
+    case "record":
+      return (
+        right.kind === "record" &&
+        areEquivalentSchemaNodesWithRepresentation(left.key, right.key) &&
+        areEquivalentSchemaNodesWithRepresentation(left.value, right.value)
+      );
+    case "union":
+      return (
+        right.kind === "union" &&
+        left.members.length === right.members.length &&
+        left.members.every((member) =>
+          right.members.some((candidate) =>
+            areEquivalentSchemaNodesWithRepresentation(member, candidate),
+          ),
+        )
+      );
+    default:
+      return true;
+  }
+}
+
 function areEquivalentTupleElements(
   left: SchemaTupleElement,
   right: SchemaTupleElement | undefined,

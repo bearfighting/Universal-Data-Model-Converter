@@ -1,4 +1,5 @@
 import type {
+  ScalarKind,
   SchemaArrayNode,
   SchemaReferenceNode,
   SchemaLiteralNode,
@@ -7,6 +8,7 @@ import type {
   SchemaObjectNode,
   SchemaRecordNode,
   SchemaScalarNode,
+  ScalarRepresentationHint,
   SchemaTupleNode,
   SchemaUnionNode,
   SchemaUnknownNode,
@@ -14,6 +16,55 @@ import type {
 
 export function isSchemaScalarNode(node: SchemaNode): node is SchemaScalarNode {
   return node.kind === "scalar";
+}
+
+export function isScalarRepresentationHint(
+  value: unknown,
+): value is ScalarRepresentationHint {
+  if (typeof value !== "object" || value === null) return false;
+
+  const hint = value as {
+    family?: unknown;
+    signedness?: unknown;
+    widthBits?: unknown;
+  };
+
+  if (
+    hint.family !== "integer" &&
+    hint.family !== "float" &&
+    hint.family !== "decimal"
+  ) {
+    return false;
+  }
+
+  if (
+    hint.signedness !== undefined &&
+    (hint.family !== "integer" ||
+      (hint.signedness !== "signed" && hint.signedness !== "unsigned"))
+  ) {
+    return false;
+  }
+
+  return (
+    hint.widthBits === undefined ||
+    hint.widthBits === "pointer" ||
+    hint.widthBits === 8 ||
+    hint.widthBits === 16 ||
+    hint.widthBits === 32 ||
+    hint.widthBits === 64 ||
+    hint.widthBits === 128
+  );
+}
+
+export function isCompatibleScalarRepresentation(
+  scalar: ScalarKind,
+  representation: ScalarRepresentationHint,
+): boolean {
+  if (!isScalarRepresentationHint(representation)) return false;
+
+  if (representation.family === "integer") return scalar === "integer";
+
+  return scalar === "number" && representation.signedness === undefined;
 }
 
 export function isSchemaLiteralNode(
