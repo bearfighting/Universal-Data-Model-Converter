@@ -7,7 +7,26 @@ into a versioned section when a release is prepared.
 
 ## Unreleased
 
-No unreleased changes.
+- Continued validation and stabilization of the Rust data schema adapters.
+
+## 0.3.0-alpha.0
+
+This alpha introduces the first Rust data schema adapter boundary.
+
+### Highlights
+
+- Add a restricted Rust struct parser for Shape IR and Constraint IR.
+- Add a deterministic Rust generator for public structs.
+- Support Rust primitive representation hints, optional/nullability mapping,
+  arrays, references, definitions, and typed integer constraints.
+- Register Rust as a builtin source and target format in the SDK.
+
+### Boundaries
+
+- Rust V1 intentionally excludes Serde attributes, enums, generics, maps,
+  macros, traits, impls, and other unsupported Rust syntax.
+- This is an alpha release while Web integration and package-install smoke
+  tests are validated against the release artifacts.
 
 ## 0.2.0
 
