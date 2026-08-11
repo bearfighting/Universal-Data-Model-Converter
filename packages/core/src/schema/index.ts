@@ -1,6 +1,10 @@
 export type {
   IdentifierName,
   ScalarKind,
+  ScalarRepresentationFamily,
+  ScalarRepresentationHint,
+  ScalarRepresentationSignedness,
+  ScalarRepresentationWidth,
   SchemaLiteralValue,
   SchemaArrayNode,
   SchemaBaseNode,
@@ -51,7 +55,10 @@ export {
 
 export { identifierName } from "./identifiers.js";
 
-export { areEquivalentSchemaNodes } from "./equivalence.js";
+export {
+  areEquivalentSchemaNodes,
+  areEquivalentSchemaNodesWithRepresentation,
+} from "./equivalence.js";
 export {
   createSchemaDefinitionIndex,
   createSchemaDefinitionIndexFromLookup,
@@ -135,6 +142,8 @@ export {
   isSchemaReferenceNode,
   isSchemaRecordNode,
   isSchemaScalarNode,
+  isCompatibleScalarRepresentation,
+  isScalarRepresentationHint,
   isSchemaTupleNode,
   isSchemaUnionNode,
   isSchemaUnknownNode,

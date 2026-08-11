@@ -1,14 +1,25 @@
-import { walkSchemaDocument } from "@schema-transformation-toolkit/core";
+import {
+  isDecimalValue,
+  isNumericConstraint,
+  isNumericConstraintKind,
+  numericValueToSafeNumber,
+  walkSchemaDocument,
+} from "@schema-transformation-toolkit/core";
 import type {
   SchemaDiagnostic,
   SchemaDiagnosticNodeKind,
   SchemaDocument,
 } from "@schema-transformation-toolkit/core";
 import type { JsonSchemaGenerateFailureResult } from "./failure.js";
+import type { ResolvedJsonSchemaGeneratorOptions } from "./options.js";
 
 export function validateJsonSchemaDocument(
   doc: SchemaDocument,
+  options?: Pick<ResolvedJsonSchemaGeneratorOptions, "constraints">,
 ): JsonSchemaGenerateFailureResult | null {
+  const decimalFailure = validateDecimalConstraints(options?.constraints);
+  if (decimalFailure !== null) return decimalFailure;
+
   let failure: JsonSchemaGenerateFailureResult | null = null;
 
   walkSchemaDocument(
@@ -66,6 +77,37 @@ export function validateJsonSchemaDocument(
   );
 
   return failure;
+}
+
+function validateDecimalConstraints(
+  constraints: ResolvedJsonSchemaGeneratorOptions["constraints"],
+): JsonSchemaGenerateFailureResult | null {
+  for (const entry of constraints?.entries ?? []) {
+    for (const item of entry.constraints) {
+      if (!isNumericConstraintKind(item.kind)) continue;
+      if (!isNumericConstraint(item)) {
+        return createValidationFailure(
+          "invalid-numeric-constraint",
+          `The numeric constraint "${item.kind}" has an invalid value.`,
+          entry.target.path,
+          "type",
+          { constraintKind: item.kind, value: item.value },
+        );
+      }
+      if (!isDecimalValue(item.value)) continue;
+      if (numericValueToSafeNumber(item.value) !== undefined) continue;
+
+      return createValidationFailure(
+        "unsupported-decimal-constraint",
+        "This JSON Schema generator cannot emit a DecimalValue without losing numeric precision.",
+        entry.target.path,
+        "type",
+        { constraintKind: item.kind, value: item.value.value },
+      );
+    }
+  }
+
+  return null;
 }
 
 function createValidationFailure(

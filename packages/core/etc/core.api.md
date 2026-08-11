@@ -13,7 +13,26 @@ import type {
   ConstraintSeverity,
   ConstraintTarget,
   ConstraintTargetKind,
+  DecimalValue,
+  NumericConstraint,
+  NumericConstraintKind,
+  NumericConstraintSet,
+  NumericValue,
 } from "./types.js";
+export declare function decimalValue(value: string): DecimalValue;
+export declare function numericConstraint(
+  kind: NumericConstraintKind,
+  value: NumericValue,
+  options?: Omit<Parameters<typeof constraint>[1], "value">,
+): NumericConstraint;
+export declare function integerRangeConstraint(
+  range: Pick<NumericConstraintSet, "minimum" | "maximum">,
+  options?: Omit<Parameters<typeof constraint>[1], "value">,
+): NumericConstraint[];
+export declare function numberRangeConstraint(
+  range: Pick<NumericConstraintSet, "minimum" | "maximum">,
+  options?: Omit<Parameters<typeof constraint>[1], "value">,
+): NumericConstraint[];
 export declare function constraintTarget(
   kind: ConstraintTargetKind,
   path?: string[],
@@ -53,11 +72,23 @@ import type {
   ConstraintDocument,
   ConstraintEntry,
   ConstraintTarget,
+  DecimalValue,
+  NumericConstraintKind,
+  NumericConstraint,
+  NumericValue,
 } from "./types.js";
+export declare function isNumericConstraintKind(
+  kind: string,
+): kind is NumericConstraintKind;
+export declare function isDecimalValue(value: unknown): value is DecimalValue;
+export declare function isNumericValue(value: unknown): value is NumericValue;
 export declare function isConstraintTarget(
   value: unknown,
 ): value is ConstraintTarget;
 export declare function isConstraint(value: unknown): value is Constraint;
+export declare function isNumericConstraint(
+  value: unknown,
+): value is NumericConstraint;
 export declare function isConstraintEntry(
   value: unknown,
 ): value is ConstraintEntry;
@@ -80,6 +111,11 @@ export type {
   ConstraintSeverity,
   ConstraintTarget,
   ConstraintTargetKind,
+  DecimalValue,
+  NumericConstraintKind,
+  NumericConstraint,
+  NumericConstraintSet,
+  NumericValue,
 } from "./types.js";
 export {
   constraint,
@@ -87,6 +123,10 @@ export {
   constraintDocument,
   constraintEntry,
   constraintTarget,
+  decimalValue,
+  integerRangeConstraint,
+  numberRangeConstraint,
+  numericConstraint,
 } from "./factories.js";
 export {
   isConstraint,
@@ -94,13 +134,86 @@ export {
   isConstraintDocument,
   isConstraintEntry,
   isConstraintTarget,
+  isDecimalValue,
+  isNumericConstraint,
+  isNumericConstraintKind,
+  isNumericValue,
 } from "./guards.js";
+export {
+  areEquivalentNumericConstraintSets,
+  areEquivalentNumericConstraints,
+  compareNumericValues,
+  getNumericConstraintsAtPath,
+  mergeNumericConstraints,
+  numericValueToSafeNumber,
+  validateNumericConstraint,
+  validateIntegerNumericValue,
+  validateNumericValue,
+} from "./numeric.js";
+```
+
+## packages/core/src/constraint/numeric.d.ts
+
+```ts
+import type {
+  Constraint,
+  ConstraintDocument,
+  NumericConstraint,
+  NumericConstraintSet,
+  NumericValue,
+} from "./types.js";
+export declare function validateNumericValue(value: NumericValue): void;
+export declare function validateIntegerNumericValue(value: NumericValue): void;
+export declare function validateNumericConstraint(constraint: Constraint): void;
+export declare function compareNumericValues(
+  left: NumericValue,
+  right: NumericValue,
+): number;
+/** Compares the semantic value of two numeric constraints, ignoring metadata. */
+export declare function areEquivalentNumericConstraints(
+  left: Constraint,
+  right: Constraint,
+): boolean;
+/** Compares numeric constraint sets without depending on object property order. */
+export declare function areEquivalentNumericConstraintSets(
+  left: NumericConstraintSet,
+  right: NumericConstraintSet,
+): boolean;
+/** Returns a number only when converting a numeric value preserves its canonical value. */
+export declare function numericValueToSafeNumber(
+  value: NumericValue,
+): number | undefined;
+export declare function mergeNumericConstraints(
+  constraints: readonly Constraint[],
+): NumericConstraintSet;
+export declare function getNumericConstraintsAtPath(
+  document: ConstraintDocument,
+  path: readonly string[],
+): NumericConstraint[];
 ```
 
 ## packages/core/src/constraint/types.d.ts
 
 ```ts
 export type ConstraintSeverity = "info" | "warning" | "error";
+export interface DecimalValue {
+  representation: "decimal";
+  value: string;
+}
+export type NumericValue = number | DecimalValue;
+export type NumericConstraintKind =
+  | "minimum"
+  | "maximum"
+  | "exclusive-minimum"
+  | "exclusive-maximum"
+  | "multiple-of";
+export interface NumericConstraintSet {
+  minimum?: NumericValue;
+  maximum?: NumericValue;
+  exclusiveMinimum?: NumericValue;
+  exclusiveMaximum?: NumericValue;
+  multipleOf?: NumericValue;
+}
 export type ConstraintTargetKind =
   "document" | "root" | "definition" | "field" | "node";
 export interface ConstraintTarget {
@@ -113,6 +226,10 @@ export interface Constraint {
   message?: string;
   value?: unknown;
   evidence?: Record<string, unknown>;
+}
+export interface NumericConstraint extends Constraint {
+  kind: NumericConstraintKind;
+  value: NumericValue;
 }
 export interface ConstraintEntry {
   target: ConstraintTarget;
@@ -972,6 +1089,11 @@ export declare function areEquivalentSchemaNodes(
   left: SchemaNode,
   right: SchemaNode,
 ): boolean;
+/** Compares Shape IR including optional scalar representation hints. */
+export declare function areEquivalentSchemaNodesWithRepresentation(
+  left: SchemaNode,
+  right: SchemaNode,
+): boolean;
 ```
 
 ## packages/core/src/schema/factories.d.ts
@@ -979,6 +1101,7 @@ export declare function areEquivalentSchemaNodes(
 ```ts
 import type {
   ScalarKind,
+  ScalarRepresentationHint,
   SchemaLiteralValue,
   SchemaArrayNode,
   SchemaDocument,
@@ -999,7 +1122,12 @@ import type {
   UnknownReason,
 } from "./types.js";
 import { type IdentifierInput } from "./identifiers.js";
-export declare function schemaScalarNode(scalar: ScalarKind): SchemaScalarNode;
+export declare function schemaScalarNode(
+  scalar: ScalarKind,
+  options?: {
+    representation?: ScalarRepresentationHint;
+  },
+): SchemaScalarNode;
 export declare function schemaLiteralNode(
   value: SchemaLiteralValue,
 ): SchemaLiteralNode;
@@ -1058,6 +1186,7 @@ export declare function schemaDocument(
 
 ```ts
 import type {
+  ScalarKind,
   SchemaArrayNode,
   SchemaReferenceNode,
   SchemaLiteralNode,
@@ -1066,6 +1195,7 @@ import type {
   SchemaObjectNode,
   SchemaRecordNode,
   SchemaScalarNode,
+  ScalarRepresentationHint,
   SchemaTupleNode,
   SchemaUnionNode,
   SchemaUnknownNode,
@@ -1073,6 +1203,13 @@ import type {
 export declare function isSchemaScalarNode(
   node: SchemaNode,
 ): node is SchemaScalarNode;
+export declare function isScalarRepresentationHint(
+  value: unknown,
+): value is ScalarRepresentationHint;
+export declare function isCompatibleScalarRepresentation(
+  scalar: ScalarKind,
+  representation: ScalarRepresentationHint,
+): boolean;
 export declare function isSchemaLiteralNode(
   node: SchemaNode,
 ): node is SchemaLiteralNode;
@@ -1121,6 +1258,10 @@ export declare function normalizeWords(
 export type {
   IdentifierName,
   ScalarKind,
+  ScalarRepresentationFamily,
+  ScalarRepresentationHint,
+  ScalarRepresentationSignedness,
+  ScalarRepresentationWidth,
   SchemaLiteralValue,
   SchemaArrayNode,
   SchemaBaseNode,
@@ -1168,7 +1309,10 @@ export {
   schemaUnknownNode,
 } from "./factories.js";
 export { identifierName } from "./identifiers.js";
-export { areEquivalentSchemaNodes } from "./equivalence.js";
+export {
+  areEquivalentSchemaNodes,
+  areEquivalentSchemaNodesWithRepresentation,
+} from "./equivalence.js";
 export {
   createSchemaDefinitionIndex,
   createSchemaDefinitionIndexFromLookup,
@@ -1243,6 +1387,8 @@ export {
   isSchemaReferenceNode,
   isSchemaRecordNode,
   isSchemaScalarNode,
+  isCompatibleScalarRepresentation,
+  isScalarRepresentationHint,
   isSchemaTupleNode,
   isSchemaUnionNode,
   isSchemaUnknownNode,
@@ -1596,6 +1742,14 @@ export declare function walkSchemaNode(
 
 ```ts
 export type ScalarKind = "string" | "integer" | "number" | "boolean";
+export type ScalarRepresentationFamily = "integer" | "float" | "decimal";
+export type ScalarRepresentationSignedness = "signed" | "unsigned";
+export type ScalarRepresentationWidth = 8 | 16 | 32 | 64 | 128 | "pointer";
+export interface ScalarRepresentationHint {
+  family: ScalarRepresentationFamily;
+  signedness?: ScalarRepresentationSignedness;
+  widthBits?: ScalarRepresentationWidth;
+}
 export type SchemaLiteralValue = string | number | boolean;
 export type UnknownReason =
   | "no-evidence"
@@ -1671,6 +1825,7 @@ export interface IdentifierName {
 export interface SchemaScalarNode extends SchemaBaseNode {
   kind: "scalar";
   scalar: ScalarKind;
+  representation?: ScalarRepresentationHint;
 }
 export interface SchemaLiteralNode extends SchemaBaseNode {
   kind: "literal";
@@ -1769,6 +1924,10 @@ export declare function tryValidateSchemaFieldNullability(
 
 ```ts
 export type {
+  ScalarRepresentationFamily as ShapeScalarRepresentationFamily,
+  ScalarRepresentationHint as ShapeScalarRepresentationHint,
+  ScalarRepresentationSignedness as ShapeScalarRepresentationSignedness,
+  ScalarRepresentationWidth as ShapeScalarRepresentationWidth,
   SchemaArrayNode as ShapeArrayNode,
   SchemaBaseNode as ShapeBaseNode,
   SchemaDefinition as ShapeDefinition,
@@ -1880,6 +2039,7 @@ export type {
 export {
   appendSchemaPath,
   areEquivalentSchemaNodes,
+  areEquivalentSchemaNodesWithRepresentation,
   createSchemaDefinitionIndex,
   createSchemaDefinitionIndexFromLookup,
   createDefinitionSchemaPath,

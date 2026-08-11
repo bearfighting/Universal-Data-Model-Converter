@@ -39,6 +39,10 @@ The current generator supports:
 - simple `nullable` fields through compact `type: ["T", "null"]` rendering
 - `unknown` nodes as the widest valid schema
 
+Portable numeric constraints can use finite JavaScript numbers or exact
+`DecimalValue` objects from core. Values that cannot be emitted without losing
+precision return a structured generation failure.
+
 ## API
 
 `generateJsonSchema(document, options?)`

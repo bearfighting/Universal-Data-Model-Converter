@@ -3,6 +3,7 @@ import {
   constraintDocument,
   constraintEntry,
   constraintTarget,
+  numericConstraint,
   schemaArrayNode,
   pushSchemaObservation,
   schemaDefinition,
@@ -24,6 +25,8 @@ import {
   type SchemaSemanticNote,
   type ConstraintDocument,
   type ConstraintEntry,
+  type NumericConstraintKind,
+  type NumericValue,
 } from "@schema-transformation-toolkit/core";
 import {
   jsonSchemaDiagnostic,
@@ -37,6 +40,13 @@ import {
 import type { ResolvedJsonSchemaParseOptions } from "./options.js";
 
 const DRAFT_2020_12_URI = "https://json-schema.org/draft/2020-12/schema";
+const NUMERIC_CONSTRAINT_KINDS = new Set<NumericConstraintKind>([
+  "minimum",
+  "maximum",
+  "exclusive-minimum",
+  "exclusive-maximum",
+  "multiple-of",
+]);
 const ROOT_ALLOWED_KEYWORDS = new Set([
   "$schema",
   "$id",
@@ -1677,16 +1687,23 @@ function pushExtractedConstraint(
   value: unknown,
   sourceKeyword: string,
 ): void {
-  constraintEntries.push(
-    constraintEntry(constraintTarget("node", path), [
-      constraint(kind, {
+  const extractedConstraint = NUMERIC_CONSTRAINT_KINDS.has(
+    kind as NumericConstraintKind,
+  )
+    ? numericConstraint(kind as NumericConstraintKind, value as NumericValue, {
+        message: message.replace("extracted into", "preserved in"),
+        evidence: { sourceKeyword },
+      })
+    : constraint(kind, {
         value,
         message: message.replace("extracted into", "preserved in"),
         evidence: {
           sourceKeyword,
         },
-      }),
-    ]),
+      });
+
+  constraintEntries.push(
+    constraintEntry(constraintTarget("node", path), [extractedConstraint]),
   );
 
   semanticNotes.push(

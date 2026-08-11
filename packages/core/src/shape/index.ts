@@ -1,4 +1,8 @@
 export type {
+  ScalarRepresentationFamily as ShapeScalarRepresentationFamily,
+  ScalarRepresentationHint as ShapeScalarRepresentationHint,
+  ScalarRepresentationSignedness as ShapeScalarRepresentationSignedness,
+  ScalarRepresentationWidth as ShapeScalarRepresentationWidth,
   SchemaArrayNode as ShapeArrayNode,
   SchemaBaseNode as ShapeBaseNode,
   SchemaDefinition as ShapeDefinition,
@@ -120,6 +124,7 @@ export type {
 export {
   appendSchemaPath,
   areEquivalentSchemaNodes,
+  areEquivalentSchemaNodesWithRepresentation,
   createSchemaDefinitionIndex,
   createSchemaDefinitionIndexFromLookup,
   createDefinitionSchemaPath,

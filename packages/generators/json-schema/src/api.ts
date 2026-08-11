@@ -104,7 +104,7 @@ function renderJsonSchemaDocumentResult(
   doc: SchemaDocument,
   options: ResolvedJsonSchemaGeneratorOptions,
 ): JsonSchemaGenerateResult {
-  const validationFailure = validateJsonSchemaDocument(doc);
+  const validationFailure = validateJsonSchemaDocument(doc, options);
 
   if (validationFailure !== null) {
     return validationFailure;

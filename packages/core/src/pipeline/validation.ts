@@ -7,6 +7,11 @@ import type {
   TransformerExecutionContext,
 } from "./descriptor-contracts.js";
 import { tryValidateValueDocument } from "../value/internal.js";
+import {
+  isConstraint,
+  isNumericConstraintKind,
+  validateNumericConstraint,
+} from "../constraint/index.js";
 
 export interface IrValidationSuccess {
   ok: true;
@@ -266,6 +271,25 @@ function validateConstraintDocument(
           "invalid-constraint",
           "Constraint IR items require a string kind.",
         );
+      }
+
+      if (isNumericConstraintKind(item.kind)) {
+        try {
+          if (!isConstraint(item)) {
+            return failure(
+              "invalid-numeric-constraint",
+              `Numeric constraint "${item.kind}" is invalid.`,
+            );
+          }
+          validateNumericConstraint(item);
+        } catch (error) {
+          return failure(
+            "invalid-numeric-constraint",
+            error instanceof Error
+              ? error.message
+              : `Numeric constraint "${item.kind}" is invalid.`,
+          );
+        }
       }
     }
   }

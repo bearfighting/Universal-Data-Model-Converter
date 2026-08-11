@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   type SchemaDocument,
+  constraint,
+  constraintDocument,
+  decimalValue,
+  numericConstraint,
   schemaArrayNode,
   schemaDefinition,
   schemaDocument,
@@ -367,6 +371,110 @@ describe("generator-json-schema", () => {
       items: {
         $ref: "#/$defs/User",
       },
+    });
+  });
+
+  it("renders safe DecimalValue constraints without changing number output", () => {
+    const result = tryGenerateJsonSchema(
+      schemaDocument("Bounded", schemaScalarNode("integer")),
+      {
+        constraints: constraintDocument("Bounded", [
+          {
+            target: { kind: "node", path: ["root"] },
+            constraints: [numericConstraint("maximum", decimalValue("255"))],
+          },
+        ]),
+      },
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      output: {
+        type: "integer",
+        maximum: 255,
+      },
+    });
+  });
+
+  it("fails instead of rounding an unsafe DecimalValue constraint", () => {
+    const result = tryGenerateJsonSchema(
+      schemaDocument("WideInteger", schemaScalarNode("integer")),
+      {
+        constraints: constraintDocument("WideInteger", [
+          {
+            target: { kind: "node", path: ["root"] },
+            constraints: [
+              numericConstraint(
+                "maximum",
+                decimalValue("18446744073709551615"),
+              ),
+            ],
+          },
+        ]),
+      },
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "unsupported-decimal-constraint",
+    });
+  });
+
+  it("does not treat DecimalValue metadata as a numeric constraint", () => {
+    const result = tryGenerateJsonSchema(
+      schemaDocument("Metadata", schemaScalarNode("string")),
+      {
+        constraints: constraintDocument("Metadata", [
+          {
+            target: { kind: "node", path: ["root"] },
+            constraints: [
+              constraint("custom-metadata", {
+                value: decimalValue("18446744073709551615"),
+              }),
+            ],
+          },
+        ]),
+      },
+    );
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("fails on malformed known numeric constraints", () => {
+    const result = tryGenerateJsonSchema(
+      schemaDocument("InvalidConstraint", schemaScalarNode("integer")),
+      {
+        constraints: constraintDocument("InvalidConstraint", [
+          {
+            target: { kind: "root", path: ["root"] },
+            constraints: [constraint("minimum", { value: "not-a-number" })],
+          },
+        ]),
+      },
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "invalid-numeric-constraint",
+    });
+  });
+
+  it("renders numeric constraints from non-node target kinds", () => {
+    const result = tryGenerateJsonSchema(
+      schemaDocument("RootConstraint", schemaScalarNode("integer")),
+      {
+        constraints: constraintDocument("RootConstraint", [
+          {
+            target: { kind: "root", path: ["root"] },
+            constraints: [constraint("minimum", { value: 1 })],
+          },
+        ]),
+      },
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      output: { type: "integer", minimum: 1 },
     });
   });
 

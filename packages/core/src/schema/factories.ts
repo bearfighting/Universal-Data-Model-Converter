@@ -1,5 +1,6 @@
 import type {
   ScalarKind,
+  ScalarRepresentationHint,
   SchemaLiteralValue,
   SchemaArrayNode,
   SchemaDocument,
@@ -25,15 +26,31 @@ import {
   normalizeUnionMembers,
   normalizeUnknownEvidence,
 } from "./normalization.js";
+import { isCompatibleScalarRepresentation } from "./guards.js";
 import {
   validateSchemaDocument,
   validateSchemaFieldNullability,
 } from "./validation.js";
 
-export function schemaScalarNode(scalar: ScalarKind): SchemaScalarNode {
+export function schemaScalarNode(
+  scalar: ScalarKind,
+  options?: { representation?: ScalarRepresentationHint },
+): SchemaScalarNode {
+  if (
+    options?.representation !== undefined &&
+    !isCompatibleScalarRepresentation(scalar, options.representation)
+  ) {
+    throw new Error(
+      `Invalid scalar representation hint for scalar type "${scalar}".`,
+    );
+  }
+
   return {
     kind: "scalar",
     scalar,
+    ...(options?.representation
+      ? { representation: options.representation }
+      : {}),
   };
 }
 

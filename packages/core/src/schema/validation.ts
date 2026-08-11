@@ -6,6 +6,7 @@ import type {
   SchemaValidationResult,
 } from "./types.js";
 import { walkSchemaDocument } from "./traversal.js";
+import { isCompatibleScalarRepresentation } from "./guards.js";
 
 export function validateSchemaDocument(document: SchemaDocument): void {
   const result = tryValidateSchemaDocument(document);
@@ -94,6 +95,25 @@ function collectSchemaDocumentValidationDiagnostics(
     document,
     {
       enter(context) {
+        if (context.node.kind === "scalar" && context.node.representation) {
+          const representation = context.node.representation;
+          const compatible = isCompatibleScalarRepresentation(
+            context.node.scalar,
+            representation,
+          );
+
+          if (!compatible) {
+            diagnostics.push({
+              severity: "error",
+              code: "invalid-scalar-representation",
+              message: `Invalid scalar representation hint for scalar type "${context.node.scalar}".`,
+              path: context.path,
+              nodeKind: "scalar",
+              source: "core",
+            });
+          }
+        }
+
         if (context.node.kind !== "reference") {
           return;
         }
