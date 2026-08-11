@@ -153,6 +153,24 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-rust",
+    root: path.join(repoRoot, "packages/parsers/rust"),
+    entry: path.join(repoRoot, "packages/parsers/rust/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/rust/etc/parser-rust.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-rust",
+    root: path.join(repoRoot, "packages/generators/rust"),
+    entry: path.join(repoRoot, "packages/generators/rust/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/rust/etc/generator-rust.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/sdk",
     root: path.join(repoRoot, "packages/sdk"),
     entry: path.join(repoRoot, "packages/sdk/src/index.ts"),

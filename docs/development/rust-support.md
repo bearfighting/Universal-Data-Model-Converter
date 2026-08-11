@@ -27,6 +27,30 @@ Rust support should follow the same architectural rule as other formats:
 > Parsers preserve as much semantic information as reasonably possible.
 > Generators decide how that information can be represented in the target language.
 
+Rust support is a format adapter inside the existing TypeScript/Node.js
+workspace. It must use the existing parser, generator, descriptor, registry,
+and structured-result contracts. Rust-specific syntax libraries and runtime
+types must not leak into core IR or the SDK surface.
+
+The parser implementation backend is an explicit Phase 0 decision. The
+repository cannot consume the Rust `syn` or `quote` crates as ordinary
+TypeScript dependencies. A direct `syn`/`quote` implementation would require
+an additional Rust/WASM or native build and packaging toolchain. V1 must choose
+one of these backends before implementation:
+
+```text
+TypeScript/JavaScript Rust grammar backend
+    → simplest workspace and package integration
+
+Rust parser compiled to WASM/native helper
+    → stronger reuse of Rust tooling, but adds build/runtime distribution cost
+```
+
+The canonical IR and adapter contracts must remain independent of that choice.
+The first implementation should prefer the backend that preserves the current
+Node.js, SDK packaging, and synchronous execution model without adding a
+mandatory native runtime.
+
 ---
 
 ## 2. Scope
@@ -148,37 +172,41 @@ Unsupported syntax should fail explicitly rather than silently degrading semanti
 
 # 4. Parser Architecture
 
-Use `syn` for Rust syntax parsing.
+The parser has three internal stages. The syntax backend is an implementation
+choice and must not become part of the public adapter contract.
 
 ```text
 Rust Source
     ↓
-syn::parse_file()
+Rust syntax backend
     ↓
-syn::File
+Rust semantic model
     ↓
-Rust Semantic Mapper
+Canonical IR mapper
     ↓
 Canonical IR
 ```
 
-`syn` must remain an implementation detail of the Rust adapter.
+The syntax backend may be a JavaScript/TypeScript Rust grammar or a Rust
+component compiled for the supported runtime. If a future backend uses `syn`,
+`syn` must remain an implementation detail of that backend and must not appear
+in public package types.
 
-The canonical IR must not depend on `syn` types.
+The canonical IR must not depend on syntax-backend types.
 
 Conceptually:
 
-```rust
-pub struct RustParser;
-
-impl Parser for RustParser {
-    fn parse(&self, source: &str) -> Result<Document, ParseError> {
-        let file = syn::parse_file(source)?;
-
-        map_file(file)
-    }
-}
+```text
+Rust source
+    → parse syntax
+    → adapter-local semantic model
+    → map declarations and types
+    → Shape IR + Constraint IR
 ```
+
+The public adapter must expose the existing toolkit descriptor and
+discriminated parse result contracts. It must not expose a Rust-specific
+`Parser` trait or a Rust-specific AST.
 
 ---
 
@@ -278,6 +306,26 @@ u32 → Number
 
 because doing so unnecessarily destroys information.
 
+The canonical mapping should use both Shape IR and Constraint IR:
+
+```text
+Rust scalar
+    → Shape scalar kind: integer
+    → ScalarRepresentationHint: integer family, signedness, width
+    → numeric constraints when the bounds are language-stable
+```
+
+Integer bounds that exceed JavaScript's safe integer range must use core
+`DecimalValue` instances. For example, `u64` should preserve its maximum as
+the exact decimal value `18446744073709551615`, not as an imprecise JavaScript
+number.
+
+`isize` and `usize` use `widthBits: "pointer"`. Their exact numeric bounds are
+platform-dependent, so the parser must not invent a fixed 32-bit or 64-bit
+range. The adapter should document whether it omits those bounds or reports a
+platform-dependent semantic note; it must not silently claim a universal
+bound.
+
 ## Floating Point
 
 ```text
@@ -288,6 +336,13 @@ Number
 ```
 
 Exact floating-point representation constraints do not need to be modeled in V1.
+
+The representation hint should still preserve the Rust width:
+
+```text
+f32 → number + { family: "float", widthBits: 32 }
+f64 → number + { family: "float", widthBits: 64 }
+```
 
 ---
 
@@ -302,8 +357,16 @@ Option<String>
 maps conceptually to:
 
 ```text
-Optional<String>
+field presence: optional
+field nullability: nullable
+field type: String
 ```
+
+This is a deliberate V1 data-model policy. Without interpreting Serde
+attributes, `Option<T>` is treated as accepting both a missing field and an
+explicit null when it is used as a struct field. The policy must be reported
+or made configurable if a future serialization mode needs to distinguish
+these cases.
 
 Nested types should work recursively:
 
@@ -318,6 +381,17 @@ Optional
     └── Array
           └── String
 ```
+
+For nested positions where Shape IR has no field-presence bit, `Option<T>`
+maps to a nullable union:
+
+```text
+Vec<Option<String>>
+    → Array(Union(String, Null))
+```
+
+The same recursive rule applies to `Option<Profile>` and other supported
+inner types.
 
 ## Vec
 
@@ -487,20 +561,20 @@ Formatting
 Rust Source
 ```
 
-Prefer generating Rust tokens/AST using `quote` rather than manually concatenating source strings.
+The generator must use a deterministic Rust source emitter. If the selected
+runtime provides a Rust token/AST backend, that backend may be used internally;
+otherwise a small adapter-local emitter is sufficient for the V1 subset.
+Either way, source construction must not be scattered through semantic mapping
+code.
 
 Conceptually:
 
-```rust
-pub struct RustGenerator;
-
-impl Generator for RustGenerator {
-    fn generate(&self, document: &Document) -> Result<String, GenerateError> {
-        // IR → Rust representation
-        // Rust representation → tokens
-        // tokens → formatted source
-    }
-}
+```text
+Canonical IR
+    → Rust type selection
+    → adapter-local Rust model
+    → deterministic source emitter
+    → Rust source
 ```
 
 ---
@@ -518,6 +592,21 @@ Reference(Foo) → Foo
 ```
 
 Numeric types require a selection policy.
+
+Selection order is important:
+
+```text
+1. compatible ScalarRepresentationHint, when present
+2. exact numeric range constraints
+3. stable V1 default
+4. explicit unsupported/loss result if the range cannot be represented
+```
+
+Representation hints are especially important for Rust → Rust round trips.
+For example, an unsigned 64-bit scalar must remain `u64` even if a different
+Rust integer could represent the currently observed range. Constraints are
+the fallback for schemas produced by formats that do not preserve a concrete
+Rust representation.
 
 For example, if IR contains:
 
@@ -551,6 +640,9 @@ without enough constraints to infer a narrower representation, V1 should use a s
 ```rust
 i64
 ```
+
+The default must be documented and stable. It must not depend on the host
+platform or incidental traversal order.
 
 The important rule is:
 
@@ -586,7 +678,12 @@ pub struct User {
 
 Using `pub` consistently avoids introducing configuration decisions in V1.
 
-Serde derives should not be generated yet.
+Serde derives should not be generated yet. The V1 adapter describes common
+Rust data models, not a complete serialization contract. In particular, it
+does not interpret `serde` attributes, rename policies, omission policies, or
+custom serializers. The `Option<T>` policy above is therefore an explicit
+canonical-data-model convention, not a claim about every possible Serde
+configuration.
 
 For example, V1 should **not** automatically produce:
 
@@ -600,12 +697,14 @@ because that introduces a dependency and serialization semantics outside the ini
 
 # 14. Errors
 
-Rust-specific parsing errors should distinguish between invalid Rust and valid-but-unsupported Rust.
+Rust-specific parsing failures should distinguish between invalid Rust and
+valid-but-unsupported Rust, while being returned through the existing parser
+result contract rather than a new public Rust error hierarchy.
 
 Conceptually:
 
 ```rust
-enum RustParseError {
+enum RustParseFailure {
     SyntaxError(...),
 
     UnsupportedFeature {
@@ -619,6 +718,10 @@ enum RustParseError {
     InvalidDataModel(...),
 }
 ```
+
+These categories should map to stable adapter failure codes and structured
+diagnostics. A Rust-specific internal error type is acceptable, but it must be
+translated before crossing the parser package boundary.
 
 Possible features:
 
@@ -790,9 +893,25 @@ Rust → Rust
 
 # 19. Implementation Plan
 
+## Phase 0 — Runtime and semantic decisions
+
+Before adding packages, decide and document:
+
+```text
+syntax backend and supported Node.js/runtime environments
+Option<T> field and nested-position mapping
+isize/usize platform-dependent bound policy
+Rust identifier and keyword escaping policy
+generated visibility and formatting policy
+```
+
+This phase prevents a parser implementation from accidentally committing the
+repository to a Rust/WASM packaging model or to an implicit Serde contract.
+
 ## Phase 1 — Parser Skeleton
 
-Add Rust parser module and dependencies.
+Add the Rust parser package, selected syntax backend, descriptor, capabilities,
+options, structured failure codes, and registry manifest.
 
 Implement:
 
@@ -853,6 +972,10 @@ Optional → Option
 Array → Vec
 Reference → named type
 ```
+
+The generator must consume representation hints before inferring a type from
+constraints and must report unsupported ranges instead of silently widening or
+wrapping them.
 
 ## Phase 6 — Round-Trip Tests
 
@@ -1000,3 +1123,8 @@ Rust → Canonical IR ├→ JSON Schema
 and existing supported schemas can generate equivalent Rust data models.
 
 At that point, Rust becomes a real toolkit adapter rather than an isolated parser/generator implementation.
+
+In addition, V1 is not complete until the selected parser runtime is included
+in the normal workspace build and package smoke checks, the generated builtin
+registry discovers both Rust descriptors, and unsupported syntax produces
+structured parser failures rather than generic exceptions.

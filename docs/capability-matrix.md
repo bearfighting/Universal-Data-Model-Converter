@@ -17,22 +17,24 @@ format list is available. Use `listConversionRoutes()` and
 | TypeScript  | Shape              | schema-oriented declarations                   | supported subset only; not a full TypeScript front-end                              |
 | Zod         | Shape + Constraint | static Zod 4 expressions and generated modules | supported static expressions only; consuming project needs Zod 4 for runtime output |
 | OpenAPI     | Shape + Constraint | canonical schema-compatible documents          | bounded OpenAPI schema boundary; not full document generation                       |
+| Rust        | Shape + Constraint | V1 named structs                               | restricted struct subset; no Serde attributes, enums, generics, or maps             |
 
 ## Validated route families
 
 The following route families are currently covered by end-to-end tests and
 shared pipeline execution:
 
-| Source      | Targets                                  | Route character                          |
-| ----------- | ---------------------------------------- | ---------------------------------------- |
-| JSON        | JSON, YAML, TypeScript, JSON Schema, Zod | Value direct or Value-to-Shape inference |
-| YAML        | YAML, TypeScript, JSON Schema            | Value direct or Value-to-Shape inference |
-| CSV         | CSV and compatible Value routes          | flat array-root Value                    |
-| TOML        | TOML and compatible Value routes         | object-root Value                        |
-| JSON Schema | JSON Schema, TypeScript, Zod, OpenAPI    | Shape, often with Constraint artifacts   |
-| TypeScript  | TypeScript, JSON Schema, Zod             | Shape subset                             |
-| Zod         | Zod, TypeScript, JSON Schema, OpenAPI    | Shape + Constraint subset                |
-| OpenAPI     | schema-compatible OpenAPI targets        | explicit JSON Schema adapter boundary    |
+| Source      | Targets                                  | Route character                             |
+| ----------- | ---------------------------------------- | ------------------------------------------- |
+| JSON        | JSON, YAML, TypeScript, JSON Schema, Zod | Value direct or Value-to-Shape inference    |
+| YAML        | YAML, TypeScript, JSON Schema            | Value direct or Value-to-Shape inference    |
+| CSV         | CSV and compatible Value routes          | flat array-root Value                       |
+| TOML        | TOML and compatible Value routes         | object-root Value                           |
+| JSON Schema | JSON Schema, TypeScript, Zod, OpenAPI    | Shape, often with Constraint artifacts      |
+| TypeScript  | TypeScript, JSON Schema, Zod             | Shape subset                                |
+| Zod         | Zod, TypeScript, JSON Schema, OpenAPI    | Shape + Constraint subset                   |
+| OpenAPI     | schema-compatible OpenAPI targets        | explicit JSON Schema adapter boundary       |
+| Rust        | Rust, TypeScript, JSON Schema, Zod       | restricted struct subset with numeric hints |
 
 The exact route set can vary with registry contents and descriptor capabilities.
 Do not infer support for a route merely because both format names appear in

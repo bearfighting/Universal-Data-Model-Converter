@@ -56,6 +56,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/toml"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-rust",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/rust"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -94,6 +99,11 @@ const packageConfigs = [
     name: "@schema-transformation-toolkit/generator-toml",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/toml"),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-rust",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/rust"),
   },
 ];
 
@@ -321,6 +331,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-yaml",
     "@schema-transformation-toolkit/parser-csv",
     "@schema-transformation-toolkit/parser-toml",
+    "@schema-transformation-toolkit/parser-rust",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
@@ -329,6 +340,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/generator-yaml",
     "@schema-transformation-toolkit/generator-csv",
     "@schema-transformation-toolkit/generator-toml",
+    "@schema-transformation-toolkit/generator-rust",
   ]);
 }
 
