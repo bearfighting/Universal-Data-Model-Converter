@@ -55,14 +55,24 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 ## Next Priorities
 
-1. Keep the public SDK contract, user guide, capability matrix, and consumer
+1. Complete Rust V1 hardening: semantic round trips, recursive references,
+   negative fixtures, source locations, and cross-format fixtures.
+2. Add Rust unit-only enums by lowering them to the existing literal and union
+   Shape IR nodes; validate Rust ↔ TypeScript, JSON Schema, and Zod routes.
+3. Add string-keyed Rust maps for `HashMap<String, T>` and
+   `BTreeMap<String, T>` by lowering them to the existing record Shape IR;
+   validate map routes across JSON Schema, TypeScript, Zod, and OpenAPI.
+4. Keep data-carrying enums, Serde representation attributes, aliases,
+   newtypes, and generics deferred until enum/map work reveals concrete shared
+   IR pressure.
+5. Keep the public SDK contract, user guide, capability matrix, and consumer
    scenario matrix aligned with actual published behavior.
-2. Decide whether the current builtin registry bundle should remain fully
+6. Decide whether the current builtin registry bundle should remain fully
    bundled or gain a measured tree-shaking strategy for downstream products.
-3. Improve diagnostic location guidance for editor and code-highlighting
+7. Improve diagnostic location guidance for editor and code-highlighting
    integrations.
-4. Validate the package surface against a clean external checkout or release
-   artifact when the next prerelease is prepared.
+8. Validate the package surface against a clean external checkout or release
+   artifact when the next Rust milestone is prepared.
 
 ## Intentional Deferrals
 
@@ -71,6 +81,9 @@ Use the SDK registry APIs for the exact current route and format lists:
 - Full browser or Worker execution support in the synchronous SDK.
 - Full multi-file TypeScript resolution.
 - Full OpenAPI document generation beyond canonical 3.1 schema documents.
+- Data-carrying Rust enums, full Serde representation semantics, aliases,
+  newtypes, and generics until the preceding Rust milestones establish a
+  concrete cross-format requirement.
 - Broad new parser families or speculative IR expansion.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
@@ -92,7 +105,7 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 Latest completed baseline:
 
-- 81 test files, 914 tests passing.
+- 81 test files, 918 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
@@ -123,4 +136,4 @@ node scripts/check-sdk-package.mjs
 2. [standards.md](standards.md) for implementation and validation rules.
 3. Package `README`s and `examples/` for package-specific usage.
 
-Last verified: 2026-08-11.
+Last verified: 2026-08-17.

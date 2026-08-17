@@ -51,9 +51,11 @@ export function renderRustDocument(
       )
     : undefined;
   const root =
-    document.root.kind === "object"
+    document.root.kind === "object" || document.root.kind === "union"
       ? { name: document.name.source, node: document.root, path: ["root"] }
-      : rootDefinition?.type.kind === "object"
+      : rootDefinition &&
+          (rootDefinition.type.kind === "object" ||
+            rootDefinition.type.kind === "union")
         ? {
             name: rootDefinition.name.source,
             node: rootDefinition.type,
@@ -63,18 +65,18 @@ export function renderRustDocument(
   if (!root)
     throw new RustGenerationError(
       "unsupported-rust-root",
-      "Rust generator requires an object root.",
+      "Rust generator requires an object or string-enum root.",
     );
-  const renderedRoot = renderStruct(root.name, root.node, root.path, context);
+  const renderedRoot = renderDefinition(
+    root.name,
+    root.node,
+    root.path,
+    context,
+  );
   const renderedDefinitions = document.definitions
     .filter((definition) => definition.name.source !== root.name)
     .map((definition) => {
-      if (definition.type.kind !== "object")
-        throw new RustGenerationError(
-          "unsupported-rust-node",
-          `Rust definition "${definition.name.source}" must be an object.`,
-        );
-      return renderStruct(
+      return renderDefinition(
         definition.name.source,
         definition.type,
         ["definitions", definition.name.source],
@@ -85,6 +87,20 @@ export function renderRustDocument(
     output: [renderedRoot, ...renderedDefinitions].join("\n\n"),
     semanticNotes: context.notes,
   };
+}
+
+function renderDefinition(
+  name: string,
+  node: SchemaNode,
+  path: string[],
+  context: RenderContext,
+): string {
+  if (node.kind === "object") return renderStruct(name, node, path, context);
+  if (node.kind === "union") return renderEnum(name, node);
+  throw new RustGenerationError(
+    "unsupported-rust-node",
+    `Rust definition "${name}" must be an object or string enum.`,
+  );
 }
 
 function renderStruct(
@@ -108,6 +124,46 @@ function renderStruct(
     : `pub struct ${rustIdentifier(name)} {\n}`;
 }
 
+function renderEnum(
+  name: string,
+  node: Extract<SchemaNode, { kind: "union" }>,
+): string {
+  if (
+    node.members.length === 0 ||
+    node.members.some(
+      (member) => member.kind !== "literal" || typeof member.value !== "string",
+    )
+  )
+    throw new RustGenerationError(
+      "unsupported-rust-enum",
+      "Rust enums require a non-empty union of string literals.",
+    );
+  const variants = node.members.map((member) => {
+    if (member.kind !== "literal" || typeof member.value !== "string")
+      throw new RustGenerationError(
+        "unsupported-rust-enum",
+        "Rust enums require a non-empty union of string literals.",
+      );
+    const value = member.value;
+    let variant: string;
+    try {
+      variant = rustIdentifier(value);
+    } catch {
+      throw new RustGenerationError(
+        "unsupported-rust-enum",
+        `Rust enum literal "${value}" is not a valid unchanged Rust variant identifier.`,
+      );
+    }
+    if (variant !== value)
+      throw new RustGenerationError(
+        "unsupported-rust-enum",
+        `Rust enum literal "${value}" is not a valid unchanged Rust variant identifier.`,
+      );
+    return `    ${variant},`;
+  });
+  return `pub enum ${rustIdentifier(name)} {\n${variants.join("\n")}\n}`;
+}
+
 function renderNode(
   node: SchemaNode,
   path: string[],
@@ -128,6 +184,13 @@ function renderNode(
       return rustIdentifier(node.name);
     case "array":
       return `Vec<${renderNode(node.elementType, [...path, "items"], context)}>`;
+    case "record":
+      if (node.key.kind !== "scalar" || node.key.scalar !== "string")
+        throw new RustGenerationError(
+          "unsupported-rust-node",
+          "Rust maps require string keys.",
+        );
+      return `std::collections::HashMap<String, ${renderNode(node.value, [...path, "value"], context)}>`;
     case "union": {
       const nonNull = node.members.filter((member) => member.kind !== "null");
       if (
@@ -135,9 +198,20 @@ function renderNode(
         node.members.some((member) => member.kind === "null")
       )
         return `Option<${renderNode(nonNull[0]!, path, context)}>`;
+      if (
+        node.members.length > 0 &&
+        node.members.every(
+          (member) =>
+            member.kind === "literal" && typeof member.value === "string",
+        )
+      )
+        throw new RustGenerationError(
+          "unsupported-rust-enum",
+          "String literal unions are only valid as named Rust enum definitions.",
+        );
       throw new RustGenerationError(
         "unsupported-rust-union",
-        "Only nullable unions are supported by the Rust generator.",
+        "Only nullable unions are supported inline by the Rust generator.",
       );
     }
     default:

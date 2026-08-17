@@ -115,6 +115,7 @@ function isRustFailureCode(value: unknown): value is RustParserFailureCode {
       "missing-rust-entry",
       "duplicate-rust-definition",
       "invalid-rust-data-model",
+      "unsupported-rust-map-key",
       "unsupported-rust-parser-v1",
     ].includes(value)
   );

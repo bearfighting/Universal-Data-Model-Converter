@@ -2,6 +2,7 @@
 
 Rust data-model parser for the shared Shape IR and Constraint IR.
 
-V1 intentionally supports only named structs, common primitive types,
-`Option<T>`, `Vec<T>`, and references to other named structs. Serde attributes,
-enums, tuples, maps, aliases, and generics are rejected explicitly.
+The current subset supports named structs, unit-only enums, common primitive
+types, `Option<T>`, `Vec<T>`, transparent `Box<T>`, string-keyed
+`HashMap`/`BTreeMap`, and references to named definitions. Data-carrying enums,
+Serde attributes, tuples, aliases, and generics remain explicitly unsupported.

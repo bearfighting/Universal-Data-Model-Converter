@@ -4,6 +4,10 @@ import {
   schemaObjectNode,
   schemaScalarNode,
   identifierName,
+  schemaLiteralNode,
+  schemaRecordNode,
+  schemaReferenceNode,
+  schemaUnionNode,
 } from "@schema-transformation-toolkit/core";
 import {
   decimalValue,
@@ -13,6 +17,7 @@ import {
   numericConstraint,
 } from "@schema-transformation-toolkit/core";
 import { tryGenerateRust } from "@schema-transformation-toolkit/generator-rust";
+import { collectRustLossHotspots } from "../../packages/generators/rust/src/analysis.js";
 
 describe("Rust generator", () => {
   it("generates stable public structs and respects representation hints", () => {
@@ -137,5 +142,116 @@ describe("Rust generator", () => {
       ok: true,
       output: expect.stringContaining("u16"),
     });
+  });
+
+  it("generates named string literal unions as Rust enums", () => {
+    const document = schemaDocument(
+      "User",
+      schemaObjectNode([
+        {
+          kind: "field",
+          name: identifierName("status"),
+          required: true,
+          nullable: false,
+          type: schemaReferenceNode("Status"),
+        },
+      ]),
+      {
+        definitions: [
+          {
+            name: identifierName("Status"),
+            type: schemaUnionNode([
+              schemaLiteralNode("Pending"),
+              schemaLiteralNode("Active"),
+            ]),
+          },
+        ],
+      },
+    );
+    const result = tryGenerateRust(document);
+    expect(result).toMatchObject({ ok: true });
+    if (!result.ok) return;
+    expect(result.output).toContain(
+      "pub enum Status {\n    Pending,\n    Active,\n}",
+    );
+  });
+
+  it("generates records as fully qualified HashMaps", () => {
+    const document = schemaDocument(
+      "Config",
+      schemaObjectNode([
+        {
+          kind: "field",
+          name: identifierName("values"),
+          required: true,
+          nullable: false,
+          type: schemaRecordNode(
+            schemaScalarNode("string"),
+            schemaScalarNode("string"),
+          ),
+        },
+      ]),
+    );
+    expect(tryGenerateRust(document)).toMatchObject({
+      ok: true,
+      output:
+        "pub struct Config {\n    pub values: std::collections::HashMap<String, String>,\n}",
+    });
+  });
+
+  it("rejects inline or renamed enum literals", () => {
+    expect(
+      tryGenerateRust(
+        schemaDocument(
+          "Status",
+          schemaUnionNode([schemaLiteralNode("pending-state")]),
+        ),
+      ),
+    ).toMatchObject({ ok: false, code: "unsupported-rust-enum" });
+    expect(
+      tryGenerateRust(
+        schemaDocument(
+          "User",
+          schemaObjectNode([
+            {
+              kind: "field",
+              name: identifierName("status"),
+              required: true,
+              nullable: false,
+              type: schemaUnionNode([
+                schemaLiteralNode("Pending"),
+                schemaLiteralNode("Active"),
+              ]),
+            },
+          ]),
+        ),
+      ),
+    ).toMatchObject({ ok: false, code: "unsupported-rust-enum" });
+  });
+
+  it("reports inline literal unions as unsupported Rust hotspots", () => {
+    const document = schemaDocument(
+      "User",
+      schemaObjectNode([
+        {
+          kind: "field",
+          name: identifierName("status"),
+          required: true,
+          nullable: false,
+          type: schemaUnionNode([
+            schemaLiteralNode("Pending"),
+            schemaLiteralNode("Active"),
+          ]),
+        },
+      ]),
+    );
+    expect(collectRustLossHotspots(document)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "unsupported-rust-union",
+          path: ["root", "status"],
+        }),
+      ]),
+    );
   });
 });

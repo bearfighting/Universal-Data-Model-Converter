@@ -8,8 +8,10 @@ import {
   schemaDefinition,
   schemaDocument,
   schemaFieldNode,
+  schemaLiteralNode,
   schemaNullNode,
   schemaObjectNode,
+  schemaRecordNode,
   schemaReferenceNode,
   schemaScalarNode,
   schemaUnionNode,
@@ -20,7 +22,9 @@ import {
   type SchemaSemanticNote,
 } from "@schema-transformation-toolkit/core";
 import type {
+  RustEnumSyntax,
   RustFileSyntax,
+  RustItemSyntax,
   RustStructSyntax,
   RustTypeSyntax,
 } from "./syntax.js";
@@ -31,6 +35,7 @@ export type RustSemanticErrorCode =
   | "missing-rust-entry"
   | "duplicate-rust-definition"
   | "invalid-rust-data-model"
+  | "unsupported-rust-map-key"
   | "unsupported-rust-type";
 
 export class RustSemanticError extends Error {
@@ -61,7 +66,7 @@ interface MappedType {
 }
 
 interface MappedStruct {
-  node: Extract<SchemaNode, { kind: "object" }>;
+  node: SchemaNode;
   constraints: ConstraintEntry[];
   notes: SchemaSemanticNote[];
 }
@@ -118,55 +123,105 @@ export function mapRustFile(
   entryName?: string,
 ): RustSemanticResult {
   const names = new Set<string>();
-  for (const structure of file.structs) {
-    if (names.has(structure.name))
+  for (const item of file.items) {
+    if (names.has(item.name))
       throw new RustSemanticError(
         "duplicate-rust-definition",
-        `Duplicate Rust struct definition "${structure.name}".`,
-        structure.position,
+        `Duplicate Rust definition "${item.name}".`,
+        item.position,
       );
-    names.add(structure.name);
+    names.add(item.name);
   }
-  if (file.structs.length === 0)
+  if (file.items.length === 0)
     throw new RustSemanticError(
       "invalid-rust-data-model",
-      "Rust source must declare at least one struct.",
+      "Rust source must declare at least one struct or enum.",
     );
 
   const root = entryName
-    ? file.structs.find((structure) => structure.name === entryName)
-    : file.structs.length === 1
-      ? file.structs[0]
+    ? file.items.find((item) => item.name === entryName)
+    : file.items.length === 1
+      ? file.items[0]
       : undefined;
   if (!root) {
     throw new RustSemanticError(
       entryName ? "missing-rust-entry" : "ambiguous-rust-entry",
       entryName
-        ? `Rust entry struct "${entryName}" was not found.`
-        : "Rust source has multiple structs; an entry option is required.",
+        ? `Rust entry definition "${entryName}" was not found.`
+        : "Rust source has multiple definitions; an entry option is required.",
     );
   }
 
-  const mappedStructs = file.structs.map((structure) => ({
-    structure,
-    mapped: mapStruct(structure, structure === root, names),
+  const mappedItems = file.items.map((item) => ({
+    item,
+    mapped: mapItem(item, item === root, names),
   }));
-  const mappedRoot = mappedStructs.find(
-    (item) => item.structure === root,
-  )!.mapped;
-  const definitions = mappedStructs
-    .filter((item) => item.structure !== root)
-    .map((item) => schemaDefinition(item.structure.name, item.mapped.node));
-  const entries: ConstraintEntry[] = mappedStructs.flatMap(
+  const mappedRoot = mappedItems.find((item) => item.item === root)!.mapped;
+  const definitions = mappedItems
+    .filter(
+      (item) =>
+        item.item !== root ||
+        file.items.some((candidate) => referencesName(candidate, root.name)),
+    )
+    .map((item) => schemaDefinition(item.item.name, item.mapped.node));
+  const entries: ConstraintEntry[] = mappedItems.flatMap(
     (item) => item.mapped.constraints ?? [],
   );
-  const notes = mappedStructs.flatMap((item) => item.mapped.notes ?? []);
+  const notes = mappedItems.flatMap((item) => item.mapped.notes ?? []);
 
   return {
     document: schemaDocument(name, mappedRoot.node, { definitions }),
     constraints: constraintDocument(name, entries),
     semanticNotes: notes,
   };
+}
+
+function mapItem(
+  item: RustItemSyntax,
+  root: boolean,
+  names: Set<string>,
+): MappedStruct {
+  return item.kind === "struct" ? mapStruct(item, root, names) : mapEnum(item);
+}
+
+function mapEnum(enumSyntax: RustEnumSyntax): MappedStruct {
+  if (enumSyntax.variants.length === 0)
+    throw new RustSemanticError(
+      "invalid-rust-data-model",
+      `Rust enum "${enumSyntax.name}" must declare at least one unit variant.`,
+      enumSyntax.position,
+    );
+  const variants = new Set<string>();
+  for (const variant of enumSyntax.variants) {
+    if (variants.has(variant.name))
+      throw new RustSemanticError(
+        "invalid-rust-data-model",
+        `Rust enum "${enumSyntax.name}" declares duplicate variant "${variant.name}".`,
+        variant.position,
+      );
+    variants.add(variant.name);
+  }
+  return {
+    node: schemaUnionNode(
+      enumSyntax.variants.map((variant) => schemaLiteralNode(variant.name)),
+    ),
+    constraints: [],
+    notes: [],
+  };
+}
+
+function referencesName(item: RustItemSyntax, name: string): boolean {
+  if (item.kind !== "struct") return false;
+  return item.fields.some((field) => typeReferencesName(field.type, name));
+}
+
+function typeReferencesName(type: RustTypeSyntax, name: string): boolean {
+  if (type.kind === "named")
+    return type.path.length === 1 && type.path[0] === name;
+  if (type.kind === "reference") return false;
+  return (type.arguments ?? (type.inner ? [type.inner] : [])).some((argument) =>
+    typeReferencesName(argument, name),
+  );
 }
 
 function mapStruct(
@@ -214,7 +269,8 @@ function mapType(
   if (type.kind === "reference") return { node: schemaScalarNode("string") };
   if (type.kind === "generic") {
     const name = path;
-    if (!type.inner)
+    const arguments_ = type.arguments ?? (type.inner ? [type.inner] : []);
+    if (arguments_.length === 0)
       throw new RustSemanticError(
         "invalid-rust-data-model",
         `Rust generic type "${name}" is missing its inner type.`,
@@ -227,7 +283,13 @@ function mapType(
         "core::option::Option",
       ])
     ) {
-      const inner = mapType(type.inner, names, true, constraintPath);
+      if (arguments_.length !== 1)
+        throw new RustSemanticError(
+          "invalid-rust-data-model",
+          `Rust generic type "${name}" expects one type argument.`,
+          type.position,
+        );
+      const inner = mapType(arguments_[0]!, names, true, constraintPath);
       return nested
         ? {
             node: schemaUnionNode([inner.node, schemaNullNode()]),
@@ -241,7 +303,13 @@ function mapType(
         : { ...inner, optional: true, nullable: true };
     }
     if (isKnownPath(path, ["Vec", "std::vec::Vec", "alloc::vec::Vec"])) {
-      const inner = mapType(type.inner, names, true, [
+      if (arguments_.length !== 1)
+        throw new RustSemanticError(
+          "invalid-rust-data-model",
+          `Rust generic type "${name}" expects one type argument.`,
+          type.position,
+        );
+      const inner = mapType(arguments_[0]!, names, true, [
         ...constraintPath,
         "items",
       ]);
@@ -254,6 +322,61 @@ function mapType(
           : {}),
         ...(inner.notePath ? { notePath: inner.notePath } : {}),
       };
+    }
+    if (
+      isKnownPath(path, [
+        "HashMap",
+        "std::collections::HashMap",
+        "alloc::collections::HashMap",
+        "BTreeMap",
+        "std::collections::BTreeMap",
+        "alloc::collections::BTreeMap",
+      ])
+    ) {
+      if (arguments_.length !== 2)
+        throw new RustSemanticError(
+          "invalid-rust-data-model",
+          `Rust map type "${name}" expects a key and value type.`,
+          type.position,
+        );
+      const key = arguments_[0]!;
+      const keyPath = key.path.join("::");
+      if (
+        key.kind !== "named" ||
+        ![
+          "String",
+          "std::string::String",
+          "alloc::string::String",
+          "str",
+        ].includes(keyPath)
+      )
+        throw new RustSemanticError(
+          "unsupported-rust-map-key",
+          "Rust map keys must currently resolve to String-compatible types.",
+          key.position,
+        );
+      const value = mapType(arguments_[1]!, names, true, [
+        ...constraintPath,
+        "value",
+      ]);
+      return {
+        node: schemaRecordNode(schemaScalarNode("string"), value.node),
+        ...(value.constraints ? { constraints: value.constraints } : {}),
+        ...(value.notes ? { notes: value.notes } : {}),
+        ...(value.constraintPath
+          ? { constraintPath: value.constraintPath }
+          : {}),
+        ...(value.notePath ? { notePath: value.notePath } : {}),
+      };
+    }
+    if (isKnownPath(path, ["Box", "alloc::boxed::Box", "std::boxed::Box"])) {
+      if (arguments_.length !== 1)
+        throw new RustSemanticError(
+          "invalid-rust-data-model",
+          `Rust wrapper "${name}" expects one type argument.`,
+          type.position,
+        );
+      return mapType(arguments_[0]!, names, nested, constraintPath);
     }
     throw new RustSemanticError(
       "unsupported-rust-type",

@@ -116,7 +116,19 @@ export function tokenizeRust(source: string): RustToken[] {
       continue;
     }
 
-    if ("{}()[]<>,:;&*#!'".includes(character)) {
+    const number = source.slice(index).match(/^\d+/u)?.[0];
+    if (number) {
+      tokens.push({
+        text: number,
+        kind: "identifier",
+        position: start,
+        raw: false,
+      });
+      advance(number);
+      continue;
+    }
+
+    if ("{}()[]<>,:;&*#!'=;+-|/".includes(character)) {
       tokens.push({
         text: character,
         kind: "punctuation",

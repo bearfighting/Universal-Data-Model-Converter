@@ -59,10 +59,7 @@ describe("Rust parser", () => {
       ok: false,
       code: "unsupported-rust-attribute",
     });
-    expect(tryParseRust("enum A { One }")).toMatchObject({
-      ok: false,
-      code: "unsupported-rust-feature",
-    });
+    expect(tryParseRust("enum A { One }")).toMatchObject({ ok: true });
     expect(tryParseRust("pub struct A<T> {}")).toMatchObject({
       ok: false,
       code: "unsupported-rust-feature",
@@ -97,5 +94,100 @@ describe("Rust parser", () => {
       ok: false,
       diagnostics: [{ evidence: { position: { line: 1, column: 22 } } }],
     });
+  });
+
+  it("maps unit enums and string-keyed maps to existing Shape IR nodes", () => {
+    const result = tryParseRust(
+      `
+      use std::collections::HashMap;
+      enum Status { Pending, Active, Disabled }
+      struct User {
+        status: Status,
+        labels: HashMap<String, Vec<Status>>,
+        manager: Option<Box<User>>,
+      }
+      `,
+      { entry: "User" },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok || result.document.root.kind !== "object") return;
+    expect(result.document.root.fields[0]?.type).toMatchObject({
+      kind: "reference",
+      name: "Status",
+    });
+    expect(result.document.root.fields[1]?.type).toMatchObject({
+      kind: "record",
+      key: { kind: "scalar", scalar: "string" },
+      value: {
+        kind: "array",
+        elementType: { kind: "reference", name: "Status" },
+      },
+    });
+    expect(result.document.root.fields[2]).toMatchObject({
+      type: { kind: "reference", name: "User" },
+      required: false,
+      nullable: true,
+    });
+    expect(result.document.definitions[0]?.type).toMatchObject({
+      kind: "union",
+      members: [
+        { kind: "literal", value: "Pending" },
+        { kind: "literal", value: "Active" },
+        { kind: "literal", value: "Disabled" },
+      ],
+    });
+  });
+
+  it("supports canonical BTreeMap paths and rejects non-string keys", () => {
+    expect(
+      tryParseRust(
+        "struct Config { values: alloc::collections::BTreeMap<String, u64> }",
+      ),
+    ).toMatchObject({ ok: true });
+    expect(
+      tryParseRust("struct Config { values: HashMap<u64, String> }"),
+    ).toMatchObject({ ok: false, code: "unsupported-rust-map-key" });
+  });
+
+  it("rejects unsupported enum variants and aliases", () => {
+    expect(tryParseRust("enum Empty {}")).toMatchObject({
+      ok: false,
+      code: "invalid-rust-data-model",
+    });
+    expect(tryParseRust("enum Status { Active, Active }")).toMatchObject({
+      ok: false,
+      code: "invalid-rust-data-model",
+    });
+    expect(tryParseRust("enum Event { Created { id: u64 } }")).toMatchObject({
+      ok: false,
+      code: "unsupported-rust-feature",
+    });
+    expect(tryParseRust("enum Event { Created(u64) }")).toMatchObject({
+      ok: false,
+      code: "unsupported-rust-feature",
+    });
+    expect(tryParseRust("enum Status { Pending = 1 }")).toMatchObject({
+      ok: false,
+      code: "unsupported-rust-feature",
+    });
+    expect(tryParseRust("enum Status { Pending = -1 }")).toMatchObject({
+      ok: false,
+      code: "unsupported-rust-feature",
+    });
+    expect(tryParseRust("enum Status { Pending = 1 + 1 }")).toMatchObject({
+      ok: false,
+      code: "unsupported-rust-feature",
+    });
+    expect(
+      tryParseRust("use serde::Serialize; struct Config {}"),
+    ).toMatchObject({ ok: false, code: "unsupported-rust-feature" });
+    expect(
+      tryParseRust(
+        "use std::collections::HashMap as Map; struct Config { values: Map<String, String> }",
+      ),
+    ).toMatchObject({ ok: false, code: "unsupported-rust-feature" });
+    expect(
+      tryParseRust("struct Config { values: HashMap<String, String,> }"),
+    ).toMatchObject({ ok: true });
   });
 });
