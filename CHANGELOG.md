@@ -5,6 +5,20 @@ All notable changes to this project are documented here.
 Workspace packages use one shared version. The `Unreleased` section is moved
 into a versioned section when a release is prepared.
 
+## Unreleased
+
+### Rust enhancements
+
+- Harden Rust semantic round trips and recursive reference handling with
+  transparent `Box<T>` support.
+- Add unit-only Rust enums through the shared literal/union Shape IR.
+- Add string-keyed `HashMap`/`BTreeMap` parsing through the shared record Shape
+  IR and deterministic fully qualified `HashMap` generation.
+- Reject empty or duplicate unit-enum variants and non-canonical Rust imports;
+  accept trailing commas in supported generic type arguments.
+- Keep data-carrying enums, Serde attributes, aliases, and generics explicitly
+  unsupported.
+
 ## 0.3.0 - 2026-08-17
 
 This release introduces the first Rust data schema adapter boundary and

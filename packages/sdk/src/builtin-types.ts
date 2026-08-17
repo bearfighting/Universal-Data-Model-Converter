@@ -26,6 +26,7 @@ import type { ZodParseOptions } from "@schema-transformation-toolkit/parser-zod"
 import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yaml";
 import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
 import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
+import type { RustParseOptions } from "@schema-transformation-toolkit/parser-rust";
 
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
@@ -48,6 +49,7 @@ export interface BuiltinParserOptions {
   yaml?: YamlParseOptions;
   csv?: CsvParseOptions;
   toml?: TomlParseOptions;
+  rust?: RustParseOptions;
 }
 
 export interface BuiltinGeneratorOptions {

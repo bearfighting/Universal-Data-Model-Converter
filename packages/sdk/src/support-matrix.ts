@@ -100,6 +100,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "TOML date/time values, non-finite numbers, and unsafe integers are unsupported rather than converted to strings.",
     "TOML generation consumes object-root Value IR only; schema-only sources cannot generate TOML.",
   ],
+  rust: [
+    "Rust support is limited to serializable data-model syntax rather than the full Rust language.",
+    "Data-carrying enums, Serde attributes, tuples, aliases, and generics remain unsupported.",
+    "Map containers are normalized to string-keyed records and Rust generation uses HashMap.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -118,6 +123,11 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "explicit cell type inference",
   ],
   toml: ["date/time conversion", "broader TOML 1.1 features"],
+  rust: [
+    "data-carrying enums",
+    "Serde representation semantics",
+    "generic types",
+  ],
 };
 
 export function describeFormatSupport(

@@ -203,6 +203,9 @@ be a complete implementation of every ecosystem. In particular:
 - TypeScript is not parsed as an unrestricted TypeScript program;
 - Zod is handled through supported static schema expressions;
 - OpenAPI is bounded by its canonical schema compatibility boundary;
+- Rust is limited to serializable structs, unit-only enums, string-keyed maps,
+  and supported primitive/container types; data-carrying enums, Serde
+  attributes, aliases, and generics remain unsupported;
 - comments, source formatting, and some document-level metadata may be lost.
 
 Read the [Capability Matrix](capability-matrix.md) before promising a route to

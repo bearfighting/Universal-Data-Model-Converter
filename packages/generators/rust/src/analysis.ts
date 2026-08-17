@@ -32,15 +32,17 @@ export function collectRustCapabilityRequirements(
 ): ConversionCapabilityRequirement[] {
   const rootReferenceName =
     document.root.kind === "reference" ? document.root.name : undefined;
-  const rootIsObject =
+  const rootIsSupported =
     document.root.kind === "object" ||
+    isStringLiteralUnion(document.root) ||
     (rootReferenceName !== undefined &&
       document.definitions.some(
         (definition) =>
           definition.name.source === rootReferenceName &&
-          definition.type.kind === "object",
+          (definition.type.kind === "object" ||
+            isStringLiteralUnion(definition.type)),
       ));
-  return rootIsObject
+  return rootIsSupported
     ? []
     : [{ feature: "object-root", path: ["root"], referenceStack: [] }];
 }
@@ -65,10 +67,8 @@ export function collectRustLossHotspots(
       }
       if (
         context.node.kind === "union" &&
-        !(
-          context.node.members.length === 2 &&
-          context.node.members.some((member) => member.kind === "null")
-        )
+        !isNullableUnion(context.node) &&
+        !(context.via?.kind === "root" && isStringLiteralUnion(context.node))
       ) {
         hotspots.push(
           createHotspot(context, "unsupported-rust-union", {
@@ -76,9 +76,7 @@ export function collectRustLossHotspots(
           }),
         );
       }
-      if (
-        ["literal", "record", "tuple", "unknown"].includes(context.node.kind)
-      ) {
+      if (["record", "tuple", "unknown"].includes(context.node.kind)) {
         hotspots.push(
           createHotspot(context, "unsupported-rust-node", {
             nodeKind: context.node.kind,
@@ -88,6 +86,24 @@ export function collectRustLossHotspots(
     },
   });
   return hotspots;
+}
+
+function isNullableUnion(node: SchemaNode): boolean {
+  return (
+    node.kind === "union" &&
+    node.members.length === 2 &&
+    node.members.some((member) => member.kind === "null")
+  );
+}
+
+function isStringLiteralUnion(node: SchemaNode): boolean {
+  return (
+    node.kind === "union" &&
+    node.members.length > 0 &&
+    node.members.every(
+      (member) => member.kind === "literal" && typeof member.value === "string",
+    )
+  );
 }
 
 export function planRustSemanticLosses(context: {
@@ -148,6 +164,8 @@ function nodeAtPath(
     const segment = path[index];
     if (node.kind === "object") {
       node = node.fields.find((field) => field.name.source === segment)?.type;
+    } else if (node.kind === "record" && segment === "value") {
+      node = node.value;
     } else if (node.kind === "array" && segment === "items") {
       node = node.elementType;
     } else {

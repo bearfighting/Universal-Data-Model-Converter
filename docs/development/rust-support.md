@@ -1,4 +1,8 @@
-# Rust Parser / Generator V1 Design
+# Rust Parser / Generator Design and Roadmap
+
+The current released Rust surface is V1. The next milestones are V1
+hardening followed by unit-only enums and string-keyed maps. This page records
+the supported boundary and the intentional sequence for expanding it.
 
 ## 1. Goal
 
@@ -115,7 +119,7 @@ Multiple structs in the same source file are supported.
 
 ---
 
-## 3. Explicitly Out of Scope
+## 3. Explicitly Out of Scope for V1
 
 The following features are intentionally excluded from V1:
 
@@ -167,6 +171,55 @@ type UserId = u64;
 ```
 
 Unsupported syntax should fail explicitly rather than silently degrading semantic information.
+
+## 3.1 Planned Expansion
+
+The next Rust milestone is intentionally limited to common data-model
+semantics that already have cross-format representations.
+
+### V1 hardening
+
+- Add Rust → IR → Rust → IR semantic round-trip fixtures.
+- Add recursive reference coverage and support `Box<T>` as a narrow,
+  schema-transparent wrapper where needed for recursion.
+- Improve structured diagnostics and source-location coverage.
+- Add cross-format fixtures for the existing Rust subset.
+
+### Unit-only enums
+
+Support enums such as:
+
+```rust
+enum Status {
+    Pending,
+    Active,
+    Disabled,
+}
+```
+
+Lower them to the existing `literal` and `union` Shape IR nodes. Do not add a
+Rust-specific IR node. The first version should reject explicit discriminants,
+tuple variants, struct variants, and string literals that cannot be represented
+as deterministic valid Rust variant identifiers.
+
+### String-keyed maps
+
+Support:
+
+```rust
+HashMap<String, T>
+BTreeMap<String, T>
+```
+
+where `T` is already supported. Lower both forms to the existing `record` Shape
+IR node. Reject non-string-compatible map keys explicitly. The generator may
+choose a canonical `HashMap<String, T>` representation initially; the choice
+of `HashMap` versus `BTreeMap` is a generator policy, not shared schema
+semantics.
+
+Data-carrying enums, Serde representation attributes, aliases, newtypes, and
+generics remain deferred until enum/map implementation demonstrates concrete
+cross-format pressure for additional shared semantics.
 
 ---
 

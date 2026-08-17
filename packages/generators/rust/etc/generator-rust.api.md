@@ -60,6 +60,7 @@ export type RustGeneratorFailureCode =
   | "incompatible-rust-representation"
   | "unsupported-rust-integer-range"
   | "unsupported-rust-union"
+  | "unsupported-rust-enum"
   | "unsupported-rust-constraint";
 export declare class RustGenerationError extends Error {
   readonly code: RustGeneratorFailureCode;
