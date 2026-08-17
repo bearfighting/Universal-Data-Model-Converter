@@ -5,13 +5,10 @@ All notable changes to this project are documented here.
 Workspace packages use one shared version. The `Unreleased` section is moved
 into a versioned section when a release is prepared.
 
-## Unreleased
+## 0.3.0 - 2026-08-17
 
-- Continued validation and stabilization of the Rust data schema adapters.
-
-## 0.3.0-alpha.0
-
-This alpha introduces the first Rust data schema adapter boundary.
+This release introduces the first Rust data schema adapter boundary and
+promotes it to a stable `0.3.0` release after Web integration validation.
 
 ### Highlights
 
@@ -24,9 +21,10 @@ This alpha introduces the first Rust data schema adapter boundary.
 ### Boundaries
 
 - Rust V1 intentionally excludes Serde attributes, enums, generics, maps,
-  macros, traits, impls, and other unsupported Rust syntax.
-- This is an alpha release while Web integration and package-install smoke
-  tests are validated against the release artifacts.
+  macros, traits, impls, and other unsupported Rust syntax. These boundaries
+  are reported explicitly rather than approximated silently.
+- Web integration validation has completed. Release-artifact package smoke
+  remains part of the CI release workflow.
 
 ## 0.2.0
 
