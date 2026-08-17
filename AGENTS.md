@@ -88,6 +88,24 @@ snapshots. Do not treat parser or generator internals as stable downstream
 dependencies. Consumer-facing option explanations should be added to the
 package catalogs and exposed through the SDK option metadata APIs.
 
+## Versioning and Release Policy
+
+- All workspace packages use one shared version.
+- Before `1.0.0`, every release is considered unstable; compatibility is
+  maintained deliberately but is not treated as a stable major-version
+  contract.
+- Use `0.x.0` for a larger feature batch or meaningful capability expansion.
+- Use `0.x.y` for a smaller feature, focused enhancement, fix, or hardening
+  release within the current minor line.
+- Use prerelease suffixes for testing channels: `-alpha.N` for early feature
+  testing, `-beta.N` for broader integration testing, and `-rc.N` for release
+  candidates. For example, Rust enhancement testing should use
+  `0.3.1-beta.0` before the final `0.3.1` release.
+- The first stable compatibility contract is reserved for `1.0.0`.
+- A release must update every managed manifest, move the relevant changelog
+  entry, pass the release checks and validation gates, and use a matching
+  version tag such as `v0.3.1-beta.0`.
+
 ## Public API and Compatibility Rules
 
 - Treat `@schema-transformation-toolkit/sdk` as the stable downstream integration boundary.

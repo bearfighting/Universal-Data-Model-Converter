@@ -77,6 +77,24 @@ formats, unsupported routes, and invalid runtime documents remain distinct.
 Compatibility aliases stay supported until the breaking migration that removes
 them is deliberately documented.
 
+## Versioning and release policy
+
+All workspace packages share one version. Before `1.0.0`, releases remain
+unstable and may evolve their public behavior as the toolkit matures.
+
+Use the version components consistently:
+
+- `0.x.0` marks a larger feature batch or meaningful capability expansion.
+- `0.x.y` marks a smaller feature, focused enhancement, fix, or hardening
+  release within the current minor line.
+- `-alpha.N`, `-beta.N`, and `-rc.N` identify testing stages. Alpha is for
+  early feature validation, beta is for broader integration testing, and RC
+  is for final release-candidate validation.
+- `1.0.0` is reserved for the first stable compatibility contract.
+
+For example, the current Rust enhancement should be tested as
+`0.3.1-beta.0` and promoted to `0.3.1` only after release-artifact validation.
+
 ## Build, release, and consumer checks
 
 Workspace builds use the explicit order:
@@ -86,9 +104,11 @@ core → format packages → generated builtin registry → SDK
 ```
 
 Generated registry output must be deterministic and checked in. Before a
-release or public-boundary change, validate a third-party manifest/custom
-registry and a clean SDK tarball install. Update versions and changelog in the
-release workflow; never rely on a local workspace link as packaging evidence.
+release or public-boundary change, update every managed manifest and the
+corresponding changelog section, then validate a third-party manifest/custom
+registry and a clean SDK tarball install. Use a matching release tag; tags with
+prerelease suffixes are published as prereleases by the release workflow. Never
+rely on a local workspace link as packaging evidence.
 
 Downstream products should use registry discovery, normalized diagnostics, and
 report metadata rather than hardcoded format lists or low-level internals. The

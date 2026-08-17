@@ -5,7 +5,12 @@ All notable changes to this project are documented here.
 Workspace packages use one shared version. The `Unreleased` section is moved
 into a versioned section when a release is prepared.
 
-## Unreleased
+Version policy: releases before `1.0.0` are unstable. Use `0.x.0` for larger
+feature batches, `0.x.y` for smaller features or focused fixes, and
+`-alpha.N`, `-beta.N`, or `-rc.N` for testing stages before the corresponding
+final version.
+
+## 0.3.1-beta.0 - 2026-08-17
 
 ### Rust enhancements
 
