@@ -6,6 +6,14 @@ JSON Schema generator for the shared schema IR.
 
 This package renders the current shared schema IR into JSON Schema Draft 2020-12.
 
+The document identity remains the JSON Schema title/ID source. A known
+`SchemaDocument.rootName` is preserved by the root reference and definitions;
+anonymous roots continue to use the document identity.
+
+For an inline root whose declaration name cannot be represented separately in
+JSON Schema, generation succeeds with the structured semantic note
+`root-declaration-name-not-preserved`.
+
 The first version is intentionally narrow:
 
 - one `SchemaDocument` in
@@ -236,11 +244,21 @@ Example object-closure option:
 
 The generator currently returns structured failures for:
 
+- invalid Shape IR documents, reported as `invalid-schema-document` with the
+  original Core validation diagnostics
 - unresolved references
 - invalid record-key semantics on runtime documents
 - unsupported runtime node kinds
 
-Current diagnostics use the shared `SchemaDiagnostic` shape and identify the emitting layer as `generator-json-schema`.
+Core validation runs before JSON Schema-specific validation. As a result,
+invalid references and record keys supplied through raw runtime documents may
+now be reported as `invalid-schema-document`, with diagnostic codes such as
+`unknown-reference` or `invalid-record-key` and `source: "core"`. Valid
+documents continue to use JSON Schema-specific validation codes where
+applicable.
+
+Current generator-specific diagnostics use the shared `SchemaDiagnostic` shape
+and identify the emitting layer as `generator-json-schema`.
 
 Successful generation may also include warnings for cases such as:
 

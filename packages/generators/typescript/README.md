@@ -2,6 +2,13 @@
 
 TypeScript generator for the shared schema IR.
 
+When present, `SchemaDocument.rootName` controls the generated root declaration;
+legacy documents fall back to `SchemaDocument.name`.
+
+For a named root reference, the generator emits the referenced declaration once
+and does not add a self-referencing alias such as `export type User = User;`.
+Legacy documents without `rootName` retain the document-name alias behavior.
+
 ## Responsibilities
 
 - read the shared IR without depending on any specific parser

@@ -13,3 +13,12 @@ recursive references are supported; quoted forward references are rejected.
 The parser keeps required presence separate from nullability. Unsupported
 types, defaults, decorators, inheritance, and unknown references return stable
 structured failure codes with source-location evidence.
+
+For nested nullable values, nullability remains inside the Shape node. For
+example, `values: list[str | None]` is a required, non-nullable field whose
+type is `array(union(string, null))`; it is not an optional field.
+
+The document name identifies the schema document. When the source exposes a
+root class name, the parser records it in shared Shape IR as `rootName`, so
+generators can preserve the declaration name independently of document
+identity. This is shared IR metadata, not Python-specific metadata.

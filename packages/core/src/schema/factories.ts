@@ -217,6 +217,7 @@ export function schemaDocument(
   name: IdentifierInput,
   root: SchemaNode,
   options?: {
+    rootName?: IdentifierInput;
     definitions?: SchemaDefinition[];
   },
 ): SchemaDocument {
@@ -225,6 +226,9 @@ export function schemaDocument(
     version: "0.1",
     kind: "document",
     name: identifierName(name),
+    ...(options?.rootName !== undefined
+      ? { rootName: identifierName(options.rootName) }
+      : {}),
     definitions,
     root,
   };

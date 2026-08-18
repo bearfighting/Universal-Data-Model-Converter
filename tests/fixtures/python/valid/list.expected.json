@@ -1,0 +1,41 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "rootName": { "source": "Lists", "words": ["lists"] },
+  "definitions": [],
+  "root": {
+    "kind": "object",
+    "fields": [
+      {
+        "kind": "field",
+        "name": { "source": "names", "words": ["names"] },
+        "required": true,
+        "nullable": false,
+        "type": {
+          "kind": "array",
+          "elementType": { "kind": "scalar", "scalar": "string" }
+        }
+      },
+      {
+        "kind": "field",
+        "name": { "source": "matrix", "words": ["matrix"] },
+        "required": true,
+        "nullable": false,
+        "type": {
+          "kind": "array",
+          "elementType": {
+            "kind": "array",
+            "elementType": {
+              "kind": "union",
+              "members": [
+                { "kind": "scalar", "scalar": "string" },
+                { "kind": "null" }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

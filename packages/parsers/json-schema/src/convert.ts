@@ -229,7 +229,10 @@ export function convertJsonSchemaToDocument(
   );
 
   return {
-    document: schemaDocument(documentName, root, { definitions }),
+    document: schemaDocument(documentName, root, {
+      ...(root.kind === "reference" ? { rootName: root.name } : {}),
+      definitions,
+    }),
     constraints: constraintDocument(documentName, constraintEntries),
     diagnostics,
     semanticNotes,

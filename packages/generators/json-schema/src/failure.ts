@@ -5,6 +5,7 @@ import type {
 import type { JsonSchemaOutput } from "./options.js";
 
 export type JsonSchemaGeneratorFailureCode =
+  | "invalid-schema-document"
   | "invalid-json-schema-reference"
   | "invalid-record-key"
   | "invalid-numeric-constraint"

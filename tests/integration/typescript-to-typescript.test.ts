@@ -31,7 +31,6 @@ describe("integration: typescript -> ir -> typescript", () => {
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
     expect(result.output).toContain("name?: string | null;");
-    expect(result.output).toContain("export type UserDocument = User;");
   });
 
   it("round-trips reachable named references and literal-record composition", () => {
@@ -54,8 +53,6 @@ describe("integration: typescript -> ir -> typescript", () => {
         'export type Status = "open" | "closed";',
         "",
         "export type Messages = Record<string, Status>;",
-        "",
-        "export type MessagesDocument = Messages;",
       ].join("\n"),
     });
   });
@@ -75,7 +72,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     });
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
-    expect(result.output).toContain("export type PairDocument = Pair;");
   });
 
   it("round-trips optional tuple members", () => {
@@ -98,7 +94,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     });
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
-    expect(result.output).toContain("export type PairDocument = Pair;");
   });
 
   it("round-trips transitive reachable definitions without emitting unused declarations", () => {
@@ -137,8 +132,6 @@ describe("integration: typescript -> ir -> typescript", () => {
         "export interface Response {",
         "  users: User[];",
         "}",
-        "",
-        "export type ResponseDocument = Response;",
       ].join("\n"),
     });
   });
@@ -174,7 +167,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     expect(result.output).toContain("profile: {");
     expect(result.output).toContain("tags: [string, string?];");
     expect(result.output).toContain("metadata: Record<string, boolean>;");
-    expect(result.output).toContain("export type ResponseDocument = Response;");
   });
 
   it("round-trips mixed declaration styles and normalized array syntax", () => {
@@ -204,7 +196,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     expect(result.output).toContain('export type Status = "open" | "closed";');
     expect(result.output).toContain("primary: User[];");
     expect(result.output).toContain("secondary: User[];");
-    expect(result.output).toContain("export type ResponseDocument = Response;");
   });
 
   it("round-trips literal roots and nested record-array compositions", () => {
@@ -222,9 +213,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     });
 
     expectOk(literalResult, "Expected the TypeScript generator to succeed.");
-    expect(literalResult.output).toContain(
-      "export type EnabledDocument = Enabled;",
-    );
 
     const nestedParsed = typeScriptParser.parse(
       [
@@ -253,9 +241,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     expect(nestedResult.output).toContain(
       "grouped: Record<string, Array<User | null>>;",
     );
-    expect(nestedResult.output).toContain(
-      "export type ResponseDocument = Response;",
-    );
   });
 
   it("round-trips enum declarations as literal unions", () => {
@@ -282,7 +267,6 @@ describe("integration: typescript -> ir -> typescript", () => {
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
     expect(result.output).toContain("status: Status;");
-    expect(result.output).toContain("export type ResponseDocument = Response;");
   });
 
   it("round-trips numeric enum declarations as numeric literal unions", () => {
@@ -303,7 +287,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     });
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
-    expect(result.output).toContain("export type LevelDocument = Level;");
   });
 
   it("round-trips enum member references as normalized literal unions", () => {
@@ -324,7 +307,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     });
 
     expectOk(result, "Expected the TypeScript generator to succeed.");
-    expect(result.output).toContain("export type LevelDocument = Level;");
   });
 
   it("round-trips readonly syntax as ordinary data-shape semantics", () => {
@@ -353,7 +335,6 @@ describe("integration: typescript -> ir -> typescript", () => {
     expectOk(result, "Expected the TypeScript generator to succeed.");
     expect(result.output).toContain("tags: string[];");
     expect(result.output).toContain("pair: [number, string?];");
-    expect(result.output).toContain("export type UserDocument = User;");
   });
 
   it("keeps a semantic fixpoint across parse -> generate -> parse for representative supported cases", () => {

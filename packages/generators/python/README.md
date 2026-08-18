@@ -13,3 +13,10 @@ preserve that distinction without introducing a default.
 Constraint IR is analyzed but not encoded in annotations. Constraints that
 cannot be represented produce semantic losses instead of being silently
 dropped.
+
+The same distinction applies below the field level: `list[str | None]` is
+rendered as a list whose element type is nullable, while `str | None` on a
+field uses the field's nullable metadata.
+
+When present, `SchemaDocument.rootName` is used for the root dataclass name.
+Legacy documents without `rootName` continue to use the document name.

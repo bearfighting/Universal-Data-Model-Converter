@@ -54,6 +54,18 @@ describe("Python dataclass generator", () => {
     if (result.ok) expect(result.output).toContain("class User:");
   });
 
+  it("uses rootName for an inline root independently of document identity", () => {
+    const result = tryGeneratePython(
+      schemaDocument(
+        "UserDocument",
+        schemaObjectNode([schemaFieldNode("id", schemaScalarNode("integer"))]),
+        { rootName: "User" },
+      ),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.output).toContain("class User:");
+  });
+
   it("rejects optional field presence instead of making it required", () => {
     const document = schemaDocument(
       "User",

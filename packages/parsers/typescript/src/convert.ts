@@ -48,6 +48,7 @@ export function convertTypeScriptEntryDeclarationToSchemaDocument(
     sourceName,
     schemaReferenceNode(declaration.name.text),
     {
+      rootName: declaration.name.text,
       definitions: context.definitions,
     },
   );

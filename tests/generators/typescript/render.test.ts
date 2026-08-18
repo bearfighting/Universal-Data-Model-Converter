@@ -88,6 +88,61 @@ describe("generator-typescript", () => {
     );
   });
 
+  it("uses rootName without emitting a self-referencing root alias", () => {
+    const result = tryGenerateTypeScript(
+      schemaDocument("UserDocument", schemaReferenceNode("User"), {
+        rootName: "User",
+        definitions: [
+          schemaDefinition(
+            "User",
+            schemaObjectNode([
+              schemaFieldNode("id", schemaScalarNode("integer")),
+            ]),
+          ),
+        ],
+      }),
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.output).toContain("export interface User {");
+      expect(result.output).not.toContain("export type User = User;");
+      expect(result.output).not.toContain("UserDocument = User");
+    }
+  });
+
+  it("keeps the document-name alias for legacy IR without rootName", () => {
+    const result = tryGenerateTypeScript(
+      schemaDocument("UserDocument", schemaReferenceNode("User"), {
+        definitions: [
+          schemaDefinition(
+            "User",
+            schemaObjectNode([
+              schemaFieldNode("id", schemaScalarNode("integer")),
+            ]),
+          ),
+        ],
+      }),
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok)
+      expect(result.output).toContain("export type UserDocument = User;");
+  });
+
+  it("uses rootName for an inline root independently of document identity", () => {
+    const result = tryGenerateTypeScript(
+      schemaDocument(
+        "UserDocument",
+        schemaObjectNode([schemaFieldNode("id", schemaScalarNode("integer"))]),
+        { rootName: "User" },
+      ),
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.output).toContain("export interface User {");
+  });
+
   it("generates nested inline object types", () => {
     const doc = schemaDocument(
       "NestedUser",

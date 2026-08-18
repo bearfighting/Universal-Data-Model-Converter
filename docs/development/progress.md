@@ -74,6 +74,8 @@ Use the SDK registry APIs for the exact current route and format lists:
    integrations.
 8. Validate the package surface against a clean external checkout or release
    artifact when the next Rust milestone is prepared.
+9. Validate the shared `rootName` contract across language adapters and keep
+   record/map semantics aligned without adding format-specific IR.
 
 ## Intentional Deferrals
 
@@ -86,6 +88,8 @@ Use the SDK registry APIs for the exact current route and format lists:
   newtypes, and generics until the preceding Rust milestones establish a
   concrete cross-format requirement.
 - Broad new parser families or speculative IR expansion.
+- Python `dict[str, T]` parsing until the shared record/map route matrix is
+  implemented.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 
@@ -106,7 +110,7 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 Latest completed baseline:
 
-- 87 test files, 954 tests passing.
+- 87 test files, 988 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.

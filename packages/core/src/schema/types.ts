@@ -180,6 +180,8 @@ export interface SchemaDocument {
   version: "0.1";
   kind: "document";
   name: IdentifierName;
+  /** Stable declaration name for the root shape, when the source exposes one. */
+  rootName?: IdentifierName;
   definitions: SchemaDefinition[];
   root: SchemaNode;
 }

@@ -1,0 +1,26 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "rootName": { "source": "Nullable", "words": ["nullable"] },
+  "definitions": [],
+  "root": {
+    "kind": "object",
+    "fields": [
+      {
+        "kind": "field",
+        "name": { "source": "optional_name", "words": ["optional", "name"] },
+        "required": true,
+        "nullable": true,
+        "type": { "kind": "scalar", "scalar": "string" }
+      },
+      {
+        "kind": "field",
+        "name": { "source": "explicit_name", "words": ["explicit", "name"] },
+        "required": true,
+        "nullable": true,
+        "type": { "kind": "scalar", "scalar": "string" }
+      }
+    ]
+  }
+}

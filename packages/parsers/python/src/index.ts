@@ -9,6 +9,7 @@ export {
 export type { PythonParseResult, PythonParseSuccessResult } from "./api.js";
 export type {
   PythonParseFailureResult,
+  PythonFailureCode,
   PythonParserFailureCode,
 } from "./failure.js";
 export { PythonSyntaxError } from "./failure.js";

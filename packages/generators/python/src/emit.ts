@@ -44,7 +44,7 @@ function renderDefinition(definition: SchemaDefinition): string {
 }
 
 function renderRoot(document: SchemaDocument): string {
-  return renderNamedNode(document.name, document.root);
+  return renderNamedNode(document.rootName ?? document.name, document.root);
 }
 
 function renderNamedNode(name: IdentifierName, node: SchemaNode): string {

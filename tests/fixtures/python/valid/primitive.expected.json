@@ -5,6 +5,7 @@
     "source": "PythonDocument",
     "words": ["python", "document"]
   },
+  "rootName": { "source": "Primitive", "words": ["primitive"] },
   "definitions": [],
   "root": {
     "kind": "object",

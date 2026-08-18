@@ -1,0 +1,35 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "rootName": { "source": "User", "words": ["user"] },
+  "definitions": [
+    {
+      "name": { "source": "Address", "words": ["address"] },
+      "type": {
+        "kind": "object",
+        "fields": [
+          {
+            "kind": "field",
+            "name": { "source": "city", "words": ["city"] },
+            "required": true,
+            "nullable": false,
+            "type": { "kind": "scalar", "scalar": "string" }
+          }
+        ]
+      }
+    }
+  ],
+  "root": {
+    "kind": "object",
+    "fields": [
+      {
+        "kind": "field",
+        "name": { "source": "address", "words": ["address"] },
+        "required": true,
+        "nullable": false,
+        "type": { "kind": "reference", "name": "Address" }
+      }
+    ]
+  }
+}

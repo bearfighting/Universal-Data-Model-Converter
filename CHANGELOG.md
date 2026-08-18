@@ -13,10 +13,24 @@ final version.
 ## Unreleased
 
 - Added V1 Python dataclass parser and generator support through Shape IR.
+- Added shared Shape IR `rootName` metadata to preserve root declaration
+  identity separately from document identity across language adapters.
+- Reject inline rootName conflicts with same-named definitions and report JSON
+  Schema inline root-name loss through structured semantic notes.
+- JSON Schema generation now validates Shape IR at the generator boundary and
+  returns `invalid-schema-document` with Core diagnostics before target-specific
+  validation; consumers should use the diagnostic code for the underlying
+  validation category.
+- Documented TypeScript root output: named roots no longer receive a
+  self-referencing alias, while legacy IR keeps the document-name fallback.
+- Hardened shared record-key, duplicate-field, nullable-field, reference, and
+  root identity validation without adding format-specific IR nodes.
 - Hardened Python V1 diagnostics with source locations and distinct failures for
   unsupported unions, defaults, decorators, inheritance, and references.
 - Added Python recursive-reference, fixture, semantic round-trip, and
   cross-format route coverage without changing Core IR.
+- Documented the shared root identity contract and deferred Python map support
+  through the existing `SchemaRecordNode`.
 
 ## 0.3.2 - 2026-08-18
 

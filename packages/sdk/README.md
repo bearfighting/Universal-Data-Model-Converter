@@ -28,6 +28,15 @@ does not execute Python or promise serialization behavior. Defaults,
 are intentionally unsupported in V1. Conversions that lose schema constraints
 report those losses in the normal SDK result report.
 
+The SDK treats Python Dataclass as a format-specific adapter over Shape IR. The
+shared `SchemaDocument.rootName` field preserves a known root declaration name
+separately from document identity; legacy documents without it use the document
+name as the generator fallback.
+
+Required presence and nullable values remain separate in Python conversions;
+nested nullable values are represented by Shape unions inside arrays or other
+container nodes.
+
 Use it when you want to:
 
 - convert between supported source and target formats

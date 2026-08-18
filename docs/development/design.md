@@ -137,6 +137,54 @@ one format or a concrete consumer contract.
 These boundaries are descriptor and IR contracts, not a second route matrix in
 the SDK.
 
+## Cross-language root identity
+
+`SchemaDocument.name` identifies the document, while the optional
+`SchemaDocument.rootName` preserves the declaration name of the root type when
+the source exposes one. A parser may therefore lower:
+
+```text
+document.name = "ecommerce-models"
+root declaration = "User"
+```
+
+to an object root with `rootName = "User"`. Generators use `rootName` for the
+target declaration and fall back to `name` for legacy documents that do not
+carry it. `rootName` is shared IR metadata, not Python-specific metadata.
+
+When `root` is a reference, `rootName` must match the reference and resolve to
+a definition. Inline roots may carry a declaration name without a definition,
+but may not reuse the name of another definition in the same document.
+Transforms, normalization, and document equivalence preserve this identity.
+
+The existing `SchemaRecordNode` already represents string-keyed map semantics.
+Future Python `dict[str, T]` support should first lower to that node and be
+validated against existing Rust, TypeScript, and JSON Schema record mappings.
+Only add another IR concept if that cross-format implementation reveals a
+semantic gap.
+
+`SchemaRecordNode` represents a pure string-keyed map. `SchemaObjectNode.fields`
+represents fixed properties, and `additionalProperties` represents the policy
+for keys outside those properties; these forms must not be silently rewritten
+into one another.
+
+Field-level nullability and nested null unions are already distinct Shape IR
+semantics:
+
+```text
+field.nullable = true
+```
+
+is not equivalent to:
+
+```text
+field.nullable = false
+field.type = union(T, null)
+```
+
+This distinction must remain explicit as arrays, records, tuples, and general
+unions gain more format support.
+
 ## Public and extension boundaries
 
 `convert`, route/capability discovery, parser/generator compatibility helpers,
@@ -162,3 +210,5 @@ should not hardcode format lists or inspect parser/generator internals.
 6. Python V1 is a restricted dataclass adapter over Shape IR. It uses no
    Python-specific IR, does not execute Python, keeps required presence and
    nullability separate, and reports unrepresentable constraints as losses.
+7. Root declaration identity is represented by the shared optional `rootName`
+   field; no format-specific root metadata is permitted.

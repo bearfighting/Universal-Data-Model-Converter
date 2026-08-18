@@ -1,8 +1,58 @@
 import type {
+  SchemaDocument,
   SchemaFieldNode,
   SchemaNode,
   SchemaTupleElement,
 } from "./types.js";
+
+export function areEquivalentSchemaDocuments(
+  left: SchemaDocument,
+  right: SchemaDocument,
+): boolean {
+  return (
+    left.name.source === right.name.source &&
+    left.rootName?.source === right.rootName?.source &&
+    left.definitions.length === right.definitions.length &&
+    left.definitions.every((definition) => {
+      const candidate = right.definitions.find(
+        (item) => item.name.source === definition.name.source,
+      );
+      return (
+        candidate !== undefined &&
+        areEquivalentSchemaNodes(definition.type, candidate.type)
+      );
+    }) &&
+    areEquivalentSchemaNodes(left.root, right.root)
+  );
+}
+
+export function areEquivalentSchemaDocumentsWithRepresentation(
+  left: SchemaDocument,
+  right: SchemaDocument,
+): boolean {
+  if (
+    left.name.source !== right.name.source ||
+    left.rootName?.source !== right.rootName?.source ||
+    left.definitions.length !== right.definitions.length
+  ) {
+    return false;
+  }
+
+  return (
+    left.definitions.every((definition) => {
+      const candidate = right.definitions.find(
+        (item) => item.name.source === definition.name.source,
+      );
+      return (
+        candidate !== undefined &&
+        areEquivalentSchemaNodesWithRepresentation(
+          definition.type,
+          candidate.type,
+        )
+      );
+    }) && areEquivalentSchemaNodesWithRepresentation(left.root, right.root)
+  );
+}
 
 export function areEquivalentSchemaNodes(
   left: SchemaNode,

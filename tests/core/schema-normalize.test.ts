@@ -8,6 +8,7 @@ import {
   schemaDefinition,
   schemaDocument,
   schemaFieldNode,
+  schemaNullNode,
   schemaObjectNode,
   schemaReferenceNode,
   schemaScalarNode,
@@ -56,6 +57,29 @@ describe("schema normalize", () => {
 
     expect(normalized).toEqual(
       schemaUnionNode([schemaScalarNode("string"), schemaScalarNode("number")]),
+    );
+  });
+
+  it("deduplicates repeated null union members", () => {
+    const normalized = normalizeSchemaNode(
+      {
+        kind: "union",
+        members: [
+          schemaScalarNode("string"),
+          schemaNullNode(),
+          schemaNullNode(),
+        ],
+      },
+      {
+        typedPath: createRootSchemaPath(),
+        path: ["root"],
+        definitionLookup: new Map(),
+        referenceStack: [],
+      },
+    );
+
+    expect(normalized).toEqual(
+      schemaUnionNode([schemaScalarNode("string"), schemaNullNode()]),
     );
   });
 
