@@ -62,6 +62,7 @@ export type PythonGeneratorFailureCode =
   | "invalid-generator-input"
   | "unsupported-python-root"
   | "unsupported-python-node"
+  | "unsupported-python-optional-field"
   | "invalid-python-identifier";
 export type PythonGenerateResult =
   | GenerateSuccessResult<string>

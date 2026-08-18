@@ -70,10 +70,10 @@ class User:
   it("rejects unsupported types and defaults", () => {
     expect(
       tryParsePython("@dataclass\nclass User:\n    value: int | str\n"),
-    ).toMatchObject({ ok: false, code: "unsupported-python-type" });
+    ).toMatchObject({ ok: false, code: "unsupported-python-union" });
     expect(
       tryParsePython("@dataclass\nclass User:\n    value: str = 'x'\n"),
-    ).toMatchObject({ ok: false, code: "unsupported-python-feature" });
+    ).toMatchObject({ ok: false, code: "unsupported-python-default" });
   });
 
   it("rejects ignored top-level syntax and invalid indentation", () => {

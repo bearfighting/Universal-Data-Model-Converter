@@ -22,6 +22,12 @@ runtime-schema module. The consuming project must install Zod 4.
 The OpenAPI schema boundary and unsupported-feature diagnostics are documented
 in the [project design](../../docs/development/design.md).
 
+Python support is a restricted Python 3.10+ dataclass type-shape adapter. It
+does not execute Python or promise serialization behavior. Defaults,
+`field(...)`, inheritance, generics, maps, arbitrary unions, Literal, and Enum
+are intentionally unsupported in V1. Conversions that lose schema constraints
+report those losses in the normal SDK result report.
+
 Use it when you want to:
 
 - convert between supported source and target formats

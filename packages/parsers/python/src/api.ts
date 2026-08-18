@@ -74,10 +74,10 @@ function pythonFailure(
         code,
         message,
         source: "parser-python",
-        ...(syntax?.position
+        ...((syntax?.position ?? semantic?.position)
           ? {
               evidence: {
-                position: syntax.position,
+                position: syntax?.position ?? semantic?.position,
                 sourceLength: input.length,
               },
             }

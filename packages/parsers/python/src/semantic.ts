@@ -16,6 +16,7 @@ import {
   type PythonClassSyntax,
   type PythonTypeSyntax,
 } from "./syntax.js";
+import type { PythonPosition } from "./syntax.js";
 
 export class PythonSemanticError extends Error {
   constructor(
@@ -24,8 +25,13 @@ export class PythonSemanticError extends Error {
       | "missing-python-entry"
       | "duplicate-python-definition"
       | "invalid-python-data-model"
-      | "unsupported-python-type",
+      | "invalid-python-syntax"
+      | "unsupported-python-type"
+      | "unsupported-python-union"
+      | "unknown-python-reference"
+      | "unsupported-python-parser-v1",
     message: string,
+    readonly position?: PythonPosition,
   ) {
     super(message);
     this.name = "PythonSemanticError";
@@ -58,17 +64,61 @@ export function mapPythonFile(
   const mapped = new Map(
     file.classes.map((item) => [item.name, mapClass(item, names)] as const),
   );
-  return schemaDocument(name, mapped.get(root.name)!, {
-    definitions: file.classes
-      .filter((item) => item !== root)
-      .map((item) => schemaDefinition(item.name, mapped.get(item.name)!)),
-  });
+  const rootNode = mapped.get(root.name)!;
+  const rootIsReferenced = file.classes.some((item) =>
+    schemaNodeReferencesName(mapped.get(item.name)!, root.name),
+  );
+  const definitions = file.classes
+    .filter((item) => item !== root || rootIsReferenced)
+    .map((item) => schemaDefinition(item.name, mapped.get(item.name)!));
+  return schemaDocument(
+    name,
+    rootIsReferenced ? schemaReferenceNode(root.name) : rootNode,
+    { definitions },
+  );
+}
+
+function schemaNodeReferencesName(node: SchemaNode, name: string): boolean {
+  switch (node.kind) {
+    case "reference":
+      return node.name === name;
+    case "array":
+      return schemaNodeReferencesName(node.elementType, name);
+    case "union":
+      return node.members.some((member) =>
+        schemaNodeReferencesName(member, name),
+      );
+    case "object":
+      return node.fields.some((field) =>
+        schemaNodeReferencesName(field.type, name),
+      );
+    default:
+      return false;
+  }
 }
 
 function mapClass(item: PythonClassSyntax, names: Set<string>): SchemaNode {
   return schemaObjectNode(
     item.fields.map((field) => {
-      const parsed = mapType(parsePythonType(field.annotation), names);
+      if (/^['"]|['"]$/u.test(field.annotation))
+        throw new PythonSemanticError(
+          "unsupported-python-type",
+          "Quoted forward references are not supported in Python V1.",
+          field.position,
+        );
+      let type: PythonTypeSyntax;
+      try {
+        type = parsePythonType(field.annotation);
+      } catch (error) {
+        if (error instanceof Error)
+          throw new PythonSemanticError(
+            "invalid-python-syntax",
+            error.message,
+            field.position,
+          );
+        throw error;
+      }
+      const parsed = mapType(type, names, false, field.position);
       return schemaFieldNode(field.name, parsed.node, {
         required: true,
         nullable: parsed.nullable,
@@ -81,6 +131,7 @@ function mapType(
   type: PythonTypeSyntax,
   names: Set<string>,
   nested = false,
+  position?: PythonPosition,
 ): { node: SchemaNode; nullable: boolean } {
   if (type.kind === "union") {
     const members = type.members ?? [];
@@ -89,13 +140,14 @@ function mapType(
     );
     if (nullMembers.length !== 1 || members.length !== 2)
       throw new PythonSemanticError(
-        "unsupported-python-type",
+        "unsupported-python-union",
         "Python V1 only supports nullable unions of the form T | None.",
+        position,
       );
     const other = members.find(
       (member) => !(member.kind === "name" && member.name === "None"),
     )!;
-    const mapped = mapType(other, names, nested);
+    const mapped = mapType(other, names, nested, position);
     return nested
       ? {
           node: schemaUnionNode([mapped.node, schemaNullNode()]),
@@ -110,8 +162,9 @@ function mapType(
         throw new PythonSemanticError(
           "unsupported-python-type",
           "list[T] requires exactly one type argument.",
+          position,
         );
-      const mapped = mapType(args[0]!, names, true);
+      const mapped = mapType(args[0]!, names, true, position);
       return { node: schemaArrayNode(mapped.node), nullable: false };
     }
     if (type.name === "Optional") {
@@ -119,8 +172,9 @@ function mapType(
         throw new PythonSemanticError(
           "unsupported-python-type",
           "Optional[T] requires exactly one type argument.",
+          position,
         );
-      const mapped = mapType(args[0]!, names, nested);
+      const mapped = mapType(args[0]!, names, nested, position);
       return nested
         ? {
             node: schemaUnionNode([mapped.node, schemaNullNode()]),
@@ -131,6 +185,7 @@ function mapType(
     throw new PythonSemanticError(
       "unsupported-python-type",
       `Python generic type "${type.name}" is not supported in V1.`,
+      position,
     );
   }
   if (type.name === "str")
@@ -145,7 +200,24 @@ function mapType(
   if (type.name && names.has(type.name))
     return { node: schemaReferenceNode(type.name), nullable: false };
   throw new PythonSemanticError(
-    "unsupported-python-type",
+    isKnownUnsupportedPythonName(type.name)
+      ? "unsupported-python-type"
+      : "unknown-python-reference",
     `Python type "${type.name ?? "unknown"}" is not supported or is not a known dataclass reference.`,
+    position,
   );
 }
+
+function isKnownUnsupportedPythonName(name: string | undefined): boolean {
+  return UNSUPPORTED_PYTHON_NAMES.has(name ?? "");
+}
+
+const UNSUPPORTED_PYTHON_NAMES = new Set([
+  "Any",
+  "BaseModel",
+  "Enum",
+  "NamedTuple",
+  "TypedDict",
+  "TypeVar",
+  "object",
+]);

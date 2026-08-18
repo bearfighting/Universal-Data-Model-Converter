@@ -67,7 +67,7 @@ function renderObject(name: string, node: SchemaObjectNode): string {
   const optionalField = node.fields.find((field) => !field.required);
   if (optionalField) {
     throw new PythonGenerationError(
-      "unsupported-python-node",
+      "unsupported-python-optional-field",
       `Python V1 cannot generate optional field presence for "${optionalField.name.source}" without preserving a dataclass default.`,
     );
   }

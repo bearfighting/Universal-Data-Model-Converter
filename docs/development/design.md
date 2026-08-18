@@ -159,3 +159,6 @@ should not hardcode format lists or inspect parser/generator internals.
 4. Keep package dependency direction one-way and generated registry output
    reproducible.
 5. Add shared concepts only when they solve a demonstrated cross-format need.
+6. Python V1 is a restricted dataclass adapter over Shape IR. It uses no
+   Python-specific IR, does not execute Python, keeps required presence and
+   nullability separate, and reports unrepresentable constraints as losses.

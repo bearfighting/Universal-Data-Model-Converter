@@ -14,9 +14,14 @@ describe("Python SDK integration", () => {
     expect(
       listTargetFormatSupports().some((item) => item.format === "python"),
     ).toBe(true);
-    expect(describeFormatSupport("python").parser?.capabilities).toContain(
-      "shape-ir",
-    );
+    const support = describeFormatSupport("python");
+    expect(support.parser?.capabilities).toContain("shape-ir");
+    expect(
+      support.notableLimitations.some((item) =>
+        item.includes("quoted forward references"),
+      ),
+    ).toBe(true);
+    expect(support.experimentalAreas).not.toContain("recursive dataclasses");
   });
 
   it("converts Python dataclasses through the shared pipeline", () => {
@@ -52,6 +57,51 @@ describe("Python SDK integration", () => {
     expect(rust.ok).toBe(true);
     if (typeScript.ok) expect(typeScript.output).toContain("class User:");
     if (rust.ok) expect(rust.output).toContain("class rustDocument:");
+  });
+
+  it("validates the Python cross-format route family", () => {
+    const python = `@dataclass
+class User:
+    id: int
+    nickname: str | None
+`;
+    const routes = [
+      ["python", "python", python],
+      ["python", "typescript", python],
+      ["python", "rust", python],
+      ["python", "json-schema", python],
+      [
+        "typescript",
+        "python",
+        "interface User { id: number; nickname: string | null }",
+      ],
+      ["rust", "python", "struct User { id: i64, }"],
+      [
+        "json-schema",
+        "python",
+        JSON.stringify({
+          type: "object",
+          properties: { name: { type: "string", minLength: 2 } },
+          required: ["name"],
+        }),
+      ],
+    ] as const;
+    for (const [sourceFormat, targetFormat, input] of routes) {
+      const result = convert({ sourceFormat, targetFormat, input });
+      expect(result.ok, `${sourceFormat} -> ${targetFormat}`).toBe(true);
+    }
+    const typeScript = convert({
+      sourceFormat: "python",
+      targetFormat: "typescript",
+      input: python,
+    });
+    expect(typeScript.ok).toBe(true);
+    if (typeScript.ok)
+      expect(typeScript.report?.lossHotspots).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ code: "integer-widening" }),
+        ]),
+      );
   });
 
   it("reports constraints lost by dataclass annotations", () => {
