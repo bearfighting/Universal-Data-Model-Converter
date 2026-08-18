@@ -1,67 +1,127 @@
 {
-  "tag": "v0.2.0-beta.0",
-  "version": "0.2.0-beta.0",
-  "generatedAt": "2026-08-04T16:18:02.228Z",
+  "tag": "v0.3.1",
+  "version": "0.3.1",
+  "generatedAt": "2026-08-18T13:54:20.138Z",
   "packages": [
     {
       "name": "@schema-transformation-toolkit/core",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-core-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-core-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/generator-csv",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-csv-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/generator-json-schema",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-generator-json-schema-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-generator-json-schema-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/generator-json",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-json-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/generator-openapi",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-generator-openapi-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-generator-openapi-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/generator-rust",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-rust-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/generator-toml",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-toml-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/generator-typescript",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-generator-typescript-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-generator-typescript-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/generator-yaml",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-generator-yaml-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/generator-zod",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-generator-zod-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-generator-zod-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-csv",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-csv-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/parser-json-schema",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-parser-json-schema-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-parser-json-schema-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/parser-json",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-parser-json-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-parser-json-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/parser-openapi",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-parser-openapi-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-parser-openapi-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-rust",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-rust-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-toml",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-toml-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/parser-typescript",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-parser-typescript-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-parser-typescript-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-yaml",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-yaml-0.3.1.tgz"
+    },
+    {
+      "name": "@schema-transformation-toolkit/parser-zod",
+      "version": "0.3.1",
+      "private": false,
+      "tarball": "schema-transformation-toolkit-parser-zod-0.3.1.tgz"
     },
     {
       "name": "@schema-transformation-toolkit/sdk",
-      "version": "0.2.0-beta.0",
+      "version": "0.3.1",
       "private": false,
-      "tarball": "schema-transformation-toolkit-sdk-0.2.0-beta.0.tgz"
+      "tarball": "schema-transformation-toolkit-sdk-0.3.1.tgz"
     }
   ]
 }

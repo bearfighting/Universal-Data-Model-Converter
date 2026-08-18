@@ -1,6 +1,6 @@
 {
   "name": "@schema-transformation-toolkit/parser-openapi",
-  "version": "0.3.1-beta.0",
+  "version": "0.3.1",
   "private": false,
   "license": "Apache-2.0",
   "type": "module",

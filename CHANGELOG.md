@@ -10,7 +10,7 @@ feature batches, `0.x.y` for smaller features or focused fixes, and
 `-alpha.N`, `-beta.N`, or `-rc.N` for testing stages before the corresponding
 final version.
 
-## 0.3.1-beta.0 - 2026-08-17
+## 0.3.1 - 2026-08-18
 
 ### Rust enhancements
 
