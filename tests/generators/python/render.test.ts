@@ -65,7 +65,7 @@ describe("Python dataclass generator", () => {
     );
     expect(tryGeneratePython(document)).toMatchObject({
       ok: false,
-      code: "unsupported-python-node",
+      code: "unsupported-python-optional-field",
     });
   });
 });

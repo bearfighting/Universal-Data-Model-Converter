@@ -13,6 +13,10 @@ final version.
 ## Unreleased
 
 - Added V1 Python dataclass parser and generator support through Shape IR.
+- Hardened Python V1 diagnostics with source locations and distinct failures for
+  unsupported unions, defaults, decorators, inheritance, and references.
+- Added Python recursive-reference, fixture, semantic round-trip, and
+  cross-format route coverage without changing Core IR.
 
 ## 0.3.2 - 2026-08-18
 

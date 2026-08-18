@@ -73,7 +73,7 @@ export function parsePythonSyntax(source: string): PythonFileSyntax {
     }
     if (trimmed.startsWith("@"))
       throw new PythonSyntaxError(
-        "unsupported-python-feature",
+        "unsupported-python-decorator",
         `Python decorator "${trimmed}" is not supported in V1.`,
         position,
       );
@@ -95,7 +95,7 @@ export function parsePythonSyntax(source: string): PythonFileSyntax {
       }
       if (classMatch[2]?.trim())
         throw new PythonSyntaxError(
-          "unsupported-python-feature",
+          "unsupported-python-inheritance",
           "Python dataclass inheritance and generics are not supported in V1.",
           position,
         );
@@ -145,7 +145,7 @@ export function parsePythonSyntax(source: string): PythonFileSyntax {
       );
     if (fieldMatch[2]!.includes("="))
       throw new PythonSyntaxError(
-        "unsupported-python-feature",
+        "unsupported-python-default",
         "Python dataclass defaults and field(...) are not supported in V1.",
         position,
       );

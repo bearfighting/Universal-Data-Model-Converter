@@ -1,0 +1,42 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": {
+    "source": "PythonDocument",
+    "words": ["python", "document"]
+  },
+  "definitions": [],
+  "root": {
+    "kind": "object",
+    "fields": [
+      {
+        "kind": "field",
+        "name": { "source": "string_value", "words": ["string", "value"] },
+        "required": true,
+        "nullable": false,
+        "type": { "kind": "scalar", "scalar": "string" }
+      },
+      {
+        "kind": "field",
+        "name": { "source": "integer_value", "words": ["integer", "value"] },
+        "required": true,
+        "nullable": false,
+        "type": { "kind": "scalar", "scalar": "integer" }
+      },
+      {
+        "kind": "field",
+        "name": { "source": "number_value", "words": ["number", "value"] },
+        "required": true,
+        "nullable": false,
+        "type": { "kind": "scalar", "scalar": "number" }
+      },
+      {
+        "kind": "field",
+        "name": { "source": "boolean_value", "words": ["boolean", "value"] },
+        "required": true,
+        "nullable": false,
+        "type": { "kind": "scalar", "scalar": "boolean" }
+      }
+    ]
+  }
+}

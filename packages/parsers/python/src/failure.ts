@@ -4,6 +4,11 @@ export type PythonParserFailureCode =
   | "invalid-python-syntax"
   | "unsupported-python-feature"
   | "unsupported-python-type"
+  | "unsupported-python-union"
+  | "unsupported-python-default"
+  | "unsupported-python-decorator"
+  | "unsupported-python-inheritance"
+  | "unknown-python-reference"
   | "ambiguous-python-entry"
   | "missing-python-entry"
   | "duplicate-python-definition"
@@ -18,6 +23,10 @@ export class PythonSyntaxError extends Error {
       | "invalid-python-syntax"
       | "unsupported-python-feature"
       | "unsupported-python-type"
+      | "unsupported-python-union"
+      | "unsupported-python-default"
+      | "unsupported-python-decorator"
+      | "unsupported-python-inheritance"
       | "invalid-python-data-model"
       | "duplicate-python-definition",
     message: string,
