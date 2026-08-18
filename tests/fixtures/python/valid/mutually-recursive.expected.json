@@ -1,0 +1,38 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "definitions": [
+    {
+      "name": { "source": "Parent", "words": ["parent"] },
+      "type": {
+        "kind": "object",
+        "fields": [
+          {
+            "kind": "field",
+            "name": { "source": "child", "words": ["child"] },
+            "required": true,
+            "nullable": true,
+            "type": { "kind": "reference", "name": "Child" }
+          }
+        ]
+      }
+    },
+    {
+      "name": { "source": "Child", "words": ["child"] },
+      "type": {
+        "kind": "object",
+        "fields": [
+          {
+            "kind": "field",
+            "name": { "source": "parent", "words": ["parent"] },
+            "required": true,
+            "nullable": true,
+            "type": { "kind": "reference", "name": "Parent" }
+          }
+        ]
+      }
+    }
+  ],
+  "root": { "kind": "reference", "name": "Parent" }
+}

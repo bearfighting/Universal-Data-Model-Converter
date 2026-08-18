@@ -70,19 +70,11 @@ export type PythonParserFailureCode =
   | "duplicate-python-definition"
   | "invalid-python-data-model"
   | "unsupported-python-parser-v1";
+export type PythonFailureCode = PythonParserFailureCode;
 export type PythonParseFailureResult =
   ParseFailureResult<PythonParserFailureCode>;
 export declare class PythonSyntaxError extends Error {
-  readonly code:
-    | "invalid-python-syntax"
-    | "unsupported-python-feature"
-    | "unsupported-python-type"
-    | "unsupported-python-union"
-    | "unsupported-python-default"
-    | "unsupported-python-decorator"
-    | "unsupported-python-inheritance"
-    | "invalid-python-data-model"
-    | "duplicate-python-definition";
+  readonly code: PythonFailureCode;
   readonly position?:
     | {
         offset: number;
@@ -91,16 +83,7 @@ export declare class PythonSyntaxError extends Error {
       }
     | undefined;
   constructor(
-    code:
-      | "invalid-python-syntax"
-      | "unsupported-python-feature"
-      | "unsupported-python-type"
-      | "unsupported-python-union"
-      | "unsupported-python-default"
-      | "unsupported-python-decorator"
-      | "unsupported-python-inheritance"
-      | "invalid-python-data-model"
-      | "duplicate-python-definition",
+    code: PythonFailureCode,
     message: string,
     position?:
       | {
@@ -127,6 +110,7 @@ export {
 export type { PythonParseResult, PythonParseSuccessResult } from "./api.js";
 export type {
   PythonParseFailureResult,
+  PythonFailureCode,
   PythonParserFailureCode,
 } from "./failure.js";
 export { PythonSyntaxError } from "./failure.js";

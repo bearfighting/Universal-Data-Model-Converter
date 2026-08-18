@@ -17,19 +17,11 @@ import {
   type PythonTypeSyntax,
 } from "./syntax.js";
 import type { PythonPosition } from "./syntax.js";
+import type { PythonFailureCode } from "./failure.js";
 
 export class PythonSemanticError extends Error {
   constructor(
-    readonly code:
-      | "ambiguous-python-entry"
-      | "missing-python-entry"
-      | "duplicate-python-definition"
-      | "invalid-python-data-model"
-      | "invalid-python-syntax"
-      | "unsupported-python-type"
-      | "unsupported-python-union"
-      | "unknown-python-reference"
-      | "unsupported-python-parser-v1",
+    readonly code: PythonFailureCode,
     message: string,
     readonly position?: PythonPosition,
   ) {
@@ -104,6 +96,12 @@ function mapClass(item: PythonClassSyntax, names: Set<string>): SchemaNode {
         throw new PythonSemanticError(
           "unsupported-python-type",
           "Quoted forward references are not supported in Python V1.",
+          field.position,
+        );
+      if (/^(?:Literal|Annotated)\s*\[/u.test(field.annotation))
+        throw new PythonSemanticError(
+          "unsupported-python-type",
+          `Python type annotation "${field.annotation}" is not supported in V1.`,
           field.position,
         );
       let type: PythonTypeSyntax;

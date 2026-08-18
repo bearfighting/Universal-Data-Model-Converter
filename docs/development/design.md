@@ -137,6 +137,50 @@ one format or a concrete consumer contract.
 These boundaries are descriptor and IR contracts, not a second route matrix in
 the SDK.
 
+## Deferred shared IR review
+
+Python Dataclass V1 exposes one cross-language IR question: a
+`SchemaDocument.name` identifies the document, but it does not always preserve
+the declaration name of the root type. A parser may therefore lower:
+
+```text
+document.name = "ecommerce-models"
+root declaration = "User"
+```
+
+to an object root without a separate `rootName`. Generators can then normalize
+the generated root declaration to the document name. This is a known fidelity
+limitation, not a Python-specific semantic failure, and does not block Python
+V1.
+
+When programming-language interoperability is reviewed across TypeScript,
+Rust, Python, and future adapters, evaluate whether Shape IR needs a shared
+root declaration identity such as `rootName`. Do not add a Python-only metadata
+field or workaround before that review.
+
+The existing `SchemaRecordNode` already represents string-keyed map semantics.
+Future Python `dict[str, T]` support should first lower to that node and be
+validated against existing Rust, TypeScript, and JSON Schema record mappings.
+Only add another IR concept if that cross-format implementation reveals a
+semantic gap.
+
+Field-level nullability and nested null unions are already distinct Shape IR
+semantics:
+
+```text
+field.nullable = true
+```
+
+is not equivalent to:
+
+```text
+field.nullable = false
+field.type = union(T, null)
+```
+
+This distinction must remain explicit as arrays, records, tuples, and general
+unions gain more format support.
+
 ## Public and extension boundaries
 
 `convert`, route/capability discovery, parser/generator compatibility helpers,
@@ -162,3 +206,5 @@ should not hardcode format lists or inspect parser/generator internals.
 6. Python V1 is a restricted dataclass adapter over Shape IR. It uses no
    Python-specific IR, does not execute Python, keeps required presence and
    nullability separate, and reports unrepresentable constraints as losses.
+7. Root declaration identity is a deferred cross-language IR review item; it
+   is not a Python V1 blocker and must not be solved with Python metadata.

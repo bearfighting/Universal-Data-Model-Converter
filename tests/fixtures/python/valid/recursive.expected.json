@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "kind": "document",
+  "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "definitions": [
+    {
+      "name": { "source": "Node", "words": ["node"] },
+      "type": {
+        "kind": "object",
+        "fields": [
+          {
+            "kind": "field",
+            "name": { "source": "next", "words": ["next"] },
+            "required": true,
+            "nullable": true,
+            "type": { "kind": "reference", "name": "Node" }
+          }
+        ]
+      }
+    }
+  ],
+  "root": { "kind": "reference", "name": "Node" }
+}

@@ -17,6 +17,8 @@ final version.
   unsupported unions, defaults, decorators, inheritance, and references.
 - Added Python recursive-reference, fixture, semantic round-trip, and
   cross-format route coverage without changing Core IR.
+- Documented deferred cross-language IR review items for root declaration
+  identity, nullability levels, and future record/map support.
 
 ## 0.3.2 - 2026-08-18
 
