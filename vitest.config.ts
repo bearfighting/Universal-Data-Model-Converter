@@ -16,6 +16,8 @@ export default defineConfig({
         "/packages/generators/toml/src/index.ts",
       "@schema-transformation-toolkit/generator-openapi":
         "/packages/generators/openapi/src/index.ts",
+      "@schema-transformation-toolkit/generator-python":
+        "/packages/generators/python/src/index.ts",
       "@schema-transformation-toolkit/generator-typescript":
         "/packages/generators/typescript/src/index.ts",
       "@schema-transformation-toolkit/generator-yaml":
@@ -36,6 +38,8 @@ export default defineConfig({
         "/packages/parsers/typescript/src/index.ts",
       "@schema-transformation-toolkit/parser-openapi":
         "/packages/parsers/openapi/src/index.ts",
+      "@schema-transformation-toolkit/parser-python":
+        "/packages/parsers/python/src/index.ts",
       "@schema-transformation-toolkit/parser-zod":
         "/packages/parsers/zod/src/index.ts",
       "@schema-transformation-toolkit/parser-yaml":
