@@ -52,7 +52,11 @@ export function renderRustDocument(
     : undefined;
   const root =
     document.root.kind === "object" || document.root.kind === "union"
-      ? { name: document.name.source, node: document.root, path: ["root"] }
+      ? {
+          name: document.rootName?.source ?? document.name.source,
+          node: document.root,
+          path: ["root"],
+        }
       : rootDefinition &&
           (rootDefinition.type.kind === "object" ||
             rootDefinition.type.kind === "union")

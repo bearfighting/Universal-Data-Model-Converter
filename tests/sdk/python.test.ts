@@ -56,7 +56,7 @@ describe("Python SDK integration", () => {
     expect(typeScript.ok).toBe(true);
     expect(rust.ok).toBe(true);
     if (typeScript.ok) expect(typeScript.output).toContain("class User:");
-    if (rust.ok) expect(rust.output).toContain("class rustDocument:");
+    if (rust.ok) expect(rust.output).toContain("class User:");
   });
 
   it("validates the Python cross-format route family", () => {
@@ -121,5 +121,24 @@ class User:
           (loss) => loss.lostCapability === "string-constraints",
         ),
       ).toBe(true);
+  });
+
+  it("reports inline root declaration-name loss in JSON Schema conversion", () => {
+    const result = convert({
+      sourceFormat: "python",
+      targetFormat: "json-schema",
+      input: "@dataclass\nclass User:\n    id: int\n",
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.report?.semanticNotes?.generate).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "root-declaration-name-not-preserved",
+          }),
+        ]),
+      );
+    }
   });
 });

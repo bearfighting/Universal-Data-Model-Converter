@@ -62,6 +62,18 @@ function collectSchemaDocumentValidationDiagnostics(
   const diagnostics: SchemaDiagnostic[] = [];
   const definitionMap = new Map<string, SchemaDefinition>();
 
+  if (document.rootName && document.rootName.source.trim().length === 0) {
+    diagnostics.push({
+      severity: "error",
+      code: "invalid-root-name",
+      message:
+        "Invalid schema document: rootName must use a non-empty declaration name.",
+      path: ["rootName"],
+      nodeKind: "document",
+      source: "core",
+    });
+  }
+
   for (const definition of document.definitions) {
     if (definition.name.source.trim().length === 0) {
       diagnostics.push({
@@ -91,10 +103,94 @@ function collectSchemaDocumentValidationDiagnostics(
     definitionMap.set(definition.name.source, definition);
   }
 
+  if (document.rootName && document.root.kind === "reference") {
+    if (document.rootName.source !== document.root.name) {
+      diagnostics.push({
+        severity: "error",
+        code: "root-name-reference-mismatch",
+        message: `Invalid schema document: rootName "${document.rootName.source}" must match root reference "${document.root.name}".`,
+        path: ["rootName"],
+        nodeKind: "document",
+        source: "core",
+      });
+    } else if (!definitionMap.has(document.rootName.source)) {
+      diagnostics.push({
+        severity: "error",
+        code: "missing-root-definition",
+        message: `Invalid schema document: rootName "${document.rootName.source}" must match a definition when root is a reference.`,
+        path: ["rootName"],
+        nodeKind: "document",
+        source: "core",
+      });
+    }
+  }
+
+  if (
+    document.rootName &&
+    document.root.kind !== "reference" &&
+    definitionMap.has(document.rootName.source)
+  ) {
+    diagnostics.push({
+      severity: "error",
+      code: "root-name-definition-conflict",
+      message: `Invalid schema document: inline rootName "${document.rootName.source}" conflicts with an existing definition of the same name.`,
+      path: ["rootName"],
+      nodeKind: "document",
+      source: "core",
+      evidence: {
+        rootName: document.rootName.source,
+        conflictingDefinition: document.rootName.source,
+      },
+    });
+  }
+
   walkSchemaDocument(
     document,
     {
       enter(context) {
+        if (context.node.kind === "object") {
+          const fieldNames = new Set<string>();
+          for (const field of context.node.fields) {
+            if (fieldNames.has(field.name.source)) {
+              diagnostics.push({
+                severity: "error",
+                code: "duplicate-field-name",
+                message: `Invalid schema object: duplicate field name "${field.name.source}".`,
+                path: [...context.path, field.name.source],
+                nodeKind: "field",
+                source: "core",
+              });
+            }
+            if (field.nullable && schemaNodeIncludesNull(field.type)) {
+              diagnostics.push({
+                severity: "error",
+                code: "invalid-field-nullability",
+                message:
+                  'Invalid schema field: a field whose type already includes "null" cannot also be marked nullable.',
+                path: [...context.path, field.name.source],
+                nodeKind: "field",
+                source: "core",
+              });
+            }
+            fieldNames.add(field.name.source);
+          }
+        }
+
+        if (
+          context.node.kind === "record" &&
+          !isSupportedRecordKeyNode(context.node.key)
+        ) {
+          diagnostics.push({
+            severity: "error",
+            code: "invalid-record-key",
+            message:
+              'Invalid schema record: record keys must currently be represented as the scalar type "string".',
+            path: [...context.path, "key"],
+            nodeKind: "record",
+            source: "core",
+          });
+        }
+
         if (context.node.kind === "scalar" && context.node.representation) {
           const representation = context.node.representation;
           const compatible = isCompatibleScalarRepresentation(
@@ -170,4 +266,8 @@ function schemaNodeIncludesNull(type: SchemaNode): boolean {
   }
 
   return false;
+}
+
+function isSupportedRecordKeyNode(type: SchemaNode): boolean {
+  return type.kind === "scalar" && type.scalar === "string";
 }

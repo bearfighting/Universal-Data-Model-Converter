@@ -25,6 +25,14 @@ export function expectIrEquivalent(
   expectValidIr(normalizedExpected);
 
   expect(normalizedActual.name.source).toBe(normalizedExpected.name.source);
+  if (
+    normalizedActual.rootName !== undefined &&
+    normalizedExpected.rootName !== undefined
+  ) {
+    expect(normalizedActual.rootName.source).toBe(
+      normalizedExpected.rootName.source,
+    );
+  }
   expect(
     normalizedActual.definitions.map((definition) => definition.name.source),
   ).toEqual(
@@ -79,16 +87,20 @@ function collapseSingleRootReferenceDocument(
     return document;
   }
 
-  return {
-    ...document,
-    definitions: isSchemaDefinitionReferenced(
+  if (
+    isSchemaDefinitionReferenced(
       rootDefinition.name.source,
       document.definitions,
     )
-      ? document.definitions
-      : document.definitions.filter(
-          (definition) => definition.name.source !== rootDefinition.name.source,
-        ),
+  ) {
+    return document;
+  }
+
+  return {
+    ...document,
+    definitions: document.definitions.filter(
+      (definition) => definition.name.source !== rootDefinition.name.source,
+    ),
     root: rootDefinition.type,
   };
 }
@@ -422,14 +434,25 @@ function expectObjectField(
   propertyName: string,
 ): SchemaFieldNode {
   const normalizedDocument = normalizeSchemaDocumentForTest(document);
+  const rootReference =
+    normalizedDocument.root.kind === "reference"
+      ? normalizedDocument.root
+      : undefined;
 
-  expect(normalizedDocument.root.kind).toBe("object");
+  const root =
+    rootReference !== undefined
+      ? normalizedDocument.definitions.find(
+          (definition) => definition.name.source === rootReference.name,
+        )?.type
+      : normalizedDocument.root;
 
-  if (normalizedDocument.root.kind !== "object") {
+  expect(root?.kind).toBe("object");
+
+  if (!root || root.kind !== "object") {
     throw new Error("Expected schema document root to be an object.");
   }
 
-  const field = normalizedDocument.root.fields.find(
+  const field = root.fields.find(
     (candidate) => candidate.name.source === propertyName,
   );
 

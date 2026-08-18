@@ -18,6 +18,5 @@ The same distinction applies below the field level: `list[str | None]` is
 rendered as a list whose element type is nullable, while `str | None` on a
 field uses the field's nullable metadata.
 
-When the Shape document does not carry a separate root declaration name, the
-generator uses the document name for the root dataclass. Preserving document
-identity and declaration identity separately is deferred to a shared IR review.
+When present, `SchemaDocument.rootName` is used for the root dataclass name.
+Legacy documents without `rootName` continue to use the document name.

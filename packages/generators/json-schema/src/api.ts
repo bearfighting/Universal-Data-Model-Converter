@@ -2,6 +2,7 @@ import type {
   SchemaDocument,
   SchemaGenerator,
 } from "@schema-transformation-toolkit/core";
+import { tryValidateSchemaDocument } from "@schema-transformation-toolkit/core";
 import { collectJsonSchemaSemanticObservations } from "./diagnostics.js";
 import { renderJsonSchemaDocument } from "./emit.js";
 import type { JsonSchemaGenerateResult } from "./failure.js";
@@ -104,6 +105,18 @@ function renderJsonSchemaDocumentResult(
   doc: SchemaDocument,
   options: ResolvedJsonSchemaGeneratorOptions,
 ): JsonSchemaGenerateResult {
+  const schemaValidation = tryValidateSchemaDocument(doc);
+  if (!schemaValidation.ok) {
+    return {
+      ok: false,
+      code: "invalid-schema-document",
+      message:
+        schemaValidation.diagnostics[0]?.message ??
+        "The JSON Schema generator received an invalid schema document.",
+      diagnostics: schemaValidation.diagnostics,
+    };
+  }
+
   const validationFailure = validateJsonSchemaDocument(doc, options);
 
   if (validationFailure !== null) {

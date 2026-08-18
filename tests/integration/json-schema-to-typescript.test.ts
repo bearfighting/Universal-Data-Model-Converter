@@ -76,8 +76,6 @@ describe("integration: json-schema -> ir -> typescript", () => {
         "}",
         "",
         "export type Response = User[];",
-        "",
-        "export type ResponseDocument = Response;",
       ].join("\n"),
     });
   });
@@ -232,8 +230,6 @@ describe("integration: json-schema -> ir -> typescript", () => {
         "export type FallbackValue = unknown;",
         "",
         'export type WideValues = "open" | FallbackValue;',
-        "",
-        "export type WideValuesDocument = WideValues;",
       ].join("\n"),
       diagnostics: [
         unknownWideningDiagnostic(["definitions", "FallbackValue"], {

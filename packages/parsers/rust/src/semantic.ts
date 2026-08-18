@@ -157,6 +157,9 @@ export function mapRustFile(
     mapped: mapItem(item, item === root, names),
   }));
   const mappedRoot = mappedItems.find((item) => item.item === root)!.mapped;
+  const rootIsReferenced = file.items.some((candidate) =>
+    referencesName(candidate, root.name),
+  );
   const definitions = mappedItems
     .filter(
       (item) =>
@@ -170,7 +173,14 @@ export function mapRustFile(
   const notes = mappedItems.flatMap((item) => item.mapped.notes ?? []);
 
   return {
-    document: schemaDocument(name, mappedRoot.node, { definitions }),
+    document: schemaDocument(
+      name,
+      rootIsReferenced ? schemaReferenceNode(root.name) : mappedRoot.node,
+      {
+        rootName: root.name,
+        definitions,
+      },
+    ),
     constraints: constraintDocument(name, entries),
     semanticNotes: notes,
   };

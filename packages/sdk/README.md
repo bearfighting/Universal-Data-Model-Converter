@@ -29,9 +29,9 @@ are intentionally unsupported in V1. Conversions that lose schema constraints
 report those losses in the normal SDK result report.
 
 The SDK treats Python Dataclass as a format-specific adapter over Shape IR. The
-document identity and generated root declaration name may differ from the
-original source declaration until a shared cross-language root-name IR decision
-is made.
+shared `SchemaDocument.rootName` field preserves a known root declaration name
+separately from document identity; legacy documents without it use the document
+name as the generator fallback.
 
 Required presence and nullable values remain separate in Python conversions;
 nested nullable values are represented by Shape unions inside arrays or other

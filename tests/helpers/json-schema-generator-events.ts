@@ -102,3 +102,34 @@ export function closedObjectSchemaSemanticNote(
     evidence,
   };
 }
+
+export function rootDeclarationNameLossDiagnostic(
+  evidence: Record<string, unknown>,
+) {
+  return {
+    severity: "warning" as const,
+    code: "root-declaration-name-not-preserved",
+    message:
+      "JSON Schema output cannot preserve the inline root declaration name separately from document identity.",
+    path: ["root"],
+    nodeKind: "document" as const,
+    source: "generator-json-schema",
+    evidence,
+  };
+}
+
+export function rootDeclarationNameLossSemanticNote(
+  evidence: Record<string, unknown>,
+) {
+  return {
+    kind: "loss" as const,
+    code: "root-declaration-name-not-preserved",
+    message:
+      "JSON Schema output cannot preserve the inline root declaration name separately from document identity.",
+    path: ["root"],
+    nodeKind: "document" as const,
+    source: "generator-json-schema",
+    layer: "target" as const,
+    evidence,
+  };
+}

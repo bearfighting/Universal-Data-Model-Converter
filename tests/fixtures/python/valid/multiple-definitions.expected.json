@@ -2,6 +2,7 @@
   "version": "0.1",
   "kind": "document",
   "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "rootName": { "source": "User", "words": ["user"] },
   "definitions": [
     {
       "name": { "source": "Address", "words": ["address"] },

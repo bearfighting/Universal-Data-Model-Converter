@@ -56,6 +56,8 @@ export {
 export { identifierName } from "./identifiers.js";
 
 export {
+  areEquivalentSchemaDocuments,
+  areEquivalentSchemaDocumentsWithRepresentation,
   areEquivalentSchemaNodes,
   areEquivalentSchemaNodesWithRepresentation,
 } from "./equivalence.js";

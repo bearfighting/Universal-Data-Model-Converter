@@ -5,6 +5,9 @@ JSON Schema parser package for the shared schema IR.
 This package is intentionally narrow.
 It accepts the largest practical JSON Schema subset that can be represented by the current shared IR without expanding `@schema-transformation-toolkit/core`.
 
+Root `$ref` documents preserve the referenced declaration as shared IR
+`rootName`; documents without a named root continue to use their document name.
+
 Its `json-schema -> ir -> json-schema` story is intentionally subset-based:
 
 - supported schemas round-trip semantically through the current IR

@@ -49,7 +49,8 @@ A change is complete only when:
 Use the smallest layer that proves the behavior, then one end-to-end route:
 
 - core tests cover IR factories/guards, validation, traversal, transforms,
-  pipeline stages, artifacts, diagnostics, notes, and losses;
+  pipeline stages, artifacts, diagnostics, notes, losses, and preservation of
+  shared document metadata such as `rootName`;
 - parser and generator tests cover valid input, unsupported constructs,
   malformed input, options, root-shape rules, and descriptor contracts;
 - integration tests cover representative Value, Shape, Constraint, loss, and

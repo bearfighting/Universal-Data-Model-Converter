@@ -132,11 +132,23 @@ function normalizeSchemaDocumentWrappers(
       (word, index) => word !== document.name.words[index],
     );
 
-  return !nameChanged && !definitionsChanged
+  const normalizedRootName = document.rootName
+    ? identifierName(document.rootName)
+    : undefined;
+  const rootNameChanged =
+    normalizedRootName !== undefined &&
+    (normalizedRootName.source !== document.rootName?.source ||
+      normalizedRootName.words.length !== document.rootName.words.length ||
+      normalizedRootName.words.some(
+        (word, index) => word !== document.rootName?.words[index],
+      ));
+
+  return !nameChanged && !rootNameChanged && !definitionsChanged
     ? document
     : {
         ...document,
         name: normalizedName,
+        ...(normalizedRootName ? { rootName: normalizedRootName } : {}),
         definitions: nextDefinitions,
       };
 }

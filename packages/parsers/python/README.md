@@ -18,6 +18,7 @@ For nested nullable values, nullability remains inside the Shape node. For
 example, `values: list[str | None]` is a required, non-nullable field whose
 type is `array(union(string, null))`; it is not an optional field.
 
-The document name identifies the schema document and is not guaranteed to be
-the original root class name. Root declaration-name preservation is a deferred
-cross-language Shape IR concern, not a Python-specific V1 feature.
+The document name identifies the schema document. When the source exposes a
+root class name, the parser records it in shared Shape IR as `rootName`, so
+generators can preserve the declaration name independently of document
+identity. This is shared IR metadata, not Python-specific metadata.

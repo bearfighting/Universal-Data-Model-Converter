@@ -66,7 +66,7 @@ export function mapPythonFile(
   return schemaDocument(
     name,
     rootIsReferenced ? schemaReferenceNode(root.name) : rootNode,
-    { definitions },
+    { definitions, rootName: root.name },
   );
 }
 

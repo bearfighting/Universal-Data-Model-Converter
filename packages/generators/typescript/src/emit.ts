@@ -32,7 +32,7 @@ export function renderTypeScriptDocument(
       renderDefinition(definition, options, definitionLookup),
     ),
     renderRootExport(doc, options, definitionLookup),
-  ];
+  ].filter((section) => section.length > 0);
 
   return sections.join("\n\n");
 }
@@ -59,13 +59,22 @@ function renderRootExport(
   options: ResolvedTypeScriptGeneratorOptions,
   definitionLookup: ReadonlyMap<string, SchemaDefinition>,
 ): string {
-  if (doc.root.kind === "object") {
-    return options.rootObjectMode === "type"
-      ? renderRootTypeAlias(doc.name, doc.root, options, definitionLookup)
-      : renderRootInterface(doc.name, doc.root, options, definitionLookup);
+  if (
+    doc.root.kind === "reference" &&
+    (doc.rootName?.source ?? doc.name.source) === doc.root.name &&
+    definitionLookup.has(doc.root.name)
+  ) {
+    return "";
   }
 
-  return `export type ${renderTypeName(doc.name, options)} = ${renderTypeNode(doc.root, 0, options, definitionLookup)};`;
+  const rootName = doc.rootName ?? doc.name;
+  if (doc.root.kind === "object") {
+    return options.rootObjectMode === "type"
+      ? renderRootTypeAlias(rootName, doc.root, options, definitionLookup)
+      : renderRootInterface(rootName, doc.root, options, definitionLookup);
+  }
+
+  return `export type ${renderTypeName(rootName, options)} = ${renderTypeNode(doc.root, 0, options, definitionLookup)};`;
 }
 
 function renderRootInterface(

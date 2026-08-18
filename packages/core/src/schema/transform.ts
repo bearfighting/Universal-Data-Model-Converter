@@ -100,6 +100,7 @@ export function transformSchemaDocumentStructure(
         version: document.version,
         kind: document.kind,
         name: document.name,
+        ...(document.rootName ? { rootName: document.rootName } : {}),
         definitions: nextDefinitions,
         root: nextRoot,
       }
@@ -164,6 +165,7 @@ export function transformSchemaDocumentFromRoot(
         version: document.version,
         kind: document.kind,
         name: document.name,
+        ...(document.rootName ? { rootName: document.rootName } : {}),
         definitions: nextDefinitions,
         root: nextRoot,
       };
@@ -208,6 +210,7 @@ export function transformSchemaDefinitions(
         version: document.version,
         kind: document.kind,
         name: document.name,
+        ...(document.rootName ? { rootName: document.rootName } : {}),
         definitions: nextDefinitions,
         root: document.root,
       }

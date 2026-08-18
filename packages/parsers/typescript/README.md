@@ -52,6 +52,11 @@ The package currently supports:
 The parser emits:
 
 - a `SchemaDocument` with a root reference to the requested entry
+- `rootName` set to the selected declaration when its name is known
+
+Downstream TypeScript generation uses this root identity to avoid emitting a
+self-referencing document-name alias.
+
 - reachable reusable definitions only
 - enum declarations as literal or literal-union definitions
 - enum member references to earlier members when they resolve to supported literal values

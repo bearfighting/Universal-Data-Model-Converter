@@ -1084,7 +1084,15 @@ export declare function resolveSchemaReference(
 ## packages/core/src/schema/equivalence.d.ts
 
 ```ts
-import type { SchemaNode } from "./types.js";
+import type { SchemaDocument, SchemaNode } from "./types.js";
+export declare function areEquivalentSchemaDocuments(
+  left: SchemaDocument,
+  right: SchemaDocument,
+): boolean;
+export declare function areEquivalentSchemaDocumentsWithRepresentation(
+  left: SchemaDocument,
+  right: SchemaDocument,
+): boolean;
 export declare function areEquivalentSchemaNodes(
   left: SchemaNode,
   right: SchemaNode,
@@ -1177,6 +1185,7 @@ export declare function schemaDocument(
   name: IdentifierInput,
   root: SchemaNode,
   options?: {
+    rootName?: IdentifierInput;
     definitions?: SchemaDefinition[];
   },
 ): SchemaDocument;
@@ -1310,6 +1319,8 @@ export {
 } from "./factories.js";
 export { identifierName } from "./identifiers.js";
 export {
+  areEquivalentSchemaDocuments,
+  areEquivalentSchemaDocumentsWithRepresentation,
   areEquivalentSchemaNodes,
   areEquivalentSchemaNodesWithRepresentation,
 } from "./equivalence.js";
@@ -1897,6 +1908,8 @@ export interface SchemaDocument {
   version: "0.1";
   kind: "document";
   name: IdentifierName;
+  /** Stable declaration name for the root shape, when the source exposes one. */
+  rootName?: IdentifierName;
   definitions: SchemaDefinition[];
   root: SchemaNode;
 }

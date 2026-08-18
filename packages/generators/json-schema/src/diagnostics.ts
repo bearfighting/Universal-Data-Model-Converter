@@ -24,6 +24,24 @@ export function collectJsonSchemaSemanticObservations(
   const diagnostics: SchemaDiagnostic[] = [];
   const semanticNotes: SchemaSemanticNote[] = [];
 
+  if (doc.rootName !== undefined && doc.root.kind !== "reference") {
+    pushSchemaObservation(diagnostics, semanticNotes, {
+      severity: "warning",
+      kind: "loss",
+      code: "root-declaration-name-not-preserved",
+      message:
+        "JSON Schema output cannot preserve the inline root declaration name separately from document identity.",
+      path: ["root"],
+      nodeKind: "document",
+      source: "generator-json-schema",
+      layer: "target",
+      evidence: {
+        rootName: doc.rootName.source,
+        documentName: doc.name.source,
+      },
+    });
+  }
+
   walkSchemaDocument(
     doc,
     {

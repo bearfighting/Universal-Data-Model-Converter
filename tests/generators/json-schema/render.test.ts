@@ -4,6 +4,7 @@ import {
   constraint,
   constraintDocument,
   decimalValue,
+  identifierName,
   numericConstraint,
   schemaArrayNode,
   schemaDefinition,
@@ -35,6 +36,8 @@ import {
   closedObjectSchemaSemanticNote,
   overlappingUnionPolicyDiagnostic,
   overlappingUnionPolicySemanticNote,
+  rootDeclarationNameLossDiagnostic,
+  rootDeclarationNameLossSemanticNote,
   wideUnknownSchemaDiagnostic,
   wideUnknownSchemaSemanticNote,
 } from "../../helpers/json-schema-generator-events.js";
@@ -65,6 +68,84 @@ describe("generator-json-schema", () => {
         },
       },
       required: ["id"],
+    });
+  });
+
+  it("reports inline root declaration names that JSON Schema cannot preserve", () => {
+    const doc = schemaDocument(
+      "UserDocument",
+      schemaObjectNode([schemaFieldNode("id", schemaScalarNode("integer"))]),
+      { rootName: "User" },
+    );
+
+    expect(tryGenerateJsonSchema(doc)).toEqual({
+      ok: true,
+      output: {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        title: "UserDocument",
+        type: "object",
+        properties: { id: { type: "integer" } },
+        required: ["id"],
+      },
+      diagnostics: [
+        rootDeclarationNameLossDiagnostic({
+          rootName: "User",
+          documentName: "UserDocument",
+        }),
+      ],
+      semanticNotes: [
+        rootDeclarationNameLossSemanticNote({
+          rootName: "User",
+          documentName: "UserDocument",
+        }),
+      ],
+    });
+  });
+
+  it("preserves named root references without a root declaration loss note", () => {
+    const doc = schemaDocument("UserDocument", schemaReferenceNode("User"), {
+      rootName: "User",
+      definitions: [
+        schemaDefinition(
+          "User",
+          schemaObjectNode([
+            schemaFieldNode("id", schemaScalarNode("integer")),
+          ]),
+        ),
+      ],
+    });
+
+    const result = tryGenerateJsonSchema(doc);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        result.semanticNotes?.map((note) => note.code) ?? [],
+      ).not.toContain("root-declaration-name-not-preserved");
+    }
+  });
+
+  it("rejects invalid inline rootName and definition conflicts before rendering", () => {
+    const invalidDocument: SchemaDocument = {
+      version: "0.1",
+      kind: "document",
+      name: identifierName("UserDocument"),
+      rootName: identifierName("User"),
+      definitions: [schemaDefinition("User", schemaObjectNode([]))],
+      root: schemaObjectNode([]),
+    };
+
+    expect(tryGenerateJsonSchema(invalidDocument)).toEqual({
+      ok: false,
+      code: "invalid-schema-document",
+      message:
+        'Invalid schema document: inline rootName "User" conflicts with an existing definition of the same name.',
+      diagnostics: [
+        expect.objectContaining({
+          code: "root-name-definition-conflict",
+          path: ["rootName"],
+          source: "core",
+        }),
+      ],
     });
   });
 
@@ -741,18 +822,18 @@ describe("generator-json-schema", () => {
 
     expect(tryGenerateJsonSchema(doc)).toEqual({
       ok: false,
-      code: "invalid-json-schema-reference",
+      code: "invalid-schema-document",
       message:
-        'The schema reference "Missing" does not match a renderable definition.',
+        'Invalid schema document: reference "Missing" does not match a known definition.',
       diagnostics: [
         {
           severity: "error",
-          code: "invalid-json-schema-reference",
+          code: "unknown-reference",
           message:
-            'The schema reference "Missing" does not match a renderable definition.',
+            'Invalid schema document: reference "Missing" does not match a known definition.',
           path: ["root"],
           nodeKind: "reference",
-          source: "generator-json-schema",
+          source: "core",
           evidence: {
             referenceName: "Missing",
           },
@@ -779,17 +860,18 @@ describe("generator-json-schema", () => {
 
     expect(tryGenerateJsonSchema(doc)).toEqual({
       ok: false,
-      code: "invalid-record-key",
-      message: "JSON Schema record keys must render from string scalar keys.",
+      code: "invalid-schema-document",
+      message:
+        'Invalid schema record: record keys must currently be represented as the scalar type "string".',
       diagnostics: [
         {
           severity: "error",
           code: "invalid-record-key",
           message:
-            "JSON Schema record keys must render from string scalar keys.",
+            'Invalid schema record: record keys must currently be represented as the scalar type "string".',
           path: ["root", "key"],
           nodeKind: "record",
-          source: "generator-json-schema",
+          source: "core",
         },
       ],
     });

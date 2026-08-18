@@ -23,7 +23,7 @@ class User:
     expect(generated.ok).toBe(true);
     if (!generated.ok) return;
     const second = tryParsePython(generated.output, {
-      entry: "PythonDocument",
+      entry: "User",
     });
     expect(second.ok).toBe(true);
     if (!second.ok) return;

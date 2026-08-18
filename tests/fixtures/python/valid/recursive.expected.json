@@ -2,6 +2,7 @@
   "version": "0.1",
   "kind": "document",
   "name": { "source": "PythonDocument", "words": ["python", "document"] },
+  "rootName": { "source": "Node", "words": ["node"] },
   "definitions": [
     {
       "name": { "source": "Node", "words": ["node"] },

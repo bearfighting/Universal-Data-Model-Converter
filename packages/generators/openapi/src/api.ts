@@ -108,7 +108,7 @@ function convertJsonSchemaToOpenApi(
   document: SchemaDocument,
   generated: JsonSchemaOutput,
 ): OpenApiGenerateResult {
-  const rootName = document.name.source;
+  const rootName = document.rootName?.source ?? document.name.source;
   const rootAndDefinitions =
     typeof generated === "boolean"
       ? { root: generated, definitions: {} }

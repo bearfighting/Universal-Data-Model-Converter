@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   schemaArrayNode,
   schemaDefinition,
-  schemaDocument,
+  schemaDocument as createSchemaDocument,
   schemaFieldNode,
   schemaLiteralNode,
   schemaNullNode,
@@ -19,6 +19,19 @@ import {
   tryInferTypeScriptDocumentWithOptions,
   typeScriptParser,
 } from "../../../packages/parsers/typescript/src/index.js";
+
+function schemaDocument(
+  name: string,
+  root: Parameters<typeof createSchemaDocument>[1],
+  options?: Parameters<typeof createSchemaDocument>[2],
+) {
+  return createSchemaDocument(name, root, {
+    ...options,
+    ...(options?.rootName === undefined && root.kind === "reference"
+      ? { rootName: root.name }
+      : {}),
+  });
+}
 
 describe("parser-typescript success paths", () => {
   describe("entry selection", () => {

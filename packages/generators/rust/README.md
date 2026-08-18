@@ -2,6 +2,9 @@
 
 Rust data-model generator for the shared Shape IR and Constraint IR.
 
+The generator preserves `SchemaDocument.rootName` for the root declaration and
+falls back to the document name for legacy IR documents.
+
 The generator emits deterministic public structs and unit-only enums without
 Serde derives. It supports objects, string literal enums, string-keyed records
 as fully qualified `std::collections::HashMap` values, primitive scalars,
