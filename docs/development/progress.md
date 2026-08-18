@@ -54,28 +54,70 @@ Use the SDK registry APIs for the exact current route and format lists:
 - `listConversionRoutes()`
 - `describeConversionRouteCapabilities()`
 
+### Python Dataclass routes
+
+Python Dataclass V1 is a supported Shape IR adapter for the documented
+structural subset. Validated semantics include:
+
+- primitive scalar fields;
+- arrays through `list[T]`;
+- nullable values through `Optional[T]` and `T | None`;
+- named dataclass references and same-file forward references;
+- recursive and mutually recursive definitions; and
+- multiple definitions selected with an explicit `entry` when required.
+
+The parser and generator are now in V1 final cleanup and maintenance mode.
+New Python syntax features are intentionally deferred until a shared semantic
+capability has been designed and validated across multiple adapters.
+
 ## Next Priorities
 
-1. Complete Rust V1 hardening: semantic round trips, recursive references,
+1. Finish Python Dataclass V1 documentation and failure-taxonomy cleanup, then
+   freeze the current supported boundary without adding Python-specific IR.
+2. Complete Rust V1 hardening: semantic round trips, recursive references,
    negative fixtures, source locations, and cross-format fixtures.
-2. Add Rust unit-only enums by lowering them to the existing literal and union
+3. Add Rust unit-only enums by lowering them to the existing literal and union
    Shape IR nodes; validate Rust ↔ TypeScript, JSON Schema, and Zod routes.
-3. Add string-keyed Rust maps for `HashMap<String, T>` and
+4. Add string-keyed Rust maps for `HashMap<String, T>` and
    `BTreeMap<String, T>` by lowering them to the existing record Shape IR;
    validate map routes across JSON Schema, TypeScript, Zod, and OpenAPI.
-4. Keep data-carrying enums, Serde representation attributes, aliases,
+5. Keep data-carrying enums, Serde representation attributes, aliases,
    newtypes, and generics deferred until enum/map work reveals concrete shared
    IR pressure.
-5. Keep the public SDK contract, user guide, capability matrix, and consumer
+6. Keep the public SDK contract, user guide, capability matrix, and consumer
    scenario matrix aligned with actual published behavior.
-6. Decide whether the current builtin registry bundle should remain fully
+7. Decide whether the current builtin registry bundle should remain fully
    bundled or gain a measured tree-shaking strategy for downstream products.
-7. Improve diagnostic location guidance for editor and code-highlighting
+8. Improve diagnostic location guidance for editor and code-highlighting
    integrations.
-8. Validate the package surface against a clean external checkout or release
+9. Validate the package surface against a clean external checkout or release
    artifact when the next Rust milestone is prepared.
-9. Validate the shared `rootName` contract across language adapters and keep
-   record/map semantics aligned without adding format-specific IR.
+10. Validate the shared `rootName` contract across language adapters and keep
+    record/map semantics aligned without adding format-specific IR.
+
+### Future shared-capability roadmap
+
+After Python V1 is frozen, future feature work should be capability-driven
+rather than language-driven:
+
+```text
+cross-language equivalence
+→ programming-language semantic matrix
+→ shared string-keyed map design
+→ Shape IR record/map validation and fixtures
+→ Python dict[str, T], Rust maps, TypeScript Record, JSON Schema maps
+→ Literal / unit-enum study
+→ general union study
+```
+
+Map is the proposed first shared capability because the current IR already
+has `SchemaRecordNode` and the four target families have clear structural
+counterparts. The first version should remain limited to `string → T` until
+cross-format tests demonstrate a need for broader key semantics. Literal and
+unit-enum support should follow only after deciding whether named enums need
+semantics beyond literal unions. General unions come later because `oneOf`,
+`anyOf`, discriminators, ambiguity, and nullable special cases require a more
+careful shared contract.
 
 ## Intentional Deferrals
 
@@ -90,6 +132,10 @@ Use the SDK registry APIs for the exact current route and format lists:
 - Broad new parser families or speculative IR expansion.
 - Python `dict[str, T]` parsing until the shared record/map route matrix is
   implemented.
+- Python defaults, `field(...)`, Pydantic, attrs, TypedDict, NamedTuple, and
+  other framework/runtime semantics remain outside the Dataclass V1 adapter.
+- Cross-language map, Literal/Enum, and general-union semantics until their
+  shared IR contracts are explicitly designed.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 

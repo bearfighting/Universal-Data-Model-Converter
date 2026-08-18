@@ -31,6 +31,9 @@ final version.
   cross-format route coverage without changing Core IR.
 - Documented the shared root identity contract and deferred Python map support
   through the existing `SchemaRecordNode`.
+- Clarified that Python Dataclass V1 supports only the generic forms `list[T]`
+  and `Optional[T]`, and documented the future capability-driven roadmap from
+  cross-language equivalence to maps, Literal/Enum, and general unions.
 
 ## 0.3.2 - 2026-08-18
 

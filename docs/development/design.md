@@ -168,6 +168,34 @@ represents fixed properties, and `additionalProperties` represents the policy
 for keys outside those properties; these forms must not be silently rewritten
 into one another.
 
+## Capability-driven evolution
+
+Once a language adapter reaches a stable V1 boundary, new work should be
+organized around shared semantic capabilities rather than a sequence of
+language-specific feature expansions. The intended development loop is:
+
+```text
+identify shared capability
+→ define the semantic intersection
+→ strengthen shared IR only when necessary
+→ implement format adapters
+→ add cross-language equivalence fixtures
+```
+
+The next proposed capability is a string-keyed map. The existing
+`SchemaRecordNode` is the starting point; the initial shared contract should
+be `string → T`, with Python `dict[str, T]`, Rust string-keyed maps,
+TypeScript `Record<string, T>`, and JSON Schema `additionalProperties` as
+adapters. This work is deferred until the route matrix exposes a concrete
+semantic gap.
+
+Literal and unit-enum semantics should follow map work, after deciding whether
+named enum declarations require identity beyond literal unions. General unions
+come later because their cross-format behavior depends on overlap, `oneOf` vs
+`anyOf`, discriminators, and ambiguity. Python defaults, framework models, and
+serialization/runtime behavior remain separate future capabilities rather than
+Python Dataclass V2 syntax additions.
+
 Field-level nullability and nested null unions are already distinct Shape IR
 semantics:
 
