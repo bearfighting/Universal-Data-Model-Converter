@@ -197,6 +197,7 @@ describe("sdk support matrix", () => {
       "json",
       "json-schema",
       "openapi",
+      "python",
       "rust",
       "toml",
       "typescript",
@@ -212,6 +213,7 @@ describe("sdk support matrix", () => {
         "json",
         "json-schema",
         "openapi",
+        "python",
         "rust",
         "toml",
         "typescript",
@@ -228,6 +230,7 @@ describe("sdk support matrix", () => {
         "json",
         "json-schema",
         "openapi",
+        "python",
         "rust",
         "toml",
         "typescript",
@@ -260,7 +263,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(59);
+    expect(listConversionRoutes()).toHaveLength(74);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

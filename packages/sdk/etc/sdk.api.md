@@ -42,6 +42,10 @@ export declare const BUILTIN_FORMAT_CATALOG: {
     readonly source: true;
     readonly target: true;
   };
+  readonly python: {
+    readonly source: true;
+    readonly target: true;
+  };
 };
 type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;
 type NonEmptyFormatList = readonly [BuiltinFormat, ...BuiltinFormat[]];
@@ -84,6 +88,8 @@ import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yam
 import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
 import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
 import type { RustParseOptions } from "@schema-transformation-toolkit/parser-rust";
+import type { PythonGeneratorOptions } from "@schema-transformation-toolkit/generator-python";
+import type { PythonParseOptions } from "@schema-transformation-toolkit/parser-python";
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
@@ -94,6 +100,7 @@ export interface BuiltinGeneratorOutputs {
   yaml: YamlOutput;
   csv: CsvOutput;
   toml: TomlOutput;
+  python: string;
 }
 export interface BuiltinParserOptions {
   json?: JsonParseOptions;
@@ -105,6 +112,7 @@ export interface BuiltinParserOptions {
   csv?: CsvParseOptions;
   toml?: TomlParseOptions;
   rust?: RustParseOptions;
+  python?: PythonParseOptions;
 }
 export interface BuiltinGeneratorOptions {
   jsonSchema?: JsonSchemaGeneratorOptions;
@@ -114,6 +122,7 @@ export interface BuiltinGeneratorOptions {
   yaml?: Record<string, never>;
   csv?: CsvGeneratorOptions;
   toml?: TomlGeneratorOptions;
+  python?: PythonGeneratorOptions;
 }
 ```
 
@@ -390,6 +399,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   csv: "csv";
   toml: "toml";
   rust: "rust";
+  python: "python";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
@@ -401,6 +411,7 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   csv: "csv";
   toml: "toml";
   rust: "rust";
+  python: "python";
 }>;
 export declare const conversionIrPreferenceSchema: z.ZodEnum<{
   value: "value";
@@ -624,6 +635,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       csv: "csv";
       toml: "toml";
       rust: "rust";
+      python: "python";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
@@ -635,6 +647,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       csv: "csv";
       toml: "toml";
       rust: "rust";
+      python: "python";
     }>;
     parser: z.ZodObject<
       {

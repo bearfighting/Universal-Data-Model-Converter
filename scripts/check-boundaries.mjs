@@ -61,6 +61,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/rust"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-python",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/python"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -104,6 +109,11 @@ const packageConfigs = [
     name: "@schema-transformation-toolkit/generator-rust",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/rust"),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-python",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/python"),
   },
 ];
 
@@ -332,6 +342,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-csv",
     "@schema-transformation-toolkit/parser-toml",
     "@schema-transformation-toolkit/parser-rust",
+    "@schema-transformation-toolkit/parser-python",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
@@ -341,6 +352,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/generator-csv",
     "@schema-transformation-toolkit/generator-toml",
     "@schema-transformation-toolkit/generator-rust",
+    "@schema-transformation-toolkit/generator-python",
   ]);
 }
 

@@ -10,6 +10,10 @@ feature batches, `0.x.y` for smaller features or focused fixes, and
 `-alpha.N`, `-beta.N`, or `-rc.N` for testing stages before the corresponding
 final version.
 
+## Unreleased
+
+- Added V1 Python dataclass parser and generator support through Shape IR.
+
 ## 0.3.2 - 2026-08-18
 
 ### Packaging

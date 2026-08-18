@@ -3,21 +3,23 @@ import { csvGeneratorDescriptor as descriptor0 } from "@schema-transformation-to
 import { jsonSchemaGeneratorDescriptor as descriptor1 } from "@schema-transformation-toolkit/generator-json-schema";
 import { jsonGeneratorDescriptor as descriptor2 } from "@schema-transformation-toolkit/generator-json";
 import { openApiGeneratorDescriptor as descriptor3 } from "@schema-transformation-toolkit/generator-openapi";
-import { rustGeneratorDescriptor as descriptor4 } from "@schema-transformation-toolkit/generator-rust";
-import { tomlGeneratorDescriptor as descriptor5 } from "@schema-transformation-toolkit/generator-toml";
-import { typeScriptGeneratorDescriptor as descriptor6 } from "@schema-transformation-toolkit/generator-typescript";
-import { yamlGeneratorDescriptor as descriptor7 } from "@schema-transformation-toolkit/generator-yaml";
-import { zodGeneratorDescriptor as descriptor8 } from "@schema-transformation-toolkit/generator-zod";
-import { csvParserDescriptor as descriptor9 } from "@schema-transformation-toolkit/parser-csv";
-import { jsonSchemaParserDescriptor as descriptor10 } from "@schema-transformation-toolkit/parser-json-schema";
-import { jsonParserDescriptor as descriptor11 } from "@schema-transformation-toolkit/parser-json";
-import { openApiParserDescriptor as descriptor12 } from "@schema-transformation-toolkit/parser-openapi";
-import { rustParserDescriptor as descriptor13 } from "@schema-transformation-toolkit/parser-rust";
-import { tomlParserDescriptor as descriptor14 } from "@schema-transformation-toolkit/parser-toml";
-import { typeScriptParserDescriptor as descriptor15 } from "@schema-transformation-toolkit/parser-typescript";
-import { yamlParserDescriptor as descriptor16 } from "@schema-transformation-toolkit/parser-yaml";
-import { zodParserDescriptor as descriptor17 } from "@schema-transformation-toolkit/parser-zod";
-import { valueToShapeTransformer as descriptor18 } from "@schema-transformation-toolkit/core";
+import { pythonGeneratorDescriptor as descriptor4 } from "@schema-transformation-toolkit/generator-python";
+import { rustGeneratorDescriptor as descriptor5 } from "@schema-transformation-toolkit/generator-rust";
+import { tomlGeneratorDescriptor as descriptor6 } from "@schema-transformation-toolkit/generator-toml";
+import { typeScriptGeneratorDescriptor as descriptor7 } from "@schema-transformation-toolkit/generator-typescript";
+import { yamlGeneratorDescriptor as descriptor8 } from "@schema-transformation-toolkit/generator-yaml";
+import { zodGeneratorDescriptor as descriptor9 } from "@schema-transformation-toolkit/generator-zod";
+import { csvParserDescriptor as descriptor10 } from "@schema-transformation-toolkit/parser-csv";
+import { jsonSchemaParserDescriptor as descriptor11 } from "@schema-transformation-toolkit/parser-json-schema";
+import { jsonParserDescriptor as descriptor12 } from "@schema-transformation-toolkit/parser-json";
+import { openApiParserDescriptor as descriptor13 } from "@schema-transformation-toolkit/parser-openapi";
+import { pythonParserDescriptor as descriptor14 } from "@schema-transformation-toolkit/parser-python";
+import { rustParserDescriptor as descriptor15 } from "@schema-transformation-toolkit/parser-rust";
+import { tomlParserDescriptor as descriptor16 } from "@schema-transformation-toolkit/parser-toml";
+import { typeScriptParserDescriptor as descriptor17 } from "@schema-transformation-toolkit/parser-typescript";
+import { yamlParserDescriptor as descriptor18 } from "@schema-transformation-toolkit/parser-yaml";
+import { zodParserDescriptor as descriptor19 } from "@schema-transformation-toolkit/parser-zod";
+import { valueToShapeTransformer as descriptor20 } from "@schema-transformation-toolkit/core";
 
 import { createDescriptorRegistry } from "@schema-transformation-toolkit/core";
 import type { DescriptorRegistry } from "@schema-transformation-toolkit/core";
@@ -33,7 +35,7 @@ export function createBuiltinRegistry(): DescriptorRegistry {
   registry.registerGenerator(descriptor6);
   registry.registerGenerator(descriptor7);
   registry.registerGenerator(descriptor8);
-  registry.registerParser(descriptor9);
+  registry.registerGenerator(descriptor9);
   registry.registerParser(descriptor10);
   registry.registerParser(descriptor11);
   registry.registerParser(descriptor12);
@@ -42,6 +44,8 @@ export function createBuiltinRegistry(): DescriptorRegistry {
   registry.registerParser(descriptor15);
   registry.registerParser(descriptor16);
   registry.registerParser(descriptor17);
-  registry.registerTransformer(descriptor18);
+  registry.registerParser(descriptor18);
+  registry.registerParser(descriptor19);
+  registry.registerTransformer(descriptor20);
   return registry;
 }

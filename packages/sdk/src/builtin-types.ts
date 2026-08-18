@@ -27,6 +27,8 @@ import type { YamlParseOptions } from "@schema-transformation-toolkit/parser-yam
 import type { CsvParseOptions } from "@schema-transformation-toolkit/parser-csv";
 import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-toml";
 import type { RustParseOptions } from "@schema-transformation-toolkit/parser-rust";
+import type { PythonGeneratorOptions } from "@schema-transformation-toolkit/generator-python";
+import type { PythonParseOptions } from "@schema-transformation-toolkit/parser-python";
 
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
@@ -38,6 +40,7 @@ export interface BuiltinGeneratorOutputs {
   yaml: YamlOutput;
   csv: CsvOutput;
   toml: TomlOutput;
+  python: string;
 }
 
 export interface BuiltinParserOptions {
@@ -50,6 +53,7 @@ export interface BuiltinParserOptions {
   csv?: CsvParseOptions;
   toml?: TomlParseOptions;
   rust?: RustParseOptions;
+  python?: PythonParseOptions;
 }
 
 export interface BuiltinGeneratorOptions {
@@ -60,4 +64,5 @@ export interface BuiltinGeneratorOptions {
   yaml?: Record<string, never>;
   csv?: CsvGeneratorOptions;
   toml?: TomlGeneratorOptions;
+  python?: PythonGeneratorOptions;
 }
