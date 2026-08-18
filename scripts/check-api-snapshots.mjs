@@ -162,12 +162,30 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-python",
+    root: path.join(repoRoot, "packages/parsers/python"),
+    entry: path.join(repoRoot, "packages/parsers/python/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/python/etc/parser-python.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-rust",
     root: path.join(repoRoot, "packages/generators/rust"),
     entry: path.join(repoRoot, "packages/generators/rust/src/index.ts"),
     snapshot: path.join(
       repoRoot,
       "packages/generators/rust/etc/generator-rust.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-python",
+    root: path.join(repoRoot, "packages/generators/python"),
+    entry: path.join(repoRoot, "packages/generators/python/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/python/etc/generator-python.api.md",
     ),
   },
   {

@@ -7,17 +7,18 @@ format list is available. Use `listConversionRoutes()` and
 
 ## Format capabilities
 
-| Format      | Primary semantics  | Typical input/output                           | Important boundary                                                                  |
-| ----------- | ------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| JSON        | Value              | concrete data and normalized JSON              | sample data does not encode every schema rule                                       |
-| YAML        | Value              | strict YAML data and YAML output               | JSON-compatible single document only                                                |
-| CSV         | Value              | flat object arrays                             | header-based; cells become strings; array root required                             |
-| TOML        | Value              | object-root TOML data                          | object root required; dates, non-finite numbers, and unsafe integers rejected       |
-| JSON Schema | Shape + Constraint | schema documents                               | current IR-aligned subset; not a full JSON Schema platform                          |
-| TypeScript  | Shape              | schema-oriented declarations                   | supported subset only; not a full TypeScript front-end                              |
-| Zod         | Shape + Constraint | static Zod 4 expressions and generated modules | supported static expressions only; consuming project needs Zod 4 for runtime output |
-| OpenAPI     | Shape + Constraint | canonical schema-compatible documents          | bounded OpenAPI schema boundary; not full document generation                       |
-| Rust        | Shape + Constraint | structs, unit enums, string-keyed maps         | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics |
+| Format      | Primary semantics  | Typical input/output                           | Important boundary                                                                   |
+| ----------- | ------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| JSON        | Value              | concrete data and normalized JSON              | sample data does not encode every schema rule                                        |
+| YAML        | Value              | strict YAML data and YAML output               | JSON-compatible single document only                                                 |
+| CSV         | Value              | flat object arrays                             | header-based; cells become strings; array root required                              |
+| TOML        | Value              | object-root TOML data                          | object root required; dates, non-finite numbers, and unsafe integers rejected        |
+| JSON Schema | Shape + Constraint | schema documents                               | current IR-aligned subset; not a full JSON Schema platform                           |
+| TypeScript  | Shape              | schema-oriented declarations                   | supported subset only; not a full TypeScript front-end                               |
+| Zod         | Shape + Constraint | static Zod 4 expressions and generated modules | supported static expressions only; consuming project needs Zod 4 for runtime output  |
+| OpenAPI     | Shape + Constraint | canonical schema-compatible documents          | bounded OpenAPI schema boundary; not full document generation                        |
+| Rust        | Shape + Constraint | structs, unit enums, string-keyed maps         | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics  |
+| Python      | Shape              | Python 3.10+ dataclasses                       | dataclass type-shape subset; no defaults, runtime behavior, inheritance, or generics |
 
 ## Validated route families
 
@@ -35,6 +36,7 @@ shared pipeline execution:
 | Zod         | Zod, TypeScript, JSON Schema, OpenAPI       | Shape + Constraint subset                |
 | OpenAPI     | schema-compatible OpenAPI targets           | explicit JSON Schema adapter boundary    |
 | Rust        | Rust, TypeScript, JSON Schema, Zod, OpenAPI | structs, unit enums, maps, numeric hints |
+| Python      | Python, TypeScript, Rust, JSON Schema       | dataclass Shape IR adapter               |
 
 The exact route set can vary with registry contents and descriptor capabilities.
 Do not infer support for a route merely because both format names appear in

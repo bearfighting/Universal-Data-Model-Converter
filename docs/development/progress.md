@@ -19,7 +19,8 @@ planning, registry adaptation, report construction, and public result schemas.
 Current platform capabilities:
 
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
-  Schema, TypeScript, Zod, OpenAPI, and the V1 Rust struct subset.
+  Schema, TypeScript, Zod, OpenAPI, the V1 Rust struct subset, and the V1
+  Python dataclass subset.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -57,21 +58,23 @@ Use the SDK registry APIs for the exact current route and format lists:
 
 1. Complete Rust V1 hardening: semantic round trips, recursive references,
    negative fixtures, source locations, and cross-format fixtures.
-2. Add Rust unit-only enums by lowering them to the existing literal and union
+2. Harden Python V1: source locations, richer negative fixtures, and cross-format
+   semantic round trips.
+3. Add Rust unit-only enums by lowering them to the existing literal and union
    Shape IR nodes; validate Rust ↔ TypeScript, JSON Schema, and Zod routes.
-3. Add string-keyed Rust maps for `HashMap<String, T>` and
+4. Add string-keyed Rust maps for `HashMap<String, T>` and
    `BTreeMap<String, T>` by lowering them to the existing record Shape IR;
    validate map routes across JSON Schema, TypeScript, Zod, and OpenAPI.
-4. Keep data-carrying enums, Serde representation attributes, aliases,
+5. Keep data-carrying enums, Serde representation attributes, aliases,
    newtypes, and generics deferred until enum/map work reveals concrete shared
    IR pressure.
-5. Keep the public SDK contract, user guide, capability matrix, and consumer
+6. Keep the public SDK contract, user guide, capability matrix, and consumer
    scenario matrix aligned with actual published behavior.
-6. Decide whether the current builtin registry bundle should remain fully
+7. Decide whether the current builtin registry bundle should remain fully
    bundled or gain a measured tree-shaking strategy for downstream products.
-7. Improve diagnostic location guidance for editor and code-highlighting
+8. Improve diagnostic location guidance for editor and code-highlighting
    integrations.
-8. Validate the package surface against a clean external checkout or release
+9. Validate the package surface against a clean external checkout or release
    artifact when the next Rust milestone is prepared.
 
 ## Intentional Deferrals

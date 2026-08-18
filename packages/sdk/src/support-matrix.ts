@@ -105,6 +105,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Data-carrying enums, Serde attributes, tuples, aliases, and generics remain unsupported.",
     "Map containers are normalized to string-keyed records and Rust generation uses HashMap.",
   ],
+  python: [
+    "Python support is limited to modern dataclass type annotations and does not execute Python.",
+    "Defaults, field(...), inheritance, generics, forward references, and serialization behavior remain unsupported.",
+    "Constraint IR is not rendered as runtime validation; unsupported constraints are reported as semantic loss.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -127,6 +132,12 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "data-carrying enums",
     "Serde representation semantics",
     "generic types",
+  ],
+  python: [
+    "forward references",
+    "recursive dataclasses",
+    "dict[str, T]",
+    "Literal and Enum",
   ],
 };
 

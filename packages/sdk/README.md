@@ -13,7 +13,7 @@ Project-level readiness and priorities live in [../../docs/development/progress.
 If you are using the toolkit rather than integrating the SDK itself, start with
 the [User Guide](../../docs/user-guide.md) and [Capability Matrix](../../docs/capability-matrix.md).
 
-The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, and YAML. Selecting
+The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, YAML, Rust, and Python dataclasses. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
@@ -58,8 +58,9 @@ if (!result.ok) {
 }
 ```
 
-The default registry includes JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI, Zod, and YAML
-parsers, plus JSON, CSV, TOML, JSON Schema, TypeScript, Zod, OpenAPI, and YAML generators. The SDK
+The default registry includes JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI, Zod, YAML, Rust,
+and Python parsers, plus JSON, CSV, TOML, JSON Schema, TypeScript, Zod, OpenAPI, YAML, Rust, and
+Python generators. The SDK
 bundles those implementations into its distributable runtime. TypeScript is
 installed as a runtime dependency because the TypeScript parser uses the
 official compiler API; Zod remains a dependency for the public contract

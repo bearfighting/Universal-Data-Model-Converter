@@ -35,6 +35,9 @@
       "@schema-transformation-toolkit/generator-rust": [
         "./packages/generators/rust/src/index.ts"
       ],
+      "@schema-transformation-toolkit/generator-python": [
+        "./packages/generators/python/src/index.ts"
+      ],
       "@schema-transformation-toolkit/parser-json": [
         "./packages/parsers/json/src/index.ts"
       ],
@@ -61,6 +64,9 @@
       ],
       "@schema-transformation-toolkit/parser-rust": [
         "./packages/parsers/rust/src/index.ts"
+      ],
+      "@schema-transformation-toolkit/parser-python": [
+        "./packages/parsers/python/src/index.ts"
       ],
       "@schema-transformation-toolkit/sdk": ["./packages/sdk/src/index.ts"]
     },

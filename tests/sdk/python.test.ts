@@ -1,0 +1,75 @@
+import { describe, expect, it } from "vitest";
+import {
+  convert,
+  describeFormatSupport,
+  listSourceFormatSupports,
+  listTargetFormatSupports,
+} from "@schema-transformation-toolkit/sdk";
+
+describe("Python SDK integration", () => {
+  it("discovers Python as a builtin source and target", () => {
+    expect(
+      listSourceFormatSupports().some((item) => item.format === "python"),
+    ).toBe(true);
+    expect(
+      listTargetFormatSupports().some((item) => item.format === "python"),
+    ).toBe(true);
+    expect(describeFormatSupport("python").parser?.capabilities).toContain(
+      "shape-ir",
+    );
+  });
+
+  it("converts Python dataclasses through the shared pipeline", () => {
+    const input =
+      "@dataclass\nclass User:\n    id: int\n    nickname: str | None\n";
+    const toTypeScript = convert({
+      sourceFormat: "python",
+      targetFormat: "typescript",
+      input,
+    });
+    const toPython = convert({
+      sourceFormat: "python",
+      targetFormat: "python",
+      input,
+    });
+    expect(toTypeScript.ok).toBe(true);
+    expect(toPython.ok).toBe(true);
+    if (toPython.ok) expect(toPython.output).toContain("nickname: str | None");
+  });
+
+  it("accepts Shape documents from TypeScript and Rust", () => {
+    const typeScript = convert({
+      sourceFormat: "typescript",
+      targetFormat: "python",
+      input: "interface User { id: number }",
+    });
+    const rust = convert({
+      sourceFormat: "rust",
+      targetFormat: "python",
+      input: "struct User { id: u64 }",
+    });
+    expect(typeScript.ok).toBe(true);
+    expect(rust.ok).toBe(true);
+    if (typeScript.ok) expect(typeScript.output).toContain("class User:");
+    if (rust.ok) expect(rust.output).toContain("class rustDocument:");
+  });
+
+  it("reports constraints lost by dataclass annotations", () => {
+    const result = convert({
+      sourceFormat: "json-schema",
+      targetFormat: "python",
+      input: JSON.stringify({
+        type: "object",
+        properties: { name: { type: "string", minLength: 2 } },
+        required: ["name"],
+      }),
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok)
+      expect(
+        result.losses?.some(
+          (loss) => loss.lostCapability === "string-constraints",
+        ),
+      ).toBe(true);
+  });
+});

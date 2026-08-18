@@ -75,6 +75,29 @@ describe("sdk registry", () => {
       planConversion("yaml", "openapi"),
       planConversion("yaml", "rust"),
     ];
+    for (const source of [
+      "json",
+      "csv",
+      "toml",
+      "json-schema",
+      "typescript",
+      "openapi",
+      "zod",
+      "rust",
+      "yaml",
+    ]) {
+      expectedRoutes.push(planConversion(source, "python"));
+    }
+    for (const target of [
+      "json-schema",
+      "openapi",
+      "python",
+      "rust",
+      "typescript",
+      "zod",
+    ]) {
+      expectedRoutes.push(planConversion("python", target));
+    }
     expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
   });
 
