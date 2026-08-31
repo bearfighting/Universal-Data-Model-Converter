@@ -87,8 +87,10 @@ describe("sdk registry", () => {
       "yaml",
     ]) {
       expectedRoutes.push(planConversion(source, "python"));
+      expectedRoutes.push(planConversion(source, "go"));
     }
     for (const target of [
+      "go",
       "json-schema",
       "openapi",
       "python",
@@ -97,6 +99,17 @@ describe("sdk registry", () => {
       "zod",
     ]) {
       expectedRoutes.push(planConversion("python", target));
+    }
+    for (const target of [
+      "go",
+      "json-schema",
+      "openapi",
+      "python",
+      "rust",
+      "typescript",
+      "zod",
+    ]) {
+      expectedRoutes.push(planConversion("go", target));
     }
     expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
   });

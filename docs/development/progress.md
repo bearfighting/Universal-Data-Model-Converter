@@ -20,7 +20,7 @@ Current platform capabilities:
 
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
   Schema, TypeScript, Zod, OpenAPI, the V1 Rust struct subset, and the V1
-  Python dataclass subset.
+  Python dataclass subset, and the V1 Go data-model subset.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -94,6 +94,8 @@ capability has been designed and validated across multiple adapters.
    artifact when the next Rust milestone is prepared.
 10. Validate the shared `rootName` contract across language adapters and keep
     record/map semantics aligned without adding format-specific IR.
+11. Harden Go V1 with broader fixtures, source locations, semantic-loss
+    reporting, and cross-format route coverage.
 
 ### Future shared-capability roadmap
 
@@ -136,6 +138,8 @@ careful shared contract.
   other framework/runtime semantics remain outside the Dataclass V1 adapter.
 - Cross-language map, Literal/Enum, and general-union semantics until their
   shared IR contracts are explicitly designed.
+- Go typed const enums, package resolution, generics, and embedded-field
+  promotion remain deferred beyond the Go data-model V1 adapter.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 

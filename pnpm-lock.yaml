@@ -59,6 +59,12 @@ importers:
         specifier: ^6.6.0
         version: 6.8.3
 
+  packages/generators/go:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/generators/json:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -130,6 +136,12 @@ importers:
       csv-parse:
         specifier: ^6.1.0
         version: 6.2.1
+
+  packages/parsers/go:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
 
   packages/parsers/json:
     dependencies:
@@ -211,6 +223,9 @@ importers:
       "@schema-transformation-toolkit/generator-csv":
         specifier: workspace:*
         version: link:../generators/csv
+      "@schema-transformation-toolkit/generator-go":
+        specifier: workspace:*
+        version: link:../generators/go
       "@schema-transformation-toolkit/generator-json":
         specifier: workspace:*
         version: link:../generators/json
@@ -241,6 +256,9 @@ importers:
       "@schema-transformation-toolkit/parser-csv":
         specifier: workspace:*
         version: link:../parsers/csv
+      "@schema-transformation-toolkit/parser-go":
+        specifier: workspace:*
+        version: link:../parsers/go
       "@schema-transformation-toolkit/parser-json":
         specifier: workspace:*
         version: link:../parsers/json

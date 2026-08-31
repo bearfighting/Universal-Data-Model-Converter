@@ -110,6 +110,14 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Defaults, field(...), inheritance, generics, quoted forward references, and serialization behavior remain unsupported.",
     "Constraint IR is not rendered as runtime validation; unsupported constraints are reported as semantic loss.",
   ],
+  go: [
+    "Go support is limited to single-file serializable data-model declarations rather than the full Go language.",
+    "Imports, cross-file resolution, functions, methods, interfaces, generics, and embedded-field promotion remain unsupported.",
+    "Go aliases are rejected because the shared IR preserves named types but not alias identity.",
+    "Pointers are interpreted as nullable values and omitempty as optional field presence.",
+    "Fixed-size arrays are widened to variable-length arrays with semantic loss.",
+    "Constraint annotations are not emitted as Go runtime validation and are reported as semantic loss.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -134,6 +142,11 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "generic types",
   ],
   python: ["dict[str, T]", "Literal and Enum"],
+  go: [
+    "typed const enums",
+    "package and cross-file resolution",
+    "generic types",
+  ],
 };
 
 export function describeFormatSupport(

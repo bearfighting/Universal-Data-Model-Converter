@@ -95,6 +95,7 @@ try {
     "@schema-transformation-toolkit/generator-openapi",
     "@schema-transformation-toolkit/generator-rust",
     "@schema-transformation-toolkit/generator-python",
+    "@schema-transformation-toolkit/generator-go",
     "@schema-transformation-toolkit/generator-toml",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",
@@ -105,6 +106,7 @@ try {
     "@schema-transformation-toolkit/parser-openapi",
     "@schema-transformation-toolkit/parser-rust",
     "@schema-transformation-toolkit/parser-python",
+    "@schema-transformation-toolkit/parser-go",
     "@schema-transformation-toolkit/parser-toml",
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
@@ -122,7 +124,7 @@ try {
     .join("\n");
   writeFileSync(
     path.join(tempRoot, "pnpm-workspace.yaml"),
-    `overrides:\n${workspaceOverrides}\n`,
+    `packages:\n  - "."\n\noverrides:\n${workspaceOverrides}\n`,
   );
 
   execFileSync("pnpm", ["install", "--ignore-scripts", "--lockfile=false"], {
@@ -144,10 +146,10 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "csv,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
+    if (sources.join(",") !== "csv,go,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "csv,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
+    if (targets.join(",") !== "csv,go,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 
@@ -164,6 +166,7 @@ try {
       { sourceFormat: "typescript", targetFormat: "rust", input: "interface User { id: number }" },
       { sourceFormat: "python", targetFormat: "typescript", input: "@dataclass\\nclass User:\\n    id: int" },
       { sourceFormat: "python", targetFormat: "python", input: "@dataclass\\nclass User:\\n    id: int" },
+      { sourceFormat: "go", targetFormat: "go", input: "package models\\ntype User struct { ID int64 }" },
       { sourceFormat: "json", targetFormat: "csv", input: "[{\\"id\\":1,\\"name\\":\\"Ada\\"}]" },
       { sourceFormat: "json", targetFormat: "toml", input: "{\\"id\\":1,\\"name\\":\\"Ada\\"}" },
     ];

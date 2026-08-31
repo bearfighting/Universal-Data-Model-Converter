@@ -66,6 +66,11 @@ const packageConfigs = [
     root: path.join(repoRoot, "packages/parsers/python"),
   },
   {
+    name: "@schema-transformation-toolkit/parser-go",
+    category: "parser",
+    root: path.join(repoRoot, "packages/parsers/go"),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-json-schema",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/json-schema"),
@@ -114,6 +119,11 @@ const packageConfigs = [
     name: "@schema-transformation-toolkit/generator-python",
     category: "generator",
     root: path.join(repoRoot, "packages/generators/python"),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-go",
+    category: "generator",
+    root: path.join(repoRoot, "packages/generators/go"),
   },
 ];
 
@@ -343,6 +353,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/parser-toml",
     "@schema-transformation-toolkit/parser-rust",
     "@schema-transformation-toolkit/parser-python",
+    "@schema-transformation-toolkit/parser-go",
     "@schema-transformation-toolkit/generator-json-schema",
     "@schema-transformation-toolkit/generator-json",
     "@schema-transformation-toolkit/generator-openapi",
@@ -353,6 +364,7 @@ function getAllowedDependencies(pkg) {
     "@schema-transformation-toolkit/generator-toml",
     "@schema-transformation-toolkit/generator-rust",
     "@schema-transformation-toolkit/generator-python",
+    "@schema-transformation-toolkit/generator-go",
   ]);
 }
 

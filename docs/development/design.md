@@ -238,5 +238,9 @@ should not hardcode format lists or inspect parser/generator internals.
 6. Python V1 is a restricted dataclass adapter over Shape IR. It uses no
    Python-specific IR, does not execute Python, keeps required presence and
    nullability separate, and reports unrepresentable constraints as losses.
-7. Root declaration identity is represented by the shared optional `rootName`
+7. Go V1 is a restricted single-file data-model adapter over Shape IR. It does
+   not execute Go or resolve packages; pointers lower to nullable values,
+   `omitempty` lowers to optional presence, and only string-keyed maps are
+   lowered to the shared record node.
+8. Root declaration identity is represented by the shared optional `rootName`
    field; no format-specific root metadata is permitted.
