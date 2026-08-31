@@ -12,6 +12,38 @@ final version.
 
 ## Unreleased
 
+## 0.4.0 - 2026-08-31
+
+This release adds first-class Go data-model adapters through the shared Shape
+IR while keeping Go support limited to a deterministic, single-file schema
+subset.
+
+### Go support
+
+- Add `@schema-transformation-toolkit/parser-go` for exported Go structs,
+  JSON tags, pointers, slices, string-keyed maps, references, recursion, and
+  Go scalar representation hints.
+- Add `@schema-transformation-toolkit/generator-go` for deterministic Go
+  structs, JSON tags, pointers, records, arrays, references, and recursive
+  definitions.
+- Register Go as a builtin SDK source and target with route discovery,
+  capability metadata, options, diagnostics, and semantic-loss reporting.
+- Report fixed-array widening, pointer nullability, optional presence, and
+  unsupported Go syntax through structured notes or failures.
+
+### Boundaries
+
+- Go V1 is a single-file schema adapter; it does not execute Go or resolve
+  packages, imports, external types, generics, methods, non-empty interfaces,
+  aliases, or embedded-field promotion.
+- Go constraint annotations are not emitted as runtime validation and are
+  reported as semantic loss when converting to Go.
+
+### Validation
+
+- Add parser, generator, SDK registry, capability, package, and cross-format
+  coverage for the new Go source and target routes.
+
 - Added V1 Python dataclass parser and generator support through Shape IR.
 - Added shared Shape IR `rootName` metadata to preserve root declaration
   identity separately from document identity across language adapters.
