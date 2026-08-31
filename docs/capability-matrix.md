@@ -31,6 +31,7 @@ shared pipeline execution:
 | YAML        | YAML, TypeScript, JSON Schema               | Value direct or Value-to-Shape inference |
 | CSV         | CSV and compatible Value routes             | flat array-root Value                    |
 | TOML        | TOML and compatible Value routes            | object-root Value                        |
+| Go          | Go data-model and Shape-compatible routes   | single-file exported structs             |
 | JSON Schema | JSON Schema, TypeScript, Zod, OpenAPI       | Shape, often with Constraint artifacts   |
 | TypeScript  | TypeScript, JSON Schema, Zod                | Shape subset                             |
 | Zod         | Zod, TypeScript, JSON Schema, OpenAPI       | Shape + Constraint subset                |

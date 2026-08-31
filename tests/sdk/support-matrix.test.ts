@@ -194,6 +194,7 @@ describe("sdk support matrix", () => {
   it("lists all current format supports", () => {
     expect(listFormatSupports().map((summary) => summary.format)).toEqual([
       "csv",
+      "go",
       "json",
       "json-schema",
       "openapi",
@@ -210,6 +211,7 @@ describe("sdk support matrix", () => {
     expect(listSourceFormatSupports().map((summary) => summary.format)).toEqual(
       [
         "csv",
+        "go",
         "json",
         "json-schema",
         "openapi",
@@ -227,6 +229,7 @@ describe("sdk support matrix", () => {
     expect(listTargetFormatSupports().map((summary) => summary.format)).toEqual(
       [
         "csv",
+        "go",
         "json",
         "json-schema",
         "openapi",
@@ -263,7 +266,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(74);
+    expect(listConversionRoutes()).toHaveLength(91);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

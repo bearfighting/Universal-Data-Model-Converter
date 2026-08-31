@@ -29,6 +29,8 @@ import type { TomlParseOptions } from "@schema-transformation-toolkit/parser-tom
 import type { RustParseOptions } from "@schema-transformation-toolkit/parser-rust";
 import type { PythonGeneratorOptions } from "@schema-transformation-toolkit/generator-python";
 import type { PythonParseOptions } from "@schema-transformation-toolkit/parser-python";
+import type { GoGeneratorOptions } from "@schema-transformation-toolkit/generator-go";
+import type { GoParseOptions } from "@schema-transformation-toolkit/parser-go";
 
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
@@ -41,6 +43,7 @@ export interface BuiltinGeneratorOutputs {
   csv: CsvOutput;
   toml: TomlOutput;
   python: string;
+  go: string;
 }
 
 export interface BuiltinParserOptions {
@@ -54,6 +57,7 @@ export interface BuiltinParserOptions {
   toml?: TomlParseOptions;
   rust?: RustParseOptions;
   python?: PythonParseOptions;
+  go?: GoParseOptions;
 }
 
 export interface BuiltinGeneratorOptions {
@@ -65,4 +69,5 @@ export interface BuiltinGeneratorOptions {
   csv?: CsvGeneratorOptions;
   toml?: TomlGeneratorOptions;
   python?: PythonGeneratorOptions;
+  go?: GoGeneratorOptions;
 }

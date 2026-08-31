@@ -28,6 +28,7 @@ describe("SDK option metadata", () => {
       listOptionCatalogs().map(({ format, role }) => `${role}:${format}`),
     ).toEqual([
       "parser:csv",
+      "parser:go",
       "parser:json",
       "parser:json-schema",
       "parser:openapi",
@@ -38,6 +39,7 @@ describe("SDK option metadata", () => {
       "parser:yaml",
       "parser:zod",
       "generator:csv",
+      "generator:go",
       "generator:json",
       "generator:json-schema",
       "generator:openapi",

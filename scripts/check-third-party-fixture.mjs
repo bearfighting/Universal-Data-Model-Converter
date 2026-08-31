@@ -13,14 +13,18 @@ const tempRoot = mkdtempSync(
   path.join(os.tmpdir(), "schema-transformation-toolkit-fixture-"),
 );
 const generatedRegistrySource = path.join(
-  fixtureDir,
+  repoRoot,
+  "packages",
+  "sdk",
   "dist",
-  "generated-registry.ts",
+  "generated-third-party-registry.ts",
 );
 const generatedRegistryOutput = path.join(
-  fixtureDir,
+  repoRoot,
+  "packages",
+  "sdk",
   "dist",
-  "generated-registry",
+  "generated-third-party-registry",
 );
 
 try {
@@ -63,13 +67,14 @@ try {
       "--external",
       "typescript",
     ],
-    { cwd: repoRoot, stdio: "inherit" },
+    { cwd: path.join(repoRoot, "packages", "sdk"), stdio: "inherit" },
   );
 
   const sdk = await import(pathToFileURL(sdkBundle).href);
   const generatedRegistry = await import(
-    pathToFileURL(path.join(generatedRegistryOutput, "generated-registry.js"))
-      .href
+    pathToFileURL(
+      path.join(generatedRegistryOutput, "generated-third-party-registry.js"),
+    ).href
   );
   const registry = generatedRegistry.createBuiltinRegistry();
   const result = sdk.createConverter(registry).convert({
