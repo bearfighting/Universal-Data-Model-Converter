@@ -112,4 +112,66 @@ describe("Java parser", () => {
       "invalid-java-syntax",
     );
   });
+
+  it("maps unit-only enums to named string literal unions", () => {
+    const result = tryParseJava(
+      "public enum Status { ACTIVE, INACTIVE, } record User(Status status) {}",
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.document.rootName?.source).toBe("Status");
+    expect(result.document.root.kind).toBe("reference");
+    const status = result.document.definitions.find(
+      (definition) => definition.name.source === "Status",
+    )?.type;
+    expect(status?.kind).toBe("union");
+    if (status?.kind !== "union") return;
+    expect(status.members).toEqual([
+      { kind: "literal", value: "ACTIVE" },
+      { kind: "literal", value: "INACTIVE" },
+    ]);
+    expect(result.semanticNotes).toContainEqual(
+      expect.objectContaining({ code: "java-enum-lowered" }),
+    );
+  });
+
+  it("reports a standalone root enum note at the root path", () => {
+    const result = tryParseJava("public enum Status { ACTIVE, INACTIVE }");
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.semanticNotes).toContainEqual(
+      expect.objectContaining({
+        code: "java-enum-lowered",
+        path: ["root"],
+      }),
+    );
+  });
+
+  it("rejects empty, duplicate, and data-carrying enums", () => {
+    expect(tryParseJava("public enum Status {}")).toMatchObject({
+      ok: false,
+      code: "empty-java-enum",
+    });
+    expect(tryParseJava("public enum Status { ACTIVE, ACTIVE }")).toMatchObject(
+      { ok: false, code: "duplicate-java-enum-variant" },
+    );
+    expect(
+      tryParseJava("public enum Status { ACTIVE(1), INACTIVE }"),
+    ).toMatchObject({ ok: false, code: "unsupported-java-enum" });
+    expect(
+      tryParseJava("public enum Status { ACTIVE; int code; }"),
+    ).toMatchObject({ ok: false, code: "unsupported-java-enum" });
+  });
+
+  it("rejects primitive type arguments but accepts primitive arrays", () => {
+    expect(
+      tryParseJava("public record User(List<int> values) {}"),
+    ).toMatchObject({ ok: false, code: "unsupported-java-generic" });
+    expect(
+      tryParseJava("public record User(Map<String, boolean> values) {}"),
+    ).toMatchObject({ ok: false, code: "unsupported-java-generic" });
+    expect(tryParseJava("public record User(int[] values) {}").ok).toBe(true);
+  });
 });

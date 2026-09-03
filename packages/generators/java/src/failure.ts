@@ -9,6 +9,8 @@ export type JavaGeneratorFailureCode =
   | "unsupported-java-node"
   | "invalid-java-identifier"
   | "duplicate-java-definition"
+  | "unsupported-java-enum"
+  | "invalid-java-package"
   | "invalid-java-visibility";
 
 export class JavaGenerationError extends Error {

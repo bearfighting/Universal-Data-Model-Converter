@@ -95,22 +95,38 @@ export function renderJavaDocument(
         )
       : undefined;
   const rootNode = rootDefinition?.type ?? document.root;
-  if (rootNode.kind !== "object")
+  if (rootNode.kind !== "object" && !isJavaEnumUnion(rootNode))
     throw new JavaGenerationError(
       "unsupported-java-root",
-      "Java generator requires an object root.",
+      "Java generator requires an object root or a string literal union enum root.",
     );
-  emitRecord(rootName, rootNode, true, context);
+  emitDeclaration(rootName, rootNode, true, context);
   for (const definition of document.definitions) {
     if (definition.name.source !== rootName)
-      emitRecord(definition.name.source, definition.type, false, context);
+      emitDeclaration(definition.name.source, definition.type, false, context);
   }
   const imports = [...context.imports]
     .sort()
     .map((item) => `import ${item};`)
     .join("\n");
-  const prefix = imports ? `${imports}\n\n` : "";
+  const packagePrefix = options.packageName
+    ? `package ${options.packageName};\n\n`
+    : "";
+  const prefix = `${packagePrefix}${imports ? `${imports}\n\n` : ""}`;
   return `${prefix}${context.declarations.join("\n\n")}\n`;
+}
+
+function emitDeclaration(
+  name: string,
+  node: SchemaNode,
+  root: boolean,
+  context: Context,
+): void {
+  if (isJavaEnumUnion(node)) {
+    emitEnum(name, node, root, context);
+    return;
+  }
+  emitRecord(name, node, root, context);
 }
 
 function emitRecord(
@@ -141,6 +157,55 @@ function emitRecord(
   );
 }
 
+function emitEnum(
+  name: string,
+  node: SchemaNode,
+  root: boolean,
+  context: Context,
+): void {
+  const identifier = javaIdentifier(name);
+  if (context.declared.has(identifier))
+    throw new JavaGenerationError(
+      "duplicate-java-definition",
+      `Java definition "${name}" was emitted more than once.`,
+    );
+  if (!isJavaEnumUnion(node))
+    throw new JavaGenerationError(
+      "unsupported-java-enum",
+      `Java enum definition "${name}" must be a string literal union.`,
+    );
+  context.declared.add(identifier);
+  const variants = node.members
+    .filter((member) => member.kind === "literal")
+    .map((member) => {
+      if (typeof member.value !== "string")
+        throw new JavaGenerationError(
+          "unsupported-java-enum",
+          `Java enum "${name}" requires string literal variants.`,
+        );
+      return javaIdentifier(member.value);
+    });
+  const visibility =
+    root && context.options.rootVisibility === "public" ? "public " : "";
+  context.declarations.push(
+    `${visibility}enum ${identifier} {\n${variants
+      .map((variant) => `    ${variant}`)
+      .join(",\n")}\n}`,
+  );
+}
+
+function isJavaEnumUnion(
+  node: SchemaNode,
+): node is Extract<SchemaNode, { kind: "union" }> {
+  return (
+    node.kind === "union" &&
+    node.members.length > 0 &&
+    node.members.every(
+      (member) => member.kind === "literal" && typeof member.value === "string",
+    )
+  );
+}
+
 function emitField(
   field: SchemaFieldNode,
   parent: string,
@@ -161,11 +226,18 @@ function renderType(
   nullable: boolean,
   inlineName: string,
   context: Context,
+  referenceContext = false,
 ): string {
   if (node.kind === "union") {
     const nonNull = node.members.filter((member) => member.kind !== "null");
     if (nonNull.length === 1 && nonNull.length < node.members.length)
-      return renderType(nonNull[0]!, true, inlineName, context);
+      return renderType(
+        nonNull[0]!,
+        true,
+        inlineName,
+        context,
+        referenceContext,
+      );
     throw new JavaGenerationError(
       "unsupported-java-node",
       "Java V1 only generates nullable unions inline.",
@@ -173,7 +245,8 @@ function renderType(
   }
   if (node.kind === "scalar") {
     if (node.scalar === "string") return "String";
-    if (node.scalar === "boolean") return nullable ? "Boolean" : "boolean";
+    if (node.scalar === "boolean")
+      return nullable || referenceContext ? "Boolean" : "boolean";
     if (node.scalar === "integer") {
       const width = node.representation?.widthBits;
       const primitive =
@@ -184,7 +257,9 @@ function renderType(
             : width === 32
               ? "int"
               : "long";
-      return nullable ? capitalize(primitive) : primitive;
+      return nullable || referenceContext
+        ? boxedPrimitive(primitive)
+        : primitive;
     }
     if (node.scalar === "number") {
       const primitive =
@@ -192,13 +267,21 @@ function renderType(
         node.representation.widthBits === 32
           ? "float"
           : "double";
-      return nullable ? capitalize(primitive) : primitive;
+      return nullable || referenceContext
+        ? boxedPrimitive(primitive)
+        : primitive;
     }
   }
   if (node.kind === "reference") return javaIdentifier(node.name);
   if (node.kind === "array") {
     context.imports.add("java.util.List");
-    return `List<${renderType(node.elementType, false, `${inlineName}Item`, context)}>`;
+    return `List<${renderType(
+      node.elementType,
+      false,
+      `${inlineName}Item`,
+      context,
+      true,
+    )}>`;
   }
   if (node.kind === "record") {
     if (node.key.kind !== "scalar" || node.key.scalar !== "string")
@@ -207,7 +290,13 @@ function renderType(
         "Java V1 only generates records with string keys.",
       );
     context.imports.add("java.util.Map");
-    return `Map<String, ${renderType(node.value, false, `${inlineName}Value`, context)}>`;
+    return `Map<String, ${renderType(
+      node.value,
+      false,
+      `${inlineName}Value`,
+      context,
+      true,
+    )}>`;
   }
   if (node.kind === "object") {
     emitRecord(inlineName, node, false, context);
@@ -228,6 +317,15 @@ function javaIdentifier(name: string): string {
   return name;
 }
 
-function capitalize(value: string): string {
-  return value[0]!.toUpperCase() + value.slice(1);
+const boxedPrimitiveMap = {
+  byte: "Byte",
+  short: "Short",
+  int: "Integer",
+  long: "Long",
+  float: "Float",
+  double: "Double",
+} as const;
+
+function boxedPrimitive(value: string): string {
+  return boxedPrimitiveMap[value as keyof typeof boxedPrimitiveMap];
 }

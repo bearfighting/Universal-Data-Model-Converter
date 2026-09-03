@@ -12,6 +12,14 @@ final version.
 
 ## Unreleased
 
+### Java parser and generator enhancements
+
+- Add unit-only Java enum parsing through shared string literal unions.
+- Generate representable named string literal unions as deterministic Java
+  enums.
+- Add validated Java `packageName` generator output and expanded Java
+  cross-format route coverage.
+
 ## 0.4.0 - 2026-08-31
 
 This release adds first-class Go data-model adapters through the shared Shape

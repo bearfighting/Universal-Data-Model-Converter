@@ -24,5 +24,24 @@ export const javaGeneratorOptionCatalog: OptionCatalog = {
         },
       ],
     },
+    {
+      key: "packageName",
+      label: "Package name",
+      description: "Adds a Java package declaration to the generated source.",
+      category: "formatting",
+      defaultValue: undefined,
+      affectedStages: ["generate"],
+      semanticEffect:
+        "Places generated declarations in the requested Java package.",
+      diagnosticEffect: "Invalid package names fail generation.",
+      supported: true,
+      examples: [
+        {
+          title: "Java package",
+          options: { packageName: "com.example.models" },
+          explanation: "Emit a package declaration before imports and records.",
+        },
+      ],
+    },
   ],
 };

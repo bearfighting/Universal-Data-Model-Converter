@@ -53,6 +53,8 @@ export type JavaGeneratorFailureCode =
   | "unsupported-java-node"
   | "invalid-java-identifier"
   | "duplicate-java-definition"
+  | "unsupported-java-enum"
+  | "invalid-java-package"
   | "invalid-java-visibility";
 export declare class JavaGenerationError extends Error {
   readonly code: JavaGeneratorFailureCode;
@@ -105,9 +107,11 @@ import type {
 } from "@schema-transformation-toolkit/core";
 export interface JavaGeneratorOptions extends GenerateOptions {
   rootVisibility?: "public" | "package-private";
+  packageName?: string;
 }
 export interface ResolvedJavaGeneratorOptions {
   rootVisibility: "public" | "package-private";
+  packageName?: string;
 }
 export declare const DEFAULT_JAVA_GENERATOR_OPTIONS: ResolvedJavaGeneratorOptions;
 export declare function resolveJavaGeneratorOptions(

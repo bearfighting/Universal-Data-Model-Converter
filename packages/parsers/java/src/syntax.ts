@@ -90,14 +90,25 @@ export interface JavaComponentSyntax {
 }
 
 export interface JavaRecordSyntax {
+  kind: "record";
   name: string;
   public: boolean;
   components: JavaComponentSyntax[];
   position: JavaPosition;
 }
 
+export interface JavaEnumSyntax {
+  kind: "enum";
+  name: string;
+  public: boolean;
+  variants: string[];
+  position: JavaPosition;
+}
+
+export type JavaDeclarationSyntax = JavaRecordSyntax | JavaEnumSyntax;
+
 export interface JavaFileSyntax {
-  records: JavaRecordSyntax[];
+  declarations: JavaDeclarationSyntax[];
 }
 
 export function parseJavaSyntax(source: string): JavaFileSyntax {
@@ -139,6 +150,18 @@ function tokenize(source: string): Token[] {
       advance(identifier[0]);
       continue;
     }
+    const number = rest.match(/^\d+(?:\.\d+)?/u);
+    if (number) {
+      tokens.push({ text: number[0], position });
+      advance(number[0]);
+      continue;
+    }
+    const quoted = rest.match(/^"(?:\\.|[^"\\])*"|^'(?:\\.|[^'\\])*'/u);
+    if (quoted) {
+      tokens.push({ text: quoted[0], position });
+      advance(quoted[0]);
+      continue;
+    }
     const punctuation = rest[0]!;
     if ("{}()[],;<>.?@*".includes(punctuation)) {
       tokens.push({ text: punctuation, position });
@@ -160,7 +183,7 @@ class Parser {
   constructor(private readonly tokens: Token[]) {}
 
   parse(): JavaFileSyntax {
-    const records: JavaRecordSyntax[] = [];
+    const declarations: JavaDeclarationSyntax[] = [];
     while (!this.end()) {
       if (this.skipPackageOrImport()) continue;
       if (this.end()) break;
@@ -171,7 +194,16 @@ class Parser {
             "unsupported-java-feature",
             "Only public and package-private Java records are supported in V1.",
           );
-        records.push(this.parseRecord(modifiers.includes("public")));
+        declarations.push(this.parseRecord(modifiers.includes("public")));
+        continue;
+      }
+      if (this.match("enum")) {
+        if (modifiers.some((modifier) => modifier !== "public"))
+          throw this.error(
+            "unsupported-java-feature",
+            "Only public and package-private Java enums are supported in V1.",
+          );
+        declarations.push(this.parseEnum(modifiers.includes("public")));
         continue;
       }
       const token = this.peek();
@@ -190,7 +222,7 @@ class Parser {
         `Top-level Java syntax "${token?.text ?? ""}" is not supported in V1.`,
       );
     }
-    return { records };
+    return { declarations };
   }
 
   private skipPackageOrImport(): boolean {
@@ -275,9 +307,56 @@ class Parser {
         "Record bodies with methods, constructors, or fields are not supported in V1.",
       );
     return {
+      kind: "record",
       name: name.text,
       public: publicRecord,
       components,
+      position: name.position,
+    };
+  }
+
+  private parseEnum(publicEnum: boolean): JavaEnumSyntax {
+    const name = this.expectIdentifier("Expected a Java enum name.");
+    this.expect("{", 'Expected "{" after a Java enum name.');
+    if (this.match("}"))
+      throw this.error(
+        "empty-java-enum",
+        "Java enums must declare at least one variant.",
+      );
+
+    const variants: string[] = [];
+    const seen = new Set<string>();
+    while (!this.end() && this.peek()?.text !== "}") {
+      const variant = this.expectIdentifier("Expected a Java enum variant.");
+      if (seen.has(variant.text))
+        throw this.error(
+          "duplicate-java-enum-variant",
+          `Duplicate Java enum variant "${variant.text}".`,
+        );
+      seen.add(variant.text);
+      variants.push(variant.text);
+      if (this.peek()?.text === "(" || this.peek()?.text === "{")
+        throw this.error(
+          "unsupported-java-enum",
+          "Java enum variants with fields, constructors, or bodies are not supported in V1.",
+        );
+      if (this.match(";"))
+        throw this.error(
+          "unsupported-java-enum",
+          "Java enum fields and methods are not supported in V1.",
+        );
+      if (!this.match(",") && this.peek()?.text !== "}")
+        throw this.error(
+          "invalid-java-syntax",
+          'Expected "," or "}" after a Java enum variant.',
+        );
+    }
+    this.expect("}", 'Expected "}" after Java enum variants.');
+    return {
+      kind: "enum",
+      name: name.text,
+      public: publicEnum,
+      variants,
       position: name.position,
     };
   }
@@ -358,7 +437,10 @@ class Parser {
     code:
       | "invalid-java-syntax"
       | "unsupported-java-feature"
-      | "unsupported-java-generic",
+      | "unsupported-java-generic"
+      | "unsupported-java-enum"
+      | "empty-java-enum"
+      | "duplicate-java-enum-variant",
     message: string,
   ): JavaSyntaxError {
     return new JavaSyntaxError(code, message, this.peek()?.position);

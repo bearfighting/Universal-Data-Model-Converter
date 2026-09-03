@@ -20,8 +20,8 @@ Current platform capabilities:
 
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
   Schema, TypeScript, Zod, OpenAPI, the V1 Rust struct subset, and the V1
-  Python dataclass subset, the V1 Go data-model subset, and the V1 Java record
-  subset.
+  Python dataclass subset, the V1 Go data-model subset, and the V1 Java
+  record/unit-enum subset with deterministic package-aware generation.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -40,8 +40,8 @@ Validated route families include:
 
 - Value routes: JSON, YAML, CSV, and TOML round trips where root constraints
   allow them.
-- Shape routes: JSON Schema, TypeScript, Zod, OpenAPI, Rust, Python, and Go
-  conversions, plus Value-to-Shape routes where supported.
+- Shape routes: JSON Schema, TypeScript, Zod, OpenAPI, Rust, Python, Go, and
+  Java conversions, plus Value-to-Shape routes where supported.
 - Rust routes: restricted Rust structs to/from Shape-compatible targets, with
   representation hints and typed numeric constraints.
 - Constraint-preserving routes: JSON Schema, Zod, OpenAPI, and Rust routes
@@ -98,6 +98,8 @@ capability has been designed and validated across multiple adapters.
     record/map semantics aligned without adding format-specific IR.
 11. Harden Go V1 with broader fixtures, source locations, semantic-loss
     reporting, and cross-format route coverage.
+12. Extend Java V1 coverage with package-aware fixtures and enum/literal
+    semantic round trips without adding Java-specific Core IR.
 
 ### Future shared-capability roadmap
 
@@ -110,7 +112,7 @@ cross-language equivalence
 → shared string-keyed map design
 → Shape IR record/map validation and fixtures
 → Python dict[str, T], Rust maps, TypeScript Record, JSON Schema maps
-→ Literal / unit-enum study
+→ Literal / unit-enum study across adapters
 → general union study
 ```
 
@@ -118,8 +120,8 @@ Map is the proposed first shared capability because the current IR already
 has `SchemaRecordNode` and the four target families have clear structural
 counterparts. The first version should remain limited to `string → T` until
 cross-format tests demonstrate a need for broader key semantics. Literal and
-unit-enum support should follow only after deciding whether named enums need
-semantics beyond literal unions. General unions come later because `oneOf`,
+unit-enum support should reuse named literal unions where targets can preserve
+their values without extra metadata. General unions come later because `oneOf`,
 `anyOf`, discriminators, ambiguity, and nullable special cases require a more
 careful shared contract.
 
@@ -142,6 +144,9 @@ careful shared contract.
   shared IR contracts are explicitly designed.
 - Go typed const enums, package resolution, generics, and embedded-field
   promotion remain deferred beyond the Go data-model V1 adapter.
+- Java data-carrying enums, Jackson/Bean Validation metadata, JavaBeans,
+  generic records, and multi-file output remain deferred beyond the Java
+  record/unit-enum adapter.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 
@@ -162,15 +167,13 @@ careful shared contract.
 
 Latest completed baseline:
 
-- 89 test files, 999 tests passing.
+- 93 test files, 1021 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
 - Explicit workspace build passing.
 - Third-party manifest/custom registry smoke passing.
-- SDK tarball clean-install smoke is part of the acceptance path; the current
-  environment's pnpm invocation is blocked by a local pnpm database error and
-  must be rerun in a normal workspace environment.
+- SDK tarball clean-install smoke is passing in the current workspace.
 
 Primary commands:
 

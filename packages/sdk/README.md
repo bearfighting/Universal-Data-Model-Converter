@@ -13,7 +13,7 @@ Project-level readiness and priorities live in [../../docs/development/progress.
 If you are using the toolkit rather than integrating the SDK itself, start with
 the [User Guide](../../docs/user-guide.md) and [Capability Matrix](../../docs/capability-matrix.md).
 
-The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, YAML, Rust, Python dataclasses, Go, and Java records. Selecting
+The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, YAML, Rust, Python dataclasses, Go, and Java records/enums. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript

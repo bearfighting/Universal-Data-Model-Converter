@@ -3,6 +3,7 @@ import {
   schemaDefinition,
   schemaDocument,
   schemaFieldNode,
+  schemaLiteralNode,
   schemaNullNode,
   schemaObjectNode,
   schemaRecordNode,
@@ -16,8 +17,8 @@ import {
 } from "@schema-transformation-toolkit/core";
 import { JavaSemanticError } from "./failure.js";
 import type {
+  JavaDeclarationSyntax,
   JavaFileSyntax,
-  JavaRecordSyntax,
   JavaTypeSyntax,
 } from "./syntax.js";
 
@@ -55,52 +56,71 @@ export function mapJavaFile(
   name: string,
   entry?: string,
 ): JavaSemanticResult {
-  if (!file.records.length)
+  if (!file.declarations.length)
     throw new JavaSemanticError(
       "invalid-java-data-model",
-      "Java source must declare at least one record.",
+      "Java source must declare at least one record or enum.",
     );
   const names = new Set<string>();
-  for (const record of file.records) {
-    if (names.has(record.name))
+  for (const declaration of file.declarations) {
+    if (names.has(declaration.name))
       throw new JavaSemanticError(
         "duplicate-java-definition",
-        `Duplicate Java definition "${record.name}".`,
-        record.position,
+        `Duplicate Java definition "${declaration.name}".`,
+        declaration.position,
       );
-    names.add(record.name);
+    names.add(declaration.name);
   }
-  const publicRecords = file.records.filter((record) => record.public);
-  if (publicRecords.length > 1)
+  const publicDeclarations = file.declarations.filter(
+    (declaration) => declaration.public,
+  );
+  if (publicDeclarations.length > 1)
     throw new JavaSemanticError(
       "multiple-java-public-roots",
-      "Java source must contain exactly one public root record.",
-      publicRecords[1]?.position,
+      "Java source must contain exactly one public root declaration.",
+      publicDeclarations[1]?.position,
     );
-  const publicRoot = publicRecords[0];
+  const publicRoot = publicDeclarations[0];
   if (!publicRoot)
     throw new JavaSemanticError(
       "missing-java-public-root",
-      "Java source must contain one public root record.",
+      "Java source must contain one public root record or enum.",
     );
   if (entry && entry !== publicRoot.name)
     throw new JavaSemanticError(
       "invalid-java-entry",
-      `Java entry "${entry}" must name the public root record "${publicRoot.name}".`,
+      `Java entry "${entry}" must name the public root declaration "${publicRoot.name}".`,
       publicRoot.position,
     );
 
   const notes: SchemaSemanticNote[] = [];
   const mapped = new Map<string, SchemaNode>();
-  for (const record of file.records)
-    mapped.set(record.name, mapRecord(record, names, notes));
+  for (const declaration of file.declarations)
+    mapped.set(declaration.name, mapDeclaration(declaration, names, notes));
   const rootNode = mapped.get(publicRoot.name)!;
-  const rootReferenced = file.records.some((record) =>
-    references(mapped.get(record.name)!, publicRoot.name),
+  const rootReferenced = file.declarations.some((declaration) =>
+    references(mapped.get(declaration.name)!, publicRoot.name),
   );
-  const definitions = file.records
-    .filter((record) => record !== publicRoot || rootReferenced)
-    .map((record) => schemaDefinition(record.name, mapped.get(record.name)!));
+  for (const declaration of file.declarations) {
+    if (declaration.kind === "enum")
+      notes.push({
+        kind: "normalization",
+        code: "java-enum-lowered",
+        message:
+          "Java enum identity was lowered to a shared string literal union.",
+        path:
+          declaration === publicRoot && !rootReferenced
+            ? ["root"]
+            : ["definitions", declaration.name],
+        source: "parser-java",
+        layer: "shape",
+      });
+  }
+  const definitions = file.declarations
+    .filter((declaration) => declaration !== publicRoot || rootReferenced)
+    .map((declaration) =>
+      schemaDefinition(declaration.name, mapped.get(declaration.name)!),
+    );
   return {
     document: schemaDocument(
       name,
@@ -114,8 +134,21 @@ export function mapJavaFile(
   };
 }
 
+function mapDeclaration(
+  declaration: JavaDeclarationSyntax,
+  names: Set<string>,
+  notes: SchemaSemanticNote[],
+): SchemaNode {
+  if (declaration.kind === "enum") {
+    return schemaUnionNode(
+      declaration.variants.map((variant) => schemaLiteralNode(variant)),
+    );
+  }
+  return mapRecord(declaration, names, notes);
+}
+
 function mapRecord(
-  record: JavaRecordSyntax,
+  record: Extract<JavaDeclarationSyntax, { kind: "record" }>,
   names: Set<string>,
   notes: SchemaSemanticNote[],
 ): SchemaNode {
@@ -154,6 +187,7 @@ function mapType(
           "List requires exactly one type argument.",
           type.position,
         );
+      rejectPrimitiveGenericArgument(args[0]!);
       const element = mapType(args[0]!, names, notes, [...path, "items"]);
       return { node: schemaArrayNode(nullableNested(element)), nullable: true };
     }
@@ -171,6 +205,7 @@ function mapType(
           "Only Map<String, T> is representable as a schema record.",
           key.position,
         );
+      rejectPrimitiveGenericArgument(args[1]!);
       const value = mapType(args[1]!, names, notes, [...path, "value"]);
       return {
         node: schemaRecordNode(
@@ -223,6 +258,19 @@ function mapType(
     `Java type "${type.name}" is not a known record or supported scalar.`,
     type.position,
   );
+}
+
+function rejectPrimitiveGenericArgument(type: JavaTypeSyntax): void {
+  if (
+    type.kind === "name" &&
+    (simpleName(type.name!) === "boolean" ||
+      primitiveRepresentations[simpleName(type.name!)] !== undefined)
+  )
+    throw new JavaSemanticError(
+      "unsupported-java-generic",
+      "Java generic type arguments cannot use primitive types.",
+      type.position,
+    );
 }
 
 function nullableScalar(

@@ -59,4 +59,72 @@ describe("SDK Java integration", () => {
     if (fromTypeScript.ok)
       expect(fromTypeScript.output).toContain("public record User(");
   });
+
+  it("covers the remaining Java Shape IR route families", () => {
+    const javaInput = "public record User(long id, String name) {}";
+    const outgoing = ["json-schema", "rust", "python", "go"] as const;
+    const incoming = [
+      {
+        sourceFormat: "rust",
+        input: "struct User { id: i64, name: String }",
+      },
+      {
+        sourceFormat: "python",
+        input: "@dataclass\nclass User:\n    id: int\n    name: str",
+      },
+      {
+        sourceFormat: "go",
+        input: "package models\ntype User struct { ID int64; Name string }",
+      },
+      {
+        sourceFormat: "json-schema",
+        input: JSON.stringify({
+          type: "object",
+          properties: { id: { type: "integer" }, name: { type: "string" } },
+          required: ["id", "name"],
+        }),
+      },
+    ] as const;
+
+    for (const targetFormat of outgoing) {
+      const result = convert({
+        sourceFormat: "java",
+        targetFormat,
+        input: javaInput,
+        name: "User",
+      });
+      expect(result.ok, `java -> ${targetFormat}`).toBe(true);
+    }
+    for (const source of incoming) {
+      const result = convert({
+        sourceFormat: source.sourceFormat,
+        targetFormat: "java",
+        input: source.input,
+        name: "User",
+      });
+      expect(result.ok, `${source.sourceFormat} -> java`).toBe(true);
+    }
+  });
+
+  it("round-trips enums and forwards Java generator options", () => {
+    const result = convert({
+      sourceFormat: "java",
+      targetFormat: "java",
+      input: "public enum Status { ACTIVE, INACTIVE }",
+      name: "Status",
+      advanced: {
+        generator: {
+          java: { packageName: "com.example.models" },
+        },
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.output).toContain("package com.example.models;");
+    expect(result.output).toContain("public enum Status");
+    expect(
+      result.semanticNotes?.some((note) => note.code === "java-enum-lowered"),
+    ).toBe(true);
+  });
 });

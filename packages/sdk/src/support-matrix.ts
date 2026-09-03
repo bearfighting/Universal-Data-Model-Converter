@@ -120,8 +120,8 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
   ],
   java: [
     "Java support is limited to single-file record data models rather than the full Java language.",
-    "Exactly one public root record is required; additional records are package-private definitions.",
-    "Classes, interfaces, generic declarations, wildcards, annotations, enums, JavaBeans, and non-string Map keys remain unsupported.",
+    "Exactly one public root record or unit-only enum is required; additional records and enums are package-private definitions.",
+    "Classes, interfaces, generic declarations, wildcards, annotations, data-carrying enums, JavaBeans, and non-string Map keys remain unsupported.",
     "Reference types are conservatively interpreted as nullable because Java declarations do not establish non-nullability.",
   ],
 };
@@ -154,7 +154,6 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "generic types",
   ],
   java: [
-    "enums",
     "Set<T>",
     "Jackson metadata",
     "Bean Validation",

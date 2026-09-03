@@ -2,13 +2,16 @@ import type {
   GenerateOptions,
   PreparedOptions,
 } from "@schema-transformation-toolkit/core";
+import { JavaGenerationError } from "./failure.js";
 
 export interface JavaGeneratorOptions extends GenerateOptions {
   rootVisibility?: "public" | "package-private";
+  packageName?: string;
 }
 
 export interface ResolvedJavaGeneratorOptions {
   rootVisibility: "public" | "package-private";
+  packageName?: string;
 }
 
 export const DEFAULT_JAVA_GENERATOR_OPTIONS: ResolvedJavaGeneratorOptions = {
@@ -18,17 +21,98 @@ export const DEFAULT_JAVA_GENERATOR_OPTIONS: ResolvedJavaGeneratorOptions = {
 export function resolveJavaGeneratorOptions(
   options: JavaGeneratorOptions = {},
 ): ResolvedJavaGeneratorOptions {
-  return { rootVisibility: options.rootVisibility ?? "public" };
+  return {
+    rootVisibility: options.rootVisibility ?? "public",
+    ...(options.packageName !== undefined
+      ? { packageName: options.packageName }
+      : {}),
+  };
 }
 
 export function validateJavaGeneratorOptions(
   options: ResolvedJavaGeneratorOptions,
 ): string[] {
-  return options.rootVisibility === "public" ||
-    options.rootVisibility === "package-private"
-    ? []
-    : ['rootVisibility must be "public" or "package-private".'];
+  const errors: string[] = [];
+  if (
+    options.rootVisibility !== "public" &&
+    options.rootVisibility !== "package-private"
+  )
+    errors.push('rootVisibility must be "public" or "package-private".');
+  if (options.packageName !== undefined) {
+    const segments = options.packageName.split(".");
+    if (
+      !options.packageName ||
+      segments.some(
+        (segment) =>
+          !/^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(segment) ||
+          JAVA_KEYWORDS.has(segment),
+      )
+    )
+      errors.push("packageName must be a dot-separated Java package name.");
+  }
+  return errors;
 }
+
+const JAVA_KEYWORDS = new Set([
+  "abstract",
+  "assert",
+  "boolean",
+  "break",
+  "byte",
+  "case",
+  "catch",
+  "char",
+  "class",
+  "const",
+  "continue",
+  "default",
+  "do",
+  "double",
+  "else",
+  "enum",
+  "extends",
+  "final",
+  "finally",
+  "float",
+  "for",
+  "goto",
+  "if",
+  "implements",
+  "import",
+  "instanceof",
+  "int",
+  "interface",
+  "long",
+  "native",
+  "new",
+  "package",
+  "private",
+  "protected",
+  "public",
+  "return",
+  "short",
+  "static",
+  "strictfp",
+  "super",
+  "switch",
+  "synchronized",
+  "this",
+  "throw",
+  "throws",
+  "transient",
+  "try",
+  "void",
+  "volatile",
+  "while",
+  "record",
+  "sealed",
+  "permits",
+  "var",
+  "true",
+  "false",
+  "null",
+  "_",
+]);
 
 export function prepareJavaGeneratorOptions(
   options: JavaGeneratorOptions = {},
@@ -45,6 +129,22 @@ export function assertSupportedJavaGeneratorOptions(
   options: ResolvedJavaGeneratorOptions,
 ): void {
   const errors = validateJavaGeneratorOptions(options);
-  if (errors.length)
-    throw new Error(`Invalid Java generator options: ${errors.join("; ")}`);
+  if (errors.length) {
+    const code =
+      options.packageName !== undefined &&
+      (options.packageName.length === 0 ||
+        options.packageName
+          .split(".")
+          .some(
+            (segment) =>
+              !/^[A-Za-z_$][A-Za-z0-9_$]*$/u.test(segment) ||
+              JAVA_KEYWORDS.has(segment),
+          ))
+        ? "invalid-java-package"
+        : "invalid-java-visibility";
+    throw new JavaGenerationError(
+      code,
+      `Invalid Java generator options: ${errors.join("; ")}`,
+    );
+  }
 }

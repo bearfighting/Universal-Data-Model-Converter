@@ -35,7 +35,7 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-rust`: restricted Rust data-model parser for Shape and Constraint IR
 - `@schema-transformation-toolkit/parser-python`: restricted Python dataclass parser for Shape IR
 - `@schema-transformation-toolkit/parser-go`: restricted Go data-model parser for Shape IR
-- `@schema-transformation-toolkit/parser-java`: restricted Java record parser for Shape IR
+- `@schema-transformation-toolkit/parser-java`: restricted Java record/unit-enum parser for Shape IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
 - `@schema-transformation-toolkit/generator-json`: Value IR to normalized JSON generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
@@ -47,7 +47,7 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/generator-rust`: deterministic Rust data-model generation
 - `@schema-transformation-toolkit/generator-python`: Python 3.10+ dataclass generation
 - `@schema-transformation-toolkit/generator-go`: deterministic Go data-model generation
-- `@schema-transformation-toolkit/generator-java`: deterministic Java record generation
+- `@schema-transformation-toolkit/generator-java`: deterministic Java record/unit-enum generation
 - `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
 
 The SDK `convert(...)` API accepts `irPreference: "auto" | "value" | "shape"`
@@ -66,7 +66,7 @@ The current implementation is intentionally conservative.
 - `@schema-transformation-toolkit/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
 - `@schema-transformation-toolkit/parser-openapi` and `@schema-transformation-toolkit/generator-openapi` support the bounded canonical OpenAPI schema boundary
 - Rust, Python Dataclass, and Go are restricted Shape IR data-model adapters with explicit unsupported-feature failures and semantic-loss reporting where applicable
-- Java is a restricted single-public-root record adapter; classes, interfaces, annotations, enums, generics, and JavaBeans are unsupported
+- Java is a restricted single-public-root record/unit-enum adapter; classes, interfaces, annotations, data-carrying enums, generics, and JavaBeans are unsupported
 - YAML support is limited to a strict JSON-compatible single-document profile; it is not a full YAML 1.2 data-model implementation
 - TOML support is limited to a strict TOML v1 Value profile; date/time values, non-finite numbers, and unsafe integers are rejected
 - unsupported cases are reported through structured failures instead of silent guessing
