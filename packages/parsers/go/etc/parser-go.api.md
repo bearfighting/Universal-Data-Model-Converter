@@ -11,7 +11,7 @@ import type { GoParseFailureResult } from "./failure.js";
 export interface GoParseSuccessResult {
   ok: true;
   document: SchemaDocument;
-  artifacts: {
+  artifacts?: {
     constraints: ReturnType<
       typeof import("@schema-transformation-toolkit/core").constraintDocument
     >;

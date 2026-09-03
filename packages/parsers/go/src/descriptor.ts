@@ -29,7 +29,7 @@ export const goParserDescriptor: ParserDescriptor<
     return {
       ok: true,
       document: result.document,
-      artifacts: result.artifacts,
+      ...(result.artifacts ? { artifacts: result.artifacts } : {}),
       ...(result.semanticNotes ? { semanticNotes: result.semanticNotes } : {}),
     };
   },

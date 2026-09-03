@@ -19,6 +19,7 @@ describe("Go parser", () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    expect(result.artifacts).toBeUndefined();
     expect(result.document.rootName?.source).toBe("User");
     const root = result.document.definitions.find(
       (definition) => definition.name.source === "User",
