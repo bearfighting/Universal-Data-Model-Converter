@@ -63,7 +63,7 @@ describe("Java parser", () => {
     const map = tryParseJava(
       "public record User(Map<Integer, String> values) {}",
     );
-    const classResult = tryParseJava("public class User {}");
+    const classResult = tryParseJava("public class User { int id; }");
     const annotation = tryParseJava(
       "public record User(@Deprecated String name) {}",
     );
@@ -71,9 +71,7 @@ describe("Java parser", () => {
       "unsupported-java-generic",
     );
     expect(map.ok ? undefined : map.code).toBe("unsupported-java-map-key");
-    expect(classResult.ok ? undefined : classResult.code).toBe(
-      "unsupported-java-feature",
-    );
+    expect(classResult.ok).toBe(true);
     expect(annotation.ok ? undefined : annotation.code).toBe(
       "unsupported-java-feature",
     );
@@ -173,5 +171,72 @@ describe("Java parser", () => {
       tryParseJava("public record User(Map<String, boolean> values) {}"),
     ).toMatchObject({ ok: false, code: "unsupported-java-generic" });
     expect(tryParseJava("public record User(int[] values) {}").ok).toBe(true);
+  });
+
+  it("parses restricted structural classes and reports class lowering", () => {
+    const result = tryParseJava(`
+      public class User {
+        private final long id;
+        public String name;
+        List<String> tags;
+      }
+      class Profile { int age; User owner; }
+    `);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.document.root.kind).toBe("reference");
+    const user = result.document.definitions.find(
+      (definition) => definition.name.source === "User",
+    );
+    expect(user?.type.kind).toBe("object");
+    if (user?.type.kind !== "object") return;
+    expect(user.type.fields.map((field) => field.name.source)).toEqual([
+      "id",
+      "name",
+      "tags",
+    ]);
+    expect(result.semanticNotes).toContainEqual(
+      expect.objectContaining({
+        code: "java-class-lowered",
+        path: ["definitions", "User"],
+      }),
+    );
+  });
+
+  it("describes class support in empty and missing-root failures", () => {
+    expect(tryParseJava("")).toMatchObject({
+      ok: false,
+      code: "invalid-java-data-model",
+      message: "Java source must declare at least one record, class, or enum.",
+    });
+    expect(tryParseJava("class User { int id; }")).toMatchObject({
+      ok: false,
+      code: "missing-java-public-root",
+      message:
+        "Java source must contain one public root record, class, or enum.",
+    });
+  });
+
+  it("rejects unsupported structural class members", () => {
+    expect(tryParseJava("public class User { int id; int id; }")).toMatchObject(
+      {
+        ok: false,
+        code: "duplicate-java-field",
+      },
+    );
+    for (const source of [
+      "public class User { static int id; }",
+      "public class User { int id = 1; }",
+      "public class User { User() {} }",
+      "public class User { int getId() {} }",
+      "public class User { class Nested {} }",
+      "public class User extends Base { int id; }",
+      "public class User<T> { T value; }",
+    ])
+      expect(tryParseJava(source).ok, source).toBe(false);
+    expect(tryParseJava("public class User { static int id; }")).toMatchObject({
+      code: "unsupported-java-class-member",
+    });
   });
 });

@@ -105,7 +105,22 @@ export interface JavaEnumSyntax {
   position: JavaPosition;
 }
 
-export type JavaDeclarationSyntax = JavaRecordSyntax | JavaEnumSyntax;
+export interface JavaFieldSyntax {
+  name: string;
+  type: JavaTypeSyntax;
+  position: JavaPosition;
+}
+
+export interface JavaClassSyntax {
+  kind: "class";
+  name: string;
+  public: boolean;
+  fields: JavaFieldSyntax[];
+  position: JavaPosition;
+}
+
+export type JavaDeclarationSyntax =
+  JavaRecordSyntax | JavaEnumSyntax | JavaClassSyntax;
 
 export interface JavaFileSyntax {
   declarations: JavaDeclarationSyntax[];
@@ -163,7 +178,7 @@ function tokenize(source: string): Token[] {
       continue;
     }
     const punctuation = rest[0]!;
-    if ("{}()[],;<>.?@*".includes(punctuation)) {
+    if ("{}()[],;<>.?@*=".includes(punctuation)) {
       tokens.push({ text: punctuation, position });
       advance(punctuation);
       continue;
@@ -204,6 +219,15 @@ class Parser {
             "Only public and package-private Java enums are supported in V1.",
           );
         declarations.push(this.parseEnum(modifiers.includes("public")));
+        continue;
+      }
+      if (this.match("class")) {
+        if (modifiers.some((modifier) => modifier !== "public"))
+          throw this.error(
+            "unsupported-java-class",
+            "Only public and package-private Java classes are supported in V1.",
+          );
+        declarations.push(this.parseClass(modifiers.includes("public")));
         continue;
       }
       const token = this.peek();
@@ -361,6 +385,105 @@ class Parser {
     };
   }
 
+  private parseClass(publicClass: boolean): JavaClassSyntax {
+    const name = this.expectIdentifier("Expected a Java class name.");
+    if (this.peek()?.text === "<")
+      throw this.error(
+        "unsupported-java-generic",
+        "Generic Java classes are not supported in V1.",
+      );
+    if (this.peek()?.text === "extends" || this.peek()?.text === "implements")
+      throw this.error(
+        "unsupported-java-class",
+        "Java class inheritance and interfaces are not supported in V1.",
+      );
+    this.expect("{", 'Expected "{" after a Java class name.');
+    const fields: JavaFieldSyntax[] = [];
+    const seen = new Set<string>();
+    while (!this.end() && this.peek()?.text !== "}") {
+      if (this.peek()?.text === "@")
+        throw this.error(
+          "unsupported-java-class-member",
+          "Java class field annotations are not supported in V1.",
+        );
+      if (["class", "interface", "enum"].includes(this.peek()?.text ?? ""))
+        throw this.error(
+          "unsupported-java-class-member",
+          "Nested Java declarations are not supported in V1.",
+        );
+      const modifiers = this.parseClassFieldModifiers();
+      if (
+        modifiers.some((modifier) =>
+          ["static", "transient", "volatile", "abstract"].includes(modifier),
+        )
+      )
+        throw this.error(
+          "unsupported-java-class-member",
+          "Static, transient, volatile, and abstract class members are not supported in V1.",
+        );
+      if (this.peek()?.text === "{")
+        throw this.error(
+          "unsupported-java-class-member",
+          "Java initializer blocks are not supported in V1.",
+        );
+      const type = this.parseType();
+      if (this.peek()?.text === "(")
+        throw this.error(
+          "unsupported-java-class-member",
+          "Java methods and constructors are not supported in V1.",
+        );
+      const field = this.expectIdentifier("Expected a Java class field name.");
+      if (this.peek()?.text === "(")
+        throw this.error(
+          "unsupported-java-class-member",
+          "Java methods and constructors are not supported in V1.",
+        );
+      if (this.match("="))
+        throw this.error(
+          "unsupported-java-class-member",
+          "Java field initializers are not supported in V1.",
+        );
+      if (!this.match(";"))
+        throw this.error(
+          "invalid-java-syntax",
+          'Expected ";" after a Java class field.',
+        );
+      if (seen.has(field.text))
+        throw this.error(
+          "duplicate-java-field",
+          `Duplicate Java class field "${field.text}".`,
+        );
+      seen.add(field.text);
+      fields.push({ name: field.text, type, position: field.position });
+    }
+    this.expect("}", 'Expected "}" after Java class fields.');
+    return {
+      kind: "class",
+      name: name.text,
+      public: publicClass,
+      fields,
+      position: name.position,
+    };
+  }
+
+  private parseClassFieldModifiers(): string[] {
+    const modifiers: string[] = [];
+    while (
+      [
+        "public",
+        "protected",
+        "private",
+        "final",
+        "static",
+        "transient",
+        "volatile",
+        "abstract",
+      ].includes(this.peek()?.text ?? "")
+    )
+      modifiers.push(this.peekAndAdvance());
+    return modifiers;
+  }
+
   private parseType(): JavaTypeSyntax {
     if (this.match("?"))
       throw this.error(
@@ -426,6 +549,13 @@ class Parser {
     return true;
   }
 
+  private peekAndAdvance(): string {
+    const token = this.peek();
+    if (!token) return "";
+    this.index++;
+    return token.text;
+  }
+
   private peek(): Token | undefined {
     return this.tokens[this.index];
   }
@@ -439,8 +569,11 @@ class Parser {
       | "unsupported-java-feature"
       | "unsupported-java-generic"
       | "unsupported-java-enum"
+      | "unsupported-java-class"
+      | "unsupported-java-class-member"
       | "empty-java-enum"
-      | "duplicate-java-enum-variant",
+      | "duplicate-java-enum-variant"
+      | "duplicate-java-field",
     message: string,
   ): JavaSyntaxError {
     return new JavaSyntaxError(code, message, this.peek()?.position);

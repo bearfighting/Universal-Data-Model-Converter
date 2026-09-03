@@ -11,7 +11,8 @@ export type JavaGeneratorFailureCode =
   | "duplicate-java-definition"
   | "unsupported-java-enum"
   | "invalid-java-package"
-  | "invalid-java-visibility";
+  | "invalid-java-visibility"
+  | "invalid-java-declaration-style";
 
 export class JavaGenerationError extends Error {
   constructor(

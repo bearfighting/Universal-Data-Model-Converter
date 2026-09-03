@@ -198,6 +198,12 @@ because their cross-format behavior depends on overlap, `oneOf` vs `anyOf`,
 discriminators, and ambiguity. Format-specific package declarations remain
 generator options rather than Core document metadata.
 
+Java structural classes follow the same policy as records: supported instance
+fields lower to object Shape IR, while methods, constructors, inheritance, and
+framework metadata are rejected rather than inferred. Java generation can emit
+an object shape as a record or as a final class with public final fields and a
+full constructor; this remains generator policy and does not alter Core IR.
+
 Field-level nullability and nested null unions are already distinct Shape IR
 semantics:
 

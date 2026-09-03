@@ -119,9 +119,9 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Constraint annotations are not emitted as Go runtime validation and are reported as semantic loss.",
   ],
   java: [
-    "Java support is limited to single-file record data models rather than the full Java language.",
-    "Exactly one public root record or unit-only enum is required; additional records and enums are package-private definitions.",
-    "Classes, interfaces, generic declarations, wildcards, annotations, data-carrying enums, JavaBeans, and non-string Map keys remain unsupported.",
+    "Java support is limited to single-file records, restricted structural classes, and unit-only enums rather than the full Java language.",
+    "Exactly one public root record, class, or unit-only enum is required; additional declarations are package-private definitions.",
+    "Structural classes contain only instance fields; interfaces, generic declarations, wildcards, annotations, data-carrying enums, JavaBeans, and non-string Map keys remain unsupported.",
     "Reference types are conservatively interpreted as nullable because Java declarations do not establish non-nullability.",
   ],
 };
@@ -159,6 +159,7 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "Bean Validation",
     "generic types",
     "JavaBeans",
+    "getter/setter inference",
   ],
 };
 

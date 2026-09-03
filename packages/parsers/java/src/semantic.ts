@@ -59,7 +59,7 @@ export function mapJavaFile(
   if (!file.declarations.length)
     throw new JavaSemanticError(
       "invalid-java-data-model",
-      "Java source must declare at least one record or enum.",
+      "Java source must declare at least one record, class, or enum.",
     );
   const names = new Set<string>();
   for (const declaration of file.declarations) {
@@ -84,7 +84,7 @@ export function mapJavaFile(
   if (!publicRoot)
     throw new JavaSemanticError(
       "missing-java-public-root",
-      "Java source must contain one public root record or enum.",
+      "Java source must contain one public root record, class, or enum.",
     );
   if (entry && entry !== publicRoot.name)
     throw new JavaSemanticError(
@@ -102,12 +102,17 @@ export function mapJavaFile(
     references(mapped.get(declaration.name)!, publicRoot.name),
   );
   for (const declaration of file.declarations) {
-    if (declaration.kind === "enum")
+    if (declaration.kind === "enum" || declaration.kind === "class")
       notes.push({
         kind: "normalization",
-        code: "java-enum-lowered",
+        code:
+          declaration.kind === "enum"
+            ? "java-enum-lowered"
+            : "java-class-lowered",
         message:
-          "Java enum identity was lowered to a shared string literal union.",
+          declaration.kind === "enum"
+            ? "Java enum identity was lowered to a shared string literal union."
+            : "Java class behavior was lowered to a structural object shape.",
         path:
           declaration === publicRoot && !rootReferenced
             ? ["root"]
@@ -144,6 +149,20 @@ function mapDeclaration(
       declaration.variants.map((variant) => schemaLiteralNode(variant)),
     );
   }
+  if (declaration.kind === "class")
+    return schemaObjectNode(
+      declaration.fields.map((field) => {
+        const mapped = mapType(field.type, names, notes, [
+          "definitions",
+          declaration.name,
+          field.name,
+        ]);
+        return schemaFieldNode(field.name, mapped.node, {
+          required: true,
+          nullable: mapped.nullable,
+        });
+      }),
+    );
   return mapRecord(declaration, names, notes);
 }
 

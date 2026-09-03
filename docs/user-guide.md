@@ -211,9 +211,10 @@ be a complete implementation of every ecosystem. In particular:
 - Go is limited to single-file exported data-model declarations; package
   resolution, external types, generics, methods, aliases, and embedded-field
   promotion remain unsupported;
-- Java is limited to one public root `record` or unit-only `enum` per source
-  file, with package-private record/enum definitions; classes, interfaces,
-  annotations, data-carrying enums, generics, and JavaBeans remain unsupported;
+- Java is limited to one public root `record`, restricted structural `class`, or
+  unit-only `enum` per source file; classes contain only serializable instance
+  fields, while JavaBeans, interfaces, annotations, data-carrying enums,
+  generics, and framework semantics remain unsupported;
 - comments, source formatting, and some document-level metadata may be lost.
 
 Read the [Capability Matrix](capability-matrix.md) before promising a route to

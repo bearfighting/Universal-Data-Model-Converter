@@ -213,4 +213,35 @@ describe("Java generator", () => {
     });
     expect(invalid).toMatchObject({ ok: false, code: "invalid-java-package" });
   });
+
+  it("generates immutable classes with constructors", () => {
+    const document = schemaDocument(
+      "User",
+      schemaObjectNode([
+        schemaFieldNode("id", schemaScalarNode("integer")),
+        schemaFieldNode("name", schemaScalarNode("string")),
+      ]),
+    );
+
+    expect(
+      tryGenerateJava(document, {
+        declarationStyle: "class",
+        packageName: "com.example.models",
+      }),
+    ).toMatchObject({
+      ok: true,
+      output: `package com.example.models;\n\npublic final class User {\n    public final long id;\n    public final String name;\n\n    public User(\n        long id,\n        String name\n    ) {\n        this.id = id;\n        this.name = name;\n    }\n}\n`,
+    });
+  });
+
+  it("generates an empty class with a no-argument constructor", () => {
+    expect(
+      tryGenerateJava(schemaDocument("User", schemaObjectNode([])), {
+        declarationStyle: "class",
+      }),
+    ).toMatchObject({
+      ok: true,
+      output: `public final class User {\n    public User() {}\n}\n`,
+    });
+  });
 });

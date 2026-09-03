@@ -40,6 +40,26 @@ describe("SDK Java integration", () => {
     ).toBe(true);
   });
 
+  it("converts restricted Java classes and forwards class generation style", () => {
+    const result = convert({
+      sourceFormat: "java",
+      targetFormat: "java",
+      input: "public class User { private long id; public String name; }",
+      name: "User",
+      advanced: {
+        generator: { java: { declarationStyle: "class" } },
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.output).toContain("public final class User");
+    expect(result.output).toContain("this.id = id;");
+    expect(
+      result.semanticNotes?.some((note) => note.code === "java-class-lowered"),
+    ).toBe(true);
+  });
+
   it("converts Java records to and from another Shape IR format", () => {
     const toTypeScript = convert({
       sourceFormat: "java",

@@ -147,11 +147,32 @@ function emitRecord(
       `Java definition "${name}" must be an object.`,
     );
   context.declared.add(identifier);
+  const visibility =
+    root && context.options.rootVisibility === "public" ? "public " : "";
+  if (context.options.declarationStyle === "class") {
+    const fields = node.fields.map((field) =>
+      renderField(field, identifier, context),
+    );
+    const fieldLines = fields
+      .map(({ type, name }) => `    public final ${type} ${name};`)
+      .join("\n");
+    const constructor = fields.length
+      ? `    public ${identifier}(\n${fields
+          .map(({ type, name }) => `        ${type} ${name}`)
+          .join(",\n")}\n    ) {\n${fields
+          .map(({ name }) => `        this.${name} = ${name};`)
+          .join("\n")}\n    }`
+      : `    public ${identifier}() {}`;
+    context.declarations.push(
+      `${visibility}final class ${identifier} {\n${fieldLines}${
+        fieldLines ? "\n\n" : ""
+      }${constructor}\n}`,
+    );
+    return;
+  }
   const components = node.fields
     .map((field) => emitField(field, identifier, context))
     .join(",\n");
-  const visibility =
-    root && context.options.rootVisibility === "public" ? "public " : "";
   context.declarations.push(
     `${visibility}record ${identifier}(\n${components}\n) {}`,
   );
@@ -211,6 +232,15 @@ function emitField(
   parent: string,
   context: Context,
 ): string {
+  const fieldOutput = renderField(field, parent, context);
+  return `    ${fieldOutput.type} ${fieldOutput.name}`;
+}
+
+function renderField(
+  field: SchemaFieldNode,
+  parent: string,
+  context: Context,
+): { name: string; type: string } {
   const name = javaIdentifier(field.name.source);
   const type = renderType(
     field.type,
@@ -218,7 +248,7 @@ function emitField(
     `${parent}${name}`,
     context,
   );
-  return `    ${type} ${name}`;
+  return { name, type };
 }
 
 function renderType(

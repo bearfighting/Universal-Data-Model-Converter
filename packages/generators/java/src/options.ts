@@ -7,15 +7,18 @@ import { JavaGenerationError } from "./failure.js";
 export interface JavaGeneratorOptions extends GenerateOptions {
   rootVisibility?: "public" | "package-private";
   packageName?: string;
+  declarationStyle?: "record" | "class";
 }
 
 export interface ResolvedJavaGeneratorOptions {
   rootVisibility: "public" | "package-private";
   packageName?: string;
+  declarationStyle: "record" | "class";
 }
 
 export const DEFAULT_JAVA_GENERATOR_OPTIONS: ResolvedJavaGeneratorOptions = {
   rootVisibility: "public",
+  declarationStyle: "record",
 };
 
 export function resolveJavaGeneratorOptions(
@@ -23,6 +26,7 @@ export function resolveJavaGeneratorOptions(
 ): ResolvedJavaGeneratorOptions {
   return {
     rootVisibility: options.rootVisibility ?? "public",
+    declarationStyle: options.declarationStyle ?? "record",
     ...(options.packageName !== undefined
       ? { packageName: options.packageName }
       : {}),
@@ -38,6 +42,11 @@ export function validateJavaGeneratorOptions(
     options.rootVisibility !== "package-private"
   )
     errors.push('rootVisibility must be "public" or "package-private".');
+  if (
+    options.declarationStyle !== "record" &&
+    options.declarationStyle !== "class"
+  )
+    errors.push('declarationStyle must be "record" or "class".');
   if (options.packageName !== undefined) {
     const segments = options.packageName.split(".");
     if (
@@ -141,7 +150,10 @@ export function assertSupportedJavaGeneratorOptions(
               JAVA_KEYWORDS.has(segment),
           ))
         ? "invalid-java-package"
-        : "invalid-java-visibility";
+        : options.declarationStyle !== "record" &&
+            options.declarationStyle !== "class"
+          ? "invalid-java-declaration-style"
+          : "invalid-java-visibility";
     throw new JavaGenerationError(
       code,
       `Invalid Java generator options: ${errors.join("; ")}`,

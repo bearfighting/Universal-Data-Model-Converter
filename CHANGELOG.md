@@ -14,6 +14,8 @@ final version.
 
 ### Java parser and generator enhancements
 
+- Add restricted structural Java class parsing and configurable immutable class
+  generation; JavaBeans and framework semantics remain unsupported.
 - Add unit-only Java enum parsing through shared string literal unions.
 - Generate representable named string literal unions as deterministic Java
   enums.

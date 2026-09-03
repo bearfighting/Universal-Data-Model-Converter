@@ -21,7 +21,8 @@ Current platform capabilities:
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
   Schema, TypeScript, Zod, OpenAPI, the V1 Rust struct subset, and the V1
   Python dataclass subset, the V1 Go data-model subset, and the V1 Java
-  record/unit-enum subset with deterministic package-aware generation.
+  record/unit-enum/structural-class subset with deterministic package-aware
+  generation.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -98,8 +99,9 @@ capability has been designed and validated across multiple adapters.
     record/map semantics aligned without adding format-specific IR.
 11. Harden Go V1 with broader fixtures, source locations, semantic-loss
     reporting, and cross-format route coverage.
-12. Extend Java V1 coverage with package-aware fixtures and enum/literal
-    semantic round trips without adding Java-specific Core IR.
+12. Harden Java structural class coverage with negative fixtures, class-style
+    generation, and cross-format semantic round trips without adding
+    Java-specific Core IR.
 
 ### Future shared-capability roadmap
 
@@ -145,8 +147,8 @@ careful shared contract.
 - Go typed const enums, package resolution, generics, and embedded-field
   promotion remain deferred beyond the Go data-model V1 adapter.
 - Java data-carrying enums, Jackson/Bean Validation metadata, JavaBeans,
-  generic records, and multi-file output remain deferred beyond the Java
-  record/unit-enum adapter.
+  getter/setter inference, generic records/classes, and multi-file output remain
+  deferred beyond the Java record/unit-enum/structural-class adapter.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 
@@ -167,13 +169,14 @@ careful shared contract.
 
 Latest completed baseline:
 
-- 93 test files, 1021 tests passing.
+- 93 test files, 1029 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
 - Explicit workspace build passing.
 - Third-party manifest/custom registry smoke passing.
-- SDK tarball clean-install smoke is passing in the current workspace.
+- SDK tarball clean-install smoke remains an acceptance check; the latest run
+  was blocked by the environment's pnpm database file error.
 
 Primary commands:
 

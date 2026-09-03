@@ -7,7 +7,7 @@ export const javaGeneratorOptionCatalog: OptionCatalog = {
     {
       key: "rootVisibility",
       label: "Root visibility",
-      description: "Controls whether the generated root record is public.",
+      description: "Controls whether the generated root declaration is public.",
       category: "formatting",
       defaultValue: "public",
       affectedStages: ["generate"],
@@ -20,7 +20,28 @@ export const javaGeneratorOptionCatalog: OptionCatalog = {
           title: "Package-private output",
           options: { rootVisibility: "package-private" },
           explanation:
-            "Generate all top-level records without a public modifier.",
+            "Generate all top-level declarations without a public modifier.",
+        },
+      ],
+    },
+    {
+      key: "declarationStyle",
+      label: "Declaration style",
+      description:
+        "Controls whether object shapes are generated as records or classes.",
+      category: "formatting",
+      defaultValue: "record",
+      affectedStages: ["generate"],
+      semanticEffect:
+        "Generates object shapes as immutable records or final classes.",
+      diagnosticEffect: "Invalid declaration styles fail generation.",
+      supported: true,
+      examples: [
+        {
+          title: "Class output",
+          options: { declarationStyle: "class" },
+          explanation:
+            "Generate final classes with public final fields and a full constructor.",
         },
       ],
     },
@@ -39,7 +60,8 @@ export const javaGeneratorOptionCatalog: OptionCatalog = {
         {
           title: "Java package",
           options: { packageName: "com.example.models" },
-          explanation: "Emit a package declaration before imports and records.",
+          explanation:
+            "Emit a package declaration before imports and declarations.",
         },
       ],
     },

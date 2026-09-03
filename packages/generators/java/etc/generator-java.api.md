@@ -55,7 +55,8 @@ export type JavaGeneratorFailureCode =
   | "duplicate-java-definition"
   | "unsupported-java-enum"
   | "invalid-java-package"
-  | "invalid-java-visibility";
+  | "invalid-java-visibility"
+  | "invalid-java-declaration-style";
 export declare class JavaGenerationError extends Error {
   readonly code: JavaGeneratorFailureCode;
   constructor(code: JavaGeneratorFailureCode, message: string);
@@ -108,10 +109,12 @@ import type {
 export interface JavaGeneratorOptions extends GenerateOptions {
   rootVisibility?: "public" | "package-private";
   packageName?: string;
+  declarationStyle?: "record" | "class";
 }
 export interface ResolvedJavaGeneratorOptions {
   rootVisibility: "public" | "package-private";
   packageName?: string;
+  declarationStyle: "record" | "class";
 }
 export declare const DEFAULT_JAVA_GENERATOR_OPTIONS: ResolvedJavaGeneratorOptions;
 export declare function resolveJavaGeneratorOptions(
