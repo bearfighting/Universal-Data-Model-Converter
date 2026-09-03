@@ -118,6 +118,12 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Fixed-size arrays are widened to variable-length arrays with semantic loss.",
     "Constraint annotations are not emitted as Go runtime validation and are reported as semantic loss.",
   ],
+  java: [
+    "Java support is limited to single-file record data models rather than the full Java language.",
+    "Exactly one public root record is required; additional records are package-private definitions.",
+    "Classes, interfaces, generic declarations, wildcards, annotations, enums, JavaBeans, and non-string Map keys remain unsupported.",
+    "Reference types are conservatively interpreted as nullable because Java declarations do not establish non-nullability.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -147,6 +153,14 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "package and cross-file resolution",
     "generic types",
   ],
+  java: [
+    "enums",
+    "Set<T>",
+    "Jackson metadata",
+    "Bean Validation",
+    "generic types",
+    "JavaBeans",
+  ],
 };
 
 export function describeFormatSupport(
@@ -166,7 +180,8 @@ export function describeFormatSupport(
       format === "json" ||
       format === "yaml" ||
       format === "csv" ||
-      format === "toml"
+      format === "toml" ||
+      format === "java"
         ? []
         : [...CONSTRAINT_FAMILIES],
     notableLimitations: [...(FORMAT_LIMITATIONS[format] ?? [])],

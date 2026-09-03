@@ -20,7 +20,8 @@ Current platform capabilities:
 
 - Builtin parser and generator descriptors for JSON, YAML, CSV, TOML, JSON
   Schema, TypeScript, Zod, OpenAPI, the V1 Rust struct subset, and the V1
-  Python dataclass subset, and the V1 Go data-model subset.
+  Python dataclass subset, the V1 Go data-model subset, and the V1 Java record
+  subset.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.

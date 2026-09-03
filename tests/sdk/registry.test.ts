@@ -111,6 +111,33 @@ describe("sdk registry", () => {
     ]) {
       expectedRoutes.push(planConversion("go", target));
     }
+    for (const source of [
+      "json",
+      "csv",
+      "toml",
+      "json-schema",
+      "typescript",
+      "openapi",
+      "zod",
+      "rust",
+      "yaml",
+      "python",
+      "go",
+    ]) {
+      expectedRoutes.push(planConversion(source, "java"));
+    }
+    for (const target of [
+      "java",
+      "go",
+      "json-schema",
+      "openapi",
+      "python",
+      "rust",
+      "typescript",
+      "zod",
+    ]) {
+      expectedRoutes.push(planConversion("java", target));
+    }
     expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
   });
 

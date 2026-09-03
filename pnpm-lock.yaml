@@ -65,6 +65,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/generators/java:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/generators/json:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -138,6 +144,12 @@ importers:
         version: 6.2.1
 
   packages/parsers/go:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
+  packages/parsers/java:
     dependencies:
       "@schema-transformation-toolkit/core":
         specifier: workspace:*
@@ -226,6 +238,9 @@ importers:
       "@schema-transformation-toolkit/generator-go":
         specifier: workspace:*
         version: link:../generators/go
+      "@schema-transformation-toolkit/generator-java":
+        specifier: workspace:*
+        version: link:../generators/java
       "@schema-transformation-toolkit/generator-json":
         specifier: workspace:*
         version: link:../generators/json
@@ -259,6 +274,9 @@ importers:
       "@schema-transformation-toolkit/parser-go":
         specifier: workspace:*
         version: link:../parsers/go
+      "@schema-transformation-toolkit/parser-java":
+        specifier: workspace:*
+        version: link:../parsers/java
       "@schema-transformation-toolkit/parser-json":
         specifier: workspace:*
         version: link:../parsers/json

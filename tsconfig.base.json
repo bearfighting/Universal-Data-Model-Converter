@@ -38,6 +38,12 @@
       "@schema-transformation-toolkit/generator-python": [
         "./packages/generators/python/src/index.ts"
       ],
+      "@schema-transformation-toolkit/generator-go": [
+        "./packages/generators/go/src/index.ts"
+      ],
+      "@schema-transformation-toolkit/generator-java": [
+        "./packages/generators/java/src/index.ts"
+      ],
       "@schema-transformation-toolkit/parser-json": [
         "./packages/parsers/json/src/index.ts"
       ],
@@ -67,6 +73,12 @@
       ],
       "@schema-transformation-toolkit/parser-python": [
         "./packages/parsers/python/src/index.ts"
+      ],
+      "@schema-transformation-toolkit/parser-go": [
+        "./packages/parsers/go/src/index.ts"
+      ],
+      "@schema-transformation-toolkit/parser-java": [
+        "./packages/parsers/java/src/index.ts"
       ],
       "@schema-transformation-toolkit/sdk": ["./packages/sdk/src/index.ts"]
     },

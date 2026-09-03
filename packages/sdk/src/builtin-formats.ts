@@ -10,6 +10,7 @@ export const BUILTIN_FORMAT_CATALOG = {
   rust: { source: true, target: true },
   python: { source: true, target: true },
   go: { source: true, target: true },
+  java: { source: true, target: true },
 } as const;
 
 type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;

@@ -186,6 +186,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-java",
+    root: path.join(repoRoot, "packages/parsers/java"),
+    entry: path.join(repoRoot, "packages/parsers/java/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/java/etc/parser-java.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-python",
     root: path.join(repoRoot, "packages/generators/python"),
     entry: path.join(repoRoot, "packages/generators/python/src/index.ts"),
@@ -201,6 +210,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/go/etc/generator-go.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-java",
+    root: path.join(repoRoot, "packages/generators/java"),
+    entry: path.join(repoRoot, "packages/generators/java/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/java/etc/generator-java.api.md",
     ),
   },
   {

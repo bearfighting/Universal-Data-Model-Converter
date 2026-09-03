@@ -35,7 +35,7 @@ if (missingSource.length > 0 || missingTarget.length > 0) {
 
 for (const heading of [
   "## Format capabilities",
-  "## Validated route families",
+  "## Builtin route families",
   "## Failure categories",
 ]) {
   if (!matrix.includes(heading)) {

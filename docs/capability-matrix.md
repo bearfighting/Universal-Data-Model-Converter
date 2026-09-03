@@ -20,6 +20,7 @@ format list is available. Use `listConversionRoutes()` and
 | Rust             | Shape + Constraint | structs, unit enums, string-keyed maps         | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics                                                                                                      |
 | Python Dataclass | Shape              | Python 3.10+ dataclasses                       | dataclass type-shape subset; shared `rootName` preserves known root declarations; `list[T]` and `Optional[T]` only; no defaults, runtime behavior, inheritance, or user-defined generics |
 | Go               | Shape              | single-file exported data-model declarations   | structs, JSON tags, pointers, slices, and string-keyed maps; no package resolution, external types, generics, methods, aliases, or embedded-field promotion                              |
+| Java             | Shape              | single-file Java records                       | exactly one public root record; arrays, `List<T>`, `Map<String, T>`, references, and recursive records; no classes, annotations, enums, generics, or JavaBeans                           |
 
 ## Builtin route families
 
@@ -40,6 +41,7 @@ within each family; use the runtime discovery APIs for the exact route set.
 | OpenAPI     | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | explicit JSON Schema adapter boundary    |
 | Rust        | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | structs, unit enums, maps, numeric hints |
 | Python      | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | dataclass Shape IR adapter               |
+| Java        | Go, Java, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                  | single-public-root record adapter        |
 
 The exact route set can vary with registry contents and descriptor capabilities.
 Do not infer support for a route merely because both format names appear in
