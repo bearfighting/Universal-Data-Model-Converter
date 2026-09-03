@@ -13,7 +13,7 @@ Project-level readiness and priorities live in [../../docs/development/progress.
 If you are using the toolkit rather than integrating the SDK itself, start with
 the [User Guide](../../docs/user-guide.md) and [Capability Matrix](../../docs/capability-matrix.md).
 
-The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, YAML, Rust, and Python dataclasses. Selecting
+The current target formats are JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI 3.1, Zod 4, YAML, Rust, Python dataclasses, and Go. Selecting
 `targetFormat: "zod"` generates a single ESM module. The default output is
 TypeScript with a `z.infer` type; pass
 `advanced.generator.zod.outputLanguage: "javascript"` for a plain JavaScript
@@ -74,8 +74,8 @@ if (!result.ok) {
 ```
 
 The default registry includes JSON, CSV, TOML, JSON Schema, TypeScript, OpenAPI, Zod, YAML, Rust,
-and Python parsers, plus JSON, CSV, TOML, JSON Schema, TypeScript, Zod, OpenAPI, YAML, Rust, and
-Python generators. The SDK
+Python, and Go parsers, plus JSON, CSV, TOML, JSON Schema, TypeScript, Zod, OpenAPI, YAML, Rust,
+Python, and Go generators. The SDK
 bundles those implementations into its distributable runtime. TypeScript is
 installed as a runtime dependency because the TypeScript parser uses the
 official compiler API; Zod remains a dependency for the public contract
@@ -402,15 +402,18 @@ It is meant to power honest badges, route copy, or help text, not to expose ever
 
 ## Supported High-Level Routes
 
-Current public route planning covers:
+Current public route planning is registry-driven. The builtin registry currently
+exposes 11 source formats and 11 target formats, with 91 planned source-target
+routes. The route families include:
 
-- `json -> json`
-- `json -> typescript`
-- `json -> json-schema`
-- `json-schema -> typescript`
-- `json-schema -> json-schema`
-- `typescript -> typescript`
-- `typescript -> json-schema`
+- Value sources (`json`, `yaml`, `csv`, `toml`) to compatible Value targets and
+  Shape targets where root constraints allow it;
+- Shape sources (`json-schema`, `typescript`, `zod`, `openapi`, `rust`,
+  `python`, `go`) to compatible Shape and Constraint targets;
+- same-format routes where the parser and generator share a compatible IR.
+
+Use `listConversionRoutes()` and `describeConversionRouteCapabilities(...)` for
+the exact current route set; custom registries can change it.
 
 The `json -> json` route is a Value IR round-trip. It serializes valid JSON to
 normalized JSON text without running schema inference, so valid mixed values

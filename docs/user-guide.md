@@ -139,9 +139,9 @@ number lexemes, or duplicate keys.
 
 ### Convert an existing schema
 
-Use JSON Schema, TypeScript, Zod, or OpenAPI input when the source already
-contains structural intent. Only the documented, representable subset is
-accepted; unsupported semantics fail explicitly.
+Use JSON Schema, TypeScript, Zod, OpenAPI, Rust, Python Dataclass, or Go input
+when the source already contains structural intent. Only the documented,
+representable subset is accepted; unsupported semantics fail explicitly.
 
 ### Inspect options
 
@@ -206,6 +206,11 @@ be a complete implementation of every ecosystem. In particular:
 - Rust is limited to serializable structs, unit-only enums, string-keyed maps,
   and supported primitive/container types; data-carrying enums, Serde
   attributes, aliases, and generics remain unsupported;
+- Python is limited to the Python 3.10+ dataclass type-shape subset; defaults,
+  inheritance, maps, arbitrary unions, Literal, and Enum remain unsupported;
+- Go is limited to single-file exported data-model declarations; package
+  resolution, external types, generics, methods, aliases, and embedded-field
+  promotion remain unsupported;
 - comments, source formatting, and some document-level metadata may be lost.
 
 Read the [Capability Matrix](capability-matrix.md) before promising a route to

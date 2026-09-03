@@ -19,9 +19,9 @@ loss. A successful conversion must remain truthful about what it preserved,
 widened, normalized, or discarded.
 
 The builtin families are JSON, YAML, CSV, TOML, JSON Schema, TypeScript, Zod,
-and OpenAPI. Format packages own format policy. Core owns shared semantics and
-execution contracts. SDK is the stable consumer boundary and compatibility
-facade.
+OpenAPI, Rust, Python Dataclass, and Go. Format packages own format policy. Core
+owns shared semantics and execution contracts. SDK is the stable consumer
+boundary and compatibility facade.
 
 ## System shape
 
@@ -57,8 +57,8 @@ general format-to-format dependency.
   arrays, and objects. JSON, YAML, CSV, and TOML primarily use this layer.
 - **Shape IR** represents data structure: scalar and literal nodes, object
   fields, additional properties, arrays, tuples, records, unions, references,
-  nullability, and unknown shapes. JSON Schema, TypeScript, Zod, and OpenAPI
-  use it as their main entry layer.
+  nullability, and unknown shapes. JSON Schema, TypeScript, Zod, OpenAPI, Rust,
+  Python, and Go use it as their main entry layer.
 - **Constraint IR** is an overlay for portable restrictions such as string,
   numeric, collection, and object constraints. It is retained as an artifact
   when the target needs it and is never silently treated as shape structure.
@@ -127,8 +127,9 @@ one format or a concrete consumer contract.
 
 - JSON and YAML are Value-oriented baselines; CSV requires an array root and
   TOML requires an object root.
-- JSON Schema, Zod, and OpenAPI carry Shape and, where declared, Constraint
-  artifacts. Their constraint behavior and loss reporting must remain explicit.
+- JSON Schema, Zod, OpenAPI, Rust, Python, and Go carry Shape and, where
+  declared, Constraint artifacts. Their constraint behavior and loss reporting
+  must remain explicit.
 - TypeScript supports the schema-oriented subset documented by its parser;
   preprocessing and diagnostics are parser concerns, not SDK orchestration.
 - OpenAPI remains bounded by canonical JSON Schema-compatible documents; this

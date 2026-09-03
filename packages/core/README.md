@@ -108,9 +108,11 @@ The public factories intentionally keep construction ergonomic while still valid
 
 Today `@schema-transformation-toolkit/core` is the only required semantic handoff between:
 
+- the Value-oriented JSON, YAML, CSV, and TOML adapters;
 - `@schema-transformation-toolkit/parser-json`
 - `@schema-transformation-toolkit/parser-json-schema`
 - `@schema-transformation-toolkit/parser-typescript`
+- the Zod, OpenAPI, Rust, Python Dataclass, and Go adapters;
 - `@schema-transformation-toolkit/generator-json-schema`
 - `@schema-transformation-toolkit/generator-typescript`
 - `@schema-transformation-toolkit/sdk`
@@ -123,7 +125,11 @@ The next expansion should focus on capabilities that materially improve `json ->
 
 Some roadmap items below have already landed in the current IR surface. They remain documented here because they explain the design direction and ordering that produced the current model.
 
-### Must Have
+### Historical IR roadmap
+
+The following entries record the IR evolution that produced the current
+surface. They are not all pending implementation work; cross-language adapter
+coverage and broader semantics may still be deferred separately.
 
 #### 1. Record or Map Nodes
 

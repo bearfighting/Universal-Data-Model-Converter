@@ -30,12 +30,22 @@ That separation is intended to make parsers and generators independently replace
 - `@schema-transformation-toolkit/parser-zod`: static Zod 4 schema-expression parser for the shared IR
 - `@schema-transformation-toolkit/parser-yaml`: strict JSON-compatible YAML parser for Value and Shape IR
 - `@schema-transformation-toolkit/parser-toml`: strict TOML v1 parser for Value and Shape IR
+- `@schema-transformation-toolkit/parser-csv`: strict header-based CSV parser for Value IR
+- `@schema-transformation-toolkit/parser-openapi`: OpenAPI 3.0/3.1 schema extractor for Shape IR
+- `@schema-transformation-toolkit/parser-rust`: restricted Rust data-model parser for Shape and Constraint IR
+- `@schema-transformation-toolkit/parser-python`: restricted Python dataclass parser for Shape IR
+- `@schema-transformation-toolkit/parser-go`: restricted Go data-model parser for Shape IR
 - `@schema-transformation-toolkit/generator-json-schema`: IR to JSON Schema generation
 - `@schema-transformation-toolkit/generator-json`: Value IR to normalized JSON generation
 - `@schema-transformation-toolkit/generator-typescript`: IR to TypeScript generation
 - `@schema-transformation-toolkit/generator-zod`: IR to Zod 4 TypeScript or JavaScript generation
 - `@schema-transformation-toolkit/generator-yaml`: Value IR to deterministic YAML generation
 - `@schema-transformation-toolkit/generator-toml`: object-root Value IR to deterministic TOML generation
+- `@schema-transformation-toolkit/generator-csv`: flat Value IR object-array to CSV generation
+- `@schema-transformation-toolkit/generator-openapi`: canonical OpenAPI 3.1 schema generation
+- `@schema-transformation-toolkit/generator-rust`: deterministic Rust data-model generation
+- `@schema-transformation-toolkit/generator-python`: Python 3.10+ dataclass generation
+- `@schema-transformation-toolkit/generator-go`: deterministic Go data-model generation
 - `@schema-transformation-toolkit/sdk`: the recommended single-package consumer entry point; it bundles the built-in parsers and generators behind one pipeline API
 
 The SDK `convert(...)` API accepts `irPreference: "auto" | "value" | "shape"`
@@ -52,6 +62,8 @@ The current implementation is intentionally conservative.
 - `@schema-transformation-toolkit/generator-json-schema` supports the currently implemented IR subset
 - `@schema-transformation-toolkit/generator-typescript` supports the currently implemented IR subset
 - `@schema-transformation-toolkit/generator-zod` supports the currently implemented IR subset and emits Zod 4 runtime schemas
+- `@schema-transformation-toolkit/parser-openapi` and `@schema-transformation-toolkit/generator-openapi` support the bounded canonical OpenAPI schema boundary
+- Rust, Python Dataclass, and Go are restricted Shape IR data-model adapters with explicit unsupported-feature failures and semantic-loss reporting where applicable
 - YAML support is limited to a strict JSON-compatible single-document profile; it is not a full YAML 1.2 data-model implementation
 - TOML support is limited to a strict TOML v1 Value profile; date/time values, non-finite numbers, and unsafe integers are rejected
 - unsupported cases are reported through structured failures instead of silent guessing
@@ -72,6 +84,9 @@ The currently validated flows are:
 - `yaml -> value -> shape -> typescript/json-schema`
 - `json -> value -> yaml`
 - `zod -> shape + constraint -> json-schema/typescript/zod/openapi`
+- `json-schema/typescript/zod/openapi -> rust/go/python`
+- `rust/go/python -> json-schema/typescript/zod/openapi` (plus supported same-format routes)
+- `json/yaml/csv/toml -> shape-compatible targets` where source roots and target constraints allow it
 - `json -> zod`
 - `json-schema -> zod`
 - `typescript -> zod`

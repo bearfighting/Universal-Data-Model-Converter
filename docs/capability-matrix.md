@@ -19,25 +19,27 @@ format list is available. Use `listConversionRoutes()` and
 | OpenAPI          | Shape + Constraint | canonical schema-compatible documents          | bounded OpenAPI schema boundary; not full document generation                                                                                                                            |
 | Rust             | Shape + Constraint | structs, unit enums, string-keyed maps         | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics                                                                                                      |
 | Python Dataclass | Shape              | Python 3.10+ dataclasses                       | dataclass type-shape subset; shared `rootName` preserves known root declarations; `list[T]` and `Optional[T]` only; no defaults, runtime behavior, inheritance, or user-defined generics |
+| Go               | Shape              | single-file exported data-model declarations   | structs, JSON tags, pointers, slices, and string-keyed maps; no package resolution, external types, generics, methods, aliases, or embedded-field promotion                              |
 
-## Validated route families
+## Builtin route families
 
-The following route families are currently covered by end-to-end tests and
-shared pipeline execution:
+The following route families are currently exposed by the builtin registry and
+execute through the shared pipeline. Individual semantic boundaries still apply
+within each family; use the runtime discovery APIs for the exact route set.
 
-| Source      | Targets                                     | Route character                          |
-| ----------- | ------------------------------------------- | ---------------------------------------- |
-| JSON        | JSON, YAML, TypeScript, JSON Schema, Zod    | Value direct or Value-to-Shape inference |
-| YAML        | YAML, TypeScript, JSON Schema               | Value direct or Value-to-Shape inference |
-| CSV         | CSV and compatible Value routes             | flat array-root Value                    |
-| TOML        | TOML and compatible Value routes            | object-root Value                        |
-| Go          | Go data-model and Shape-compatible routes   | single-file exported structs             |
-| JSON Schema | JSON Schema, TypeScript, Zod, OpenAPI       | Shape, often with Constraint artifacts   |
-| TypeScript  | TypeScript, JSON Schema, Zod                | Shape subset                             |
-| Zod         | Zod, TypeScript, JSON Schema, OpenAPI       | Shape + Constraint subset                |
-| OpenAPI     | schema-compatible OpenAPI targets           | explicit JSON Schema adapter boundary    |
-| Rust        | Rust, TypeScript, JSON Schema, Zod, OpenAPI | structs, unit enums, maps, numeric hints |
-| Python      | Python, TypeScript, Rust, JSON Schema       | dataclass Shape IR adapter               |
+| Source      | Targets                                                                        | Route character                          |
+| ----------- | ------------------------------------------------------------------------------ | ---------------------------------------- |
+| JSON        | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference |
+| YAML        | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference |
+| CSV         | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod             | flat array-root Value                    |
+| TOML        | Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod      | object-root Value                        |
+| Go          | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | single-file exported structs             |
+| JSON Schema | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape, often with Constraint artifacts   |
+| TypeScript  | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape subset                             |
+| Zod         | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape + Constraint subset                |
+| OpenAPI     | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | explicit JSON Schema adapter boundary    |
+| Rust        | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | structs, unit enums, maps, numeric hints |
+| Python      | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | dataclass Shape IR adapter               |
 
 The exact route set can vary with registry contents and descriptor capabilities.
 Do not infer support for a route merely because both format names appear in
@@ -62,7 +64,7 @@ this table.
 - Value IR represents concrete data and is suitable for JSON/YAML/CSV/TOML
   routes when the target's root requirements are satisfied.
 - Shape IR represents schema structure and is used by JSON Schema, TypeScript,
-  Zod, and OpenAPI routes.
+  Zod, OpenAPI, Rust, Python, and Go routes.
 - Constraint IR is an overlay, not a replacement for Shape IR.
 - CSV generation requires an array-root Value document and currently targets
   flat object rows.

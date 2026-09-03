@@ -39,11 +39,12 @@ Validated route families include:
 
 - Value routes: JSON, YAML, CSV, and TOML round trips where root constraints
   allow them.
-- Shape routes: JSON, JSON Schema, TypeScript, Zod, and OpenAPI conversions.
+- Shape routes: JSON Schema, TypeScript, Zod, OpenAPI, Rust, Python, and Go
+  conversions, plus Value-to-Shape routes where supported.
 - Rust routes: restricted Rust structs to/from Shape-compatible targets, with
   representation hints and typed numeric constraints.
-- Constraint-preserving routes: JSON Schema, Zod, and OpenAPI routes where the
-  descriptors declare Constraint IR support.
+- Constraint-preserving routes: JSON Schema, Zod, OpenAPI, and Rust routes
+  where the descriptors declare Constraint IR support.
 - Transformer routes: Value-to-Shape inference and registered multi-stage
   transformer chains.
 
@@ -160,7 +161,7 @@ careful shared contract.
 
 Latest completed baseline:
 
-- 87 test files, 988 tests passing.
+- 89 test files, 999 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
@@ -191,4 +192,4 @@ node scripts/check-sdk-package.mjs
 2. [standards.md](standards.md) for implementation and validation rules.
 3. Package `README`s and `examples/` for package-specific usage.
 
-Last verified: 2026-08-18.
+Last verified: 2026-09-03.
