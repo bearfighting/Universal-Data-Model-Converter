@@ -31,6 +31,8 @@ import type { PythonGeneratorOptions } from "@schema-transformation-toolkit/gene
 import type { PythonParseOptions } from "@schema-transformation-toolkit/parser-python";
 import type { GoGeneratorOptions } from "@schema-transformation-toolkit/generator-go";
 import type { GoParseOptions } from "@schema-transformation-toolkit/parser-go";
+import type { JavaGeneratorOptions } from "@schema-transformation-toolkit/generator-java";
+import type { JavaParseOptions } from "@schema-transformation-toolkit/parser-java";
 
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
@@ -44,6 +46,7 @@ export interface BuiltinGeneratorOutputs {
   toml: TomlOutput;
   python: string;
   go: string;
+  java: string;
 }
 
 export interface BuiltinParserOptions {
@@ -58,6 +61,7 @@ export interface BuiltinParserOptions {
   rust?: RustParseOptions;
   python?: PythonParseOptions;
   go?: GoParseOptions;
+  java?: JavaParseOptions;
 }
 
 export interface BuiltinGeneratorOptions {
@@ -70,4 +74,5 @@ export interface BuiltinGeneratorOptions {
   toml?: TomlGeneratorOptions;
   python?: PythonGeneratorOptions;
   go?: GoGeneratorOptions;
+  java?: JavaGeneratorOptions;
 }

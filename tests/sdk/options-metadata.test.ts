@@ -29,6 +29,7 @@ describe("SDK option metadata", () => {
     ).toEqual([
       "parser:csv",
       "parser:go",
+      "parser:java",
       "parser:json",
       "parser:json-schema",
       "parser:openapi",
@@ -40,6 +41,7 @@ describe("SDK option metadata", () => {
       "parser:zod",
       "generator:csv",
       "generator:go",
+      "generator:java",
       "generator:json",
       "generator:json-schema",
       "generator:openapi",

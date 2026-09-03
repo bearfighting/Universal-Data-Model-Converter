@@ -190,12 +190,19 @@ TypeScript `Record<string, T>`, and JSON Schema `additionalProperties` as
 adapters. This work is deferred until the route matrix exposes a concrete
 semantic gap.
 
-Literal and unit-enum semantics should follow map work, after deciding whether
-named enum declarations require identity beyond literal unions. General unions
-come later because their cross-format behavior depends on overlap, `oneOf` vs
-`anyOf`, discriminators, and ambiguity. Python defaults, framework models, and
-serialization/runtime behavior remain separate future capabilities rather than
-Python Dataclass V2 syntax additions.
+Literal and unit-enum semantics reuse named literal-union definitions when
+targets can preserve their values without extra metadata. Java unit enums lower
+to string literal unions in Core and the Java generator restores only unions
+that are representable as exact enum identifiers. General unions come later
+because their cross-format behavior depends on overlap, `oneOf` vs `anyOf`,
+discriminators, and ambiguity. Format-specific package declarations remain
+generator options rather than Core document metadata.
+
+Java structural classes follow the same policy as records: supported instance
+fields lower to object Shape IR, while methods, constructors, inheritance, and
+framework metadata are rejected rather than inferred. Java generation can emit
+an object shape as a record or as a final class with public final fields and a
+full constructor; this remains generator policy and does not alter Core IR.
 
 Field-level nullability and nested null unions are already distinct Shape IR
 semantics:

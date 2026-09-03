@@ -13,7 +13,7 @@ import { mapGoFile } from "./semantic.js";
 export interface GoParseSuccessResult {
   ok: true;
   document: SchemaDocument;
-  artifacts: {
+  artifacts?: {
     constraints: ReturnType<
       typeof import("@schema-transformation-toolkit/core").constraintDocument
     >;
@@ -33,10 +33,14 @@ export function tryParseGo(
       resolved.name,
       resolved.entry,
     );
+    const artifacts =
+      result.constraints.entries.length > 0
+        ? { constraints: result.constraints }
+        : undefined;
     return {
       ok: true,
       document: result.document,
-      artifacts: { constraints: result.constraints },
+      ...(artifacts ? { artifacts } : {}),
       ...(result.semanticNotes.length
         ? { semanticNotes: result.semanticNotes }
         : {}),

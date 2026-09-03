@@ -4,24 +4,25 @@ import type {
   ParserExecutionContext,
   SchemaDocument,
 } from "@schema-transformation-toolkit/core";
-import { goParserCapabilities } from "./capabilities.js";
-import { goParserOptionCatalog } from "./option-metadata.js";
-import { tryParseGo } from "./api.js";
-import type { GoParseOptions } from "./options.js";
-export const goParserDescriptor: ParserDescriptor<
+import { javaParserCapabilities } from "./capabilities.js";
+import { javaParserOptionCatalog } from "./option-metadata.js";
+import { tryParseJava } from "./api.js";
+import type { JavaParseOptions } from "./options.js";
+
+export const javaParserDescriptor: ParserDescriptor<
   SchemaDocument,
-  GoParseOptions
+  JavaParseOptions
 > = {
   kind: "parser",
   descriptorVersion: "0.1",
-  format: "go",
-  capabilities: goParserCapabilities,
-  options: goParserOptionCatalog,
+  format: "java",
+  capabilities: javaParserCapabilities,
+  options: javaParserOptionCatalog,
   parse(
     input: string,
-    context: ParserExecutionContext<GoParseOptions>,
+    context: ParserExecutionContext<JavaParseOptions>,
   ): ParseResult<SchemaDocument> {
-    const result = tryParseGo(input, {
+    const result = tryParseJava(input, {
       ...(context.options ?? {}),
       name: context.name,
     });
@@ -29,7 +30,6 @@ export const goParserDescriptor: ParserDescriptor<
     return {
       ok: true,
       document: result.document,
-      ...(result.artifacts ? { artifacts: result.artifacts } : {}),
       ...(result.semanticNotes ? { semanticNotes: result.semanticNotes } : {}),
     };
   },

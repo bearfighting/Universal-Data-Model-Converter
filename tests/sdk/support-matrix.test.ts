@@ -191,10 +191,19 @@ describe("sdk support matrix", () => {
     });
   });
 
+  it("does not advertise constraint families for Java", () => {
+    expect(describeFormatSupport("java")).toMatchObject({
+      parser: { producesIr: ["shape"], capabilities: ["shape-ir"] },
+      generator: { consumesIr: ["shape"], capabilities: ["shape-ir"] },
+      constraintFamilies: [],
+    });
+  });
+
   it("lists all current format supports", () => {
     expect(listFormatSupports().map((summary) => summary.format)).toEqual([
       "csv",
       "go",
+      "java",
       "json",
       "json-schema",
       "openapi",
@@ -212,6 +221,7 @@ describe("sdk support matrix", () => {
       [
         "csv",
         "go",
+        "java",
         "json",
         "json-schema",
         "openapi",
@@ -230,6 +240,7 @@ describe("sdk support matrix", () => {
       [
         "csv",
         "go",
+        "java",
         "json",
         "json-schema",
         "openapi",
@@ -266,7 +277,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(91);
+    expect(listConversionRoutes()).toHaveLength(110);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",
