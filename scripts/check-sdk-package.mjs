@@ -97,6 +97,7 @@ try {
     "@schema-transformation-toolkit/generator-python",
     "@schema-transformation-toolkit/generator-go",
     "@schema-transformation-toolkit/generator-java",
+    "@schema-transformation-toolkit/generator-kotlin",
     "@schema-transformation-toolkit/generator-toml",
     "@schema-transformation-toolkit/generator-typescript",
     "@schema-transformation-toolkit/generator-zod",
@@ -109,6 +110,7 @@ try {
     "@schema-transformation-toolkit/parser-python",
     "@schema-transformation-toolkit/parser-go",
     "@schema-transformation-toolkit/parser-java",
+    "@schema-transformation-toolkit/parser-kotlin",
     "@schema-transformation-toolkit/parser-toml",
     "@schema-transformation-toolkit/parser-typescript",
     "@schema-transformation-toolkit/parser-zod",
@@ -148,10 +150,10 @@ try {
     const targets = listTargetFormatSupports()
       .map((item) => item.format)
       .sort();
-    if (sources.join(",") !== "csv,go,java,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
+    if (sources.join(",") !== "csv,go,java,json,json-schema,kotlin,openapi,python,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected source formats: " + sources.join(","));
     }
-    if (targets.join(",") !== "csv,go,java,json,json-schema,openapi,python,rust,toml,typescript,yaml,zod") {
+    if (targets.join(",") !== "csv,go,java,json,json-schema,kotlin,openapi,python,rust,toml,typescript,yaml,zod") {
       throw new Error("Unexpected target formats: " + targets.join(","));
     }
 
@@ -169,6 +171,7 @@ try {
       { sourceFormat: "python", targetFormat: "typescript", input: "@dataclass\\nclass User:\\n    id: int" },
       { sourceFormat: "python", targetFormat: "python", input: "@dataclass\\nclass User:\\n    id: int" },
       { sourceFormat: "java", targetFormat: "java", input: "public record User(long id, String name) {}" },
+      { sourceFormat: "kotlin", targetFormat: "kotlin", input: "data class User(val id: Int, val tags: Set<String>)" },
       { sourceFormat: "go", targetFormat: "go", input: "package models\\ntype User struct { ID int64 }" },
       { sourceFormat: "json", targetFormat: "csv", input: "[{\\"id\\":1,\\"name\\":\\"Ada\\"}]" },
       { sourceFormat: "json", targetFormat: "toml", input: "{\\"id\\":1,\\"name\\":\\"Ada\\"}" },

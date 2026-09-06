@@ -195,6 +195,15 @@ const packageConfigs = [
     ),
   },
   {
+    name: "@schema-transformation-toolkit/parser-kotlin",
+    root: path.join(repoRoot, "packages/parsers/kotlin"),
+    entry: path.join(repoRoot, "packages/parsers/kotlin/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/parsers/kotlin/etc/parser-kotlin.api.md",
+    ),
+  },
+  {
     name: "@schema-transformation-toolkit/generator-python",
     root: path.join(repoRoot, "packages/generators/python"),
     entry: path.join(repoRoot, "packages/generators/python/src/index.ts"),
@@ -219,6 +228,15 @@ const packageConfigs = [
     snapshot: path.join(
       repoRoot,
       "packages/generators/java/etc/generator-java.api.md",
+    ),
+  },
+  {
+    name: "@schema-transformation-toolkit/generator-kotlin",
+    root: path.join(repoRoot, "packages/generators/kotlin"),
+    entry: path.join(repoRoot, "packages/generators/kotlin/src/index.ts"),
+    snapshot: path.join(
+      repoRoot,
+      "packages/generators/kotlin/etc/generator-kotlin.api.md",
     ),
   },
   {

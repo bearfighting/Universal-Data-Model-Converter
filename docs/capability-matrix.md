@@ -7,20 +7,21 @@ format list is available. Use `listConversionRoutes()` and
 
 ## Format capabilities
 
-| Format           | Primary semantics  | Typical input/output                                         | Important boundary                                                                                                                                                                                                |
-| ---------------- | ------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON             | Value              | concrete data and normalized JSON                            | sample data does not encode every schema rule                                                                                                                                                                     |
-| YAML             | Value              | strict YAML data and YAML output                             | JSON-compatible single document only                                                                                                                                                                              |
-| CSV              | Value              | flat object arrays                                           | header-based; cells become strings; array root required                                                                                                                                                           |
-| TOML             | Value              | object-root TOML data                                        | object root required; dates, non-finite numbers, and unsafe integers rejected                                                                                                                                     |
-| JSON Schema      | Shape + Constraint | schema documents                                             | current IR-aligned subset; not a full JSON Schema platform                                                                                                                                                        |
-| TypeScript       | Shape              | schema-oriented declarations                                 | supported subset only; not a full TypeScript front-end                                                                                                                                                            |
-| Zod              | Shape + Constraint | static Zod 4 expressions and generated modules               | supported static expressions only; consuming project needs Zod 4 for runtime output                                                                                                                               |
-| OpenAPI          | Shape + Constraint | canonical schema-compatible documents                        | bounded OpenAPI schema boundary; not full document generation                                                                                                                                                     |
-| Rust             | Shape + Constraint | structs, unit enums, string-keyed maps                       | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics                                                                                                                               |
-| Python Dataclass | Shape              | Python 3.10+ dataclasses                                     | dataclass type-shape subset; shared `rootName` preserves known root declarations; `list[T]` and `Optional[T]` only; no defaults, runtime behavior, inheritance, or user-defined generics                          |
-| Go               | Shape              | single-file exported data-model declarations                 | structs, JSON tags, pointers, slices, and string-keyed maps; no package resolution, external types, generics, methods, aliases, or embedded-field promotion                                                       |
-| Java             | Shape              | single-file Java records, structural classes, and unit enums | exactly one public root declaration; structural classes contain instance fields only; arrays, `List<T>`, `Map<String, T>`, references, and recursion; no JavaBeans, annotations, data-carrying enums, or generics |
+| Format           | Primary semantics  | Typical input/output                                         | Important boundary                                                                                                                                                                                                                 |
+| ---------------- | ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JSON             | Value              | concrete data and normalized JSON                            | sample data does not encode every schema rule                                                                                                                                                                                      |
+| YAML             | Value              | strict YAML data and YAML output                             | JSON-compatible single document only                                                                                                                                                                                               |
+| CSV              | Value              | flat object arrays                                           | header-based; cells become strings; array root required                                                                                                                                                                            |
+| TOML             | Value              | object-root TOML data                                        | object root required; dates, non-finite numbers, and unsafe integers rejected                                                                                                                                                      |
+| JSON Schema      | Shape + Constraint | schema documents                                             | current IR-aligned subset; not a full JSON Schema platform                                                                                                                                                                         |
+| TypeScript       | Shape              | schema-oriented declarations                                 | supported subset only; not a full TypeScript front-end                                                                                                                                                                             |
+| Zod              | Shape + Constraint | static Zod 4 expressions and generated modules               | supported static expressions only; consuming project needs Zod 4 for runtime output                                                                                                                                                |
+| OpenAPI          | Shape + Constraint | canonical schema-compatible documents                        | bounded OpenAPI schema boundary; not full document generation                                                                                                                                                                      |
+| Rust             | Shape + Constraint | structs, unit enums, string-keyed maps                       | serializable data-model subset; no data-carrying enums, Serde, aliases, or generics                                                                                                                                                |
+| Python Dataclass | Shape              | Python 3.10+ dataclasses                                     | dataclass type-shape subset; shared `rootName` preserves known root declarations; `list[T]` and `Optional[T]` only; no defaults, runtime behavior, inheritance, or user-defined generics                                           |
+| Go               | Shape              | single-file exported data-model declarations                 | structs, JSON tags, pointers, slices, and string-keyed maps; no package resolution, external types, generics, methods, aliases, or embedded-field promotion                                                                        |
+| Java             | Shape              | single-file Java records, structural classes, and unit enums | exactly one public root declaration; structural classes contain instance fields only; arrays, `List<T>`, `Map<String, T>`, references, and recursion; no JavaBeans, annotations, data-carrying enums, or generics                  |
+| Kotlin           | Shape + Constraint | single-file data classes and unit enums                      | `List<T>`, `Map<String, T>`, `Set<T>`, references, recursion, and explicit/unique roots; no ordinary class parsing, mutable/concrete collections, defaults, annotations, inheritance, sealed hierarchies, or user-defined generics |
 
 ## Builtin route families
 
@@ -28,20 +29,21 @@ The following route families are currently exposed by the builtin registry and
 execute through the shared pipeline. Individual semantic boundaries still apply
 within each family; use the runtime discovery APIs for the exact route set.
 
-| Source      | Targets                                                                        | Route character                          |
-| ----------- | ------------------------------------------------------------------------------ | ---------------------------------------- |
-| JSON        | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference |
-| YAML        | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference |
-| CSV         | CSV, Go, JSON, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod             | flat array-root Value                    |
-| TOML        | Go, JSON, JSON Schema, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod      | object-root Value                        |
-| Go          | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | single-file exported structs             |
-| JSON Schema | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape, often with Constraint artifacts   |
-| TypeScript  | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape subset                             |
-| Zod         | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape + Constraint subset                |
-| OpenAPI     | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | explicit JSON Schema adapter boundary    |
-| Rust        | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | structs, unit enums, maps, numeric hints |
-| Python      | Go, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                        | dataclass Shape IR adapter               |
-| Java        | Go, Java, JSON Schema, OpenAPI, Python, Rust, TypeScript, Zod                  | single-public-root record/enum adapter   |
+| Source      | Targets                                                                                      | Route character                            |
+| ----------- | -------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| JSON        | CSV, Go, Java, JSON, JSON Schema, Kotlin, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference   |
+| YAML        | CSV, Go, Java, JSON, JSON Schema, Kotlin, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod | Value direct or Value-to-Shape inference   |
+| CSV         | CSV, Go, Java, JSON, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, YAML, Zod       | flat array-root Value                      |
+| TOML        | Go, Java, JSON, JSON Schema, Kotlin, OpenAPI, Python, Rust, TOML, TypeScript, YAML, Zod      | object-root Value                          |
+| Go          | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | single-file exported structs               |
+| JSON Schema | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape, often with Constraint artifacts     |
+| TypeScript  | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape subset                               |
+| Zod         | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | Shape + Constraint subset                  |
+| OpenAPI     | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | explicit JSON Schema adapter boundary      |
+| Rust        | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | structs, unit enums, maps, numeric hints   |
+| Python      | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | dataclass Shape IR adapter                 |
+| Java        | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | single-public-root record/enum adapter     |
+| Kotlin      | Go, Java, JSON Schema, Kotlin, OpenAPI, Python, Rust, TypeScript, Zod                        | data-class/enum Shape + Constraint adapter |
 
 The exact route set can vary with registry contents and descriptor capabilities.
 Do not infer support for a route merely because both format names appear in

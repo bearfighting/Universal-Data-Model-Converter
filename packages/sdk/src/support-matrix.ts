@@ -124,6 +124,11 @@ const FORMAT_LIMITATIONS: Record<string, string[]> = {
     "Structural classes contain only instance fields; interfaces, generic declarations, wildcards, annotations, data-carrying enums, JavaBeans, and non-string Map keys remain unsupported.",
     "Reference types are conservatively interpreted as nullable because Java declarations do not establish non-nullability.",
   ],
+  kotlin: [
+    "Kotlin support is limited to data classes, unit-only enums, and schema-facing List, Map<String, T>, and Set containers.",
+    "User-defined generics, ordinary class parsing, mutable or concrete collection implementations, defaults, annotations, inheritance, and sealed hierarchies remain unsupported.",
+    "Set is represented as an array with a unique-items constraint and may be generated as List when that constraint is unavailable.",
+  ],
 };
 
 const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
@@ -160,6 +165,11 @@ const FORMAT_EXPERIMENTAL_AREAS: Record<string, string[]> = {
     "generic types",
     "JavaBeans",
     "getter/setter inference",
+  ],
+  kotlin: [
+    "sealed hierarchies",
+    "serialization annotations",
+    "custom generic declarations",
   ],
 };
 

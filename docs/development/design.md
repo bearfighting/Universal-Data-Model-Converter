@@ -252,3 +252,9 @@ should not hardcode format lists or inspect parser/generator internals.
    lowered to the shared record node.
 8. Root declaration identity is represented by the shared optional `rootName`
    field; no format-specific root metadata is permitted.
+9. Kotlin V1 is a restricted data-class and unit-enum adapter over Shape IR.
+   `List<T>`, `Map<String, T>`, and `Set<T>` are the only supported collection
+   interfaces; Set lowers to an array plus the existing `unique-items`
+   Constraint IR entry. User-defined generics, defaults, annotations,
+   inheritance, sealed hierarchies, and ordinary class parsing remain outside
+   the V1 boundary.
