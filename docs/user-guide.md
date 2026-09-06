@@ -215,6 +215,12 @@ be a complete implementation of every ecosystem. In particular:
   unit-only `enum` per source file; classes contain only serializable instance
   fields, while JavaBeans, interfaces, annotations, data-carrying enums,
   generics, and framework semantics remain unsupported;
+- Kotlin is limited to single-file `data class` and unit-only `enum class`
+  models. `List<T>`, `Map<String, T>`, `Set<T>`, references, recursion, and
+  unique-root selection are supported; ordinary class parsing, mutable or
+  concrete collections, defaults, annotations, inheritance, sealed hierarchies,
+  and user-defined generics remain unsupported. `Set<T>` uses a `unique-items`
+  Constraint IR entry and may widen to `List<T>` when that constraint is lost;
 - comments, source formatting, and some document-level metadata may be lost.
 
 Read the [Capability Matrix](capability-matrix.md) before promising a route to

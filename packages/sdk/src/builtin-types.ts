@@ -33,6 +33,8 @@ import type { GoGeneratorOptions } from "@schema-transformation-toolkit/generato
 import type { GoParseOptions } from "@schema-transformation-toolkit/parser-go";
 import type { JavaGeneratorOptions } from "@schema-transformation-toolkit/generator-java";
 import type { JavaParseOptions } from "@schema-transformation-toolkit/parser-java";
+import type { KotlinGeneratorOptions } from "@schema-transformation-toolkit/generator-kotlin";
+import type { KotlinParseOptions } from "@schema-transformation-toolkit/parser-kotlin";
 
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
@@ -47,6 +49,7 @@ export interface BuiltinGeneratorOutputs {
   python: string;
   go: string;
   java: string;
+  kotlin: string;
 }
 
 export interface BuiltinParserOptions {
@@ -62,6 +65,7 @@ export interface BuiltinParserOptions {
   python?: PythonParseOptions;
   go?: GoParseOptions;
   java?: JavaParseOptions;
+  kotlin?: KotlinParseOptions;
 }
 
 export interface BuiltinGeneratorOptions {
@@ -75,4 +79,5 @@ export interface BuiltinGeneratorOptions {
   python?: PythonGeneratorOptions;
   go?: GoGeneratorOptions;
   java?: JavaGeneratorOptions;
+  kotlin?: KotlinGeneratorOptions;
 }

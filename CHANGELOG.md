@@ -10,6 +10,16 @@ feature batches, `0.x.y` for smaller features or focused fixes, and
 `-alpha.N`, `-beta.N`, or `-rc.N` for testing stages before the corresponding
 final version.
 
+## Unreleased
+
+### Kotlin support
+
+- Add restricted Kotlin data-class and unit-enum parser/generator packages.
+- Support nullable nested types, references, recursion, `List<T>`,
+  `Map<String, T>`, and `Set<T>` through the shared Shape and Constraint IR.
+- Register Kotlin as a builtin SDK source and target with options, diagnostics,
+  route discovery, API snapshots, and capability documentation.
+
 ## 0.5.0 - 2026-09-03
 
 ### Java parser and generator enhancements

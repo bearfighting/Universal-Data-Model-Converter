@@ -54,6 +54,10 @@ export declare const BUILTIN_FORMAT_CATALOG: {
     readonly source: true;
     readonly target: true;
   };
+  readonly kotlin: {
+    readonly source: true;
+    readonly target: true;
+  };
 };
 type BuiltinFormat = keyof typeof BUILTIN_FORMAT_CATALOG;
 type NonEmptyFormatList = readonly [BuiltinFormat, ...BuiltinFormat[]];
@@ -102,6 +106,8 @@ import type { GoGeneratorOptions } from "@schema-transformation-toolkit/generato
 import type { GoParseOptions } from "@schema-transformation-toolkit/parser-go";
 import type { JavaGeneratorOptions } from "@schema-transformation-toolkit/generator-java";
 import type { JavaParseOptions } from "@schema-transformation-toolkit/parser-java";
+import type { KotlinGeneratorOptions } from "@schema-transformation-toolkit/generator-kotlin";
+import type { KotlinParseOptions } from "@schema-transformation-toolkit/parser-kotlin";
 /** Compatibility-only builtin output map. Generic registry output is unknown-safe. */
 export interface BuiltinGeneratorOutputs {
   json: JsonOutput;
@@ -115,6 +121,7 @@ export interface BuiltinGeneratorOutputs {
   python: string;
   go: string;
   java: string;
+  kotlin: string;
 }
 export interface BuiltinParserOptions {
   json?: JsonParseOptions;
@@ -129,6 +136,7 @@ export interface BuiltinParserOptions {
   python?: PythonParseOptions;
   go?: GoParseOptions;
   java?: JavaParseOptions;
+  kotlin?: KotlinParseOptions;
 }
 export interface BuiltinGeneratorOptions {
   jsonSchema?: JsonSchemaGeneratorOptions;
@@ -141,6 +149,7 @@ export interface BuiltinGeneratorOptions {
   python?: PythonGeneratorOptions;
   go?: GoGeneratorOptions;
   java?: JavaGeneratorOptions;
+  kotlin?: KotlinGeneratorOptions;
 }
 ```
 
@@ -420,6 +429,7 @@ export declare const conversionSourceFormatSchema: z.ZodEnum<{
   python: "python";
   go: "go";
   java: "java";
+  kotlin: "kotlin";
 }>;
 export declare const conversionTargetFormatSchema: z.ZodEnum<{
   "json-schema": "json-schema";
@@ -434,6 +444,7 @@ export declare const conversionTargetFormatSchema: z.ZodEnum<{
   python: "python";
   go: "go";
   java: "java";
+  kotlin: "kotlin";
 }>;
 export declare const conversionIrPreferenceSchema: z.ZodEnum<{
   value: "value";
@@ -660,6 +671,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       python: "python";
       go: "go";
       java: "java";
+      kotlin: "kotlin";
     }>;
     targetFormat: z.ZodEnum<{
       "json-schema": "json-schema";
@@ -674,6 +686,7 @@ export declare const conversionOptionCatalogsSchema: z.ZodObject<
       python: "python";
       go: "go";
       java: "java";
+      kotlin: "kotlin";
     }>;
     parser: z.ZodObject<
       {

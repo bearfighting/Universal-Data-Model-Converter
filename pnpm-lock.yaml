@@ -83,6 +83,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/generators/kotlin:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/generators/openapi:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -167,6 +173,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/parsers/kotlin:
+    dependencies:
+      "@schema-transformation-toolkit/core":
+        specifier: workspace:*
+        version: link:../../core
+
   packages/parsers/openapi:
     dependencies:
       "@schema-transformation-toolkit/core":
@@ -241,6 +253,9 @@ importers:
       "@schema-transformation-toolkit/generator-java":
         specifier: workspace:*
         version: link:../generators/java
+      "@schema-transformation-toolkit/generator-kotlin":
+        specifier: workspace:*
+        version: link:../generators/kotlin
       "@schema-transformation-toolkit/generator-json":
         specifier: workspace:*
         version: link:../generators/json
@@ -283,6 +298,9 @@ importers:
       "@schema-transformation-toolkit/parser-json-schema":
         specifier: workspace:*
         version: link:../parsers/json-schema
+      "@schema-transformation-toolkit/parser-kotlin":
+        specifier: workspace:*
+        version: link:../parsers/kotlin
       "@schema-transformation-toolkit/parser-openapi":
         specifier: workspace:*
         version: link:../parsers/openapi

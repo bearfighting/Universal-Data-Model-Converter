@@ -206,6 +206,7 @@ describe("sdk support matrix", () => {
       "java",
       "json",
       "json-schema",
+      "kotlin",
       "openapi",
       "python",
       "rust",
@@ -224,6 +225,7 @@ describe("sdk support matrix", () => {
         "java",
         "json",
         "json-schema",
+        "kotlin",
         "openapi",
         "python",
         "rust",
@@ -243,6 +245,7 @@ describe("sdk support matrix", () => {
         "java",
         "json",
         "json-schema",
+        "kotlin",
         "openapi",
         "python",
         "rust",
@@ -277,7 +280,7 @@ describe("sdk support matrix", () => {
   });
 
   it("exposes stable route-discovery surfaces for downstream consumers", () => {
-    expect(listConversionRoutes()).toHaveLength(110);
+    expect(listConversionRoutes()).toHaveLength(131);
     expect(planConversion("json-schema", "typescript")).toMatchObject({
       sourceFormat: "json-schema",
       targetFormat: "typescript",

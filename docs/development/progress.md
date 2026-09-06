@@ -23,6 +23,10 @@ Current platform capabilities:
   Python dataclass subset, the V1 Go data-model subset, and the V1 Java
   record/unit-enum/structural-class subset with deterministic package-aware
   generation.
+- Builtin Kotlin parser and generator descriptors for the V1 data-class and
+  unit-enum subset, including `List<T>`, `Map<String, T>`, `Set<T>` through
+  `unique-items` Constraint IR, nullable nested types, references, recursion,
+  and deterministic root selection.
 - All current conversion routes execute through the shared core pipeline.
 - `createConversionRegistry(...)` supports custom parser, generator, and
   transformer registration.
@@ -149,6 +153,9 @@ careful shared contract.
 - Java data-carrying enums, Jackson/Bean Validation metadata, JavaBeans,
   getter/setter inference, generic records/classes, and multi-file output remain
   deferred beyond the Java record/unit-enum/structural-class adapter.
+- Kotlin ordinary class parsing, mutable/concrete collections, defaults,
+  annotations, inheritance, sealed hierarchies, custom generics, and compiler
+  runtime integration remain deferred beyond the Kotlin V1 adapter.
 - More traversal, transform, or normalization features without a concrete
   cross-format consumer requirement.
 
@@ -169,7 +176,7 @@ careful shared contract.
 
 Latest completed baseline:
 
-- 93 test files, 1029 tests passing.
+- 96 test files, 1054 tests passing.
 - TypeScript, ESLint, and Prettier passing.
 - Package boundary and API snapshot checks passing.
 - Generated builtin registry check passing.
@@ -199,4 +206,4 @@ node scripts/check-sdk-package.mjs
 2. [standards.md](standards.md) for implementation and validation rules.
 3. Package `README`s and `examples/` for package-specific usage.
 
-Last verified: 2026-09-03.
+Last verified: 2026-09-06.

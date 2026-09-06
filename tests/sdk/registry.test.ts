@@ -138,6 +138,35 @@ describe("sdk registry", () => {
     ]) {
       expectedRoutes.push(planConversion("java", target));
     }
+    for (const source of [
+      "csv",
+      "go",
+      "java",
+      "json",
+      "json-schema",
+      "openapi",
+      "python",
+      "rust",
+      "toml",
+      "typescript",
+      "yaml",
+      "zod",
+    ]) {
+      expectedRoutes.push(planConversion(source, "kotlin"));
+    }
+    for (const target of [
+      "go",
+      "java",
+      "json-schema",
+      "kotlin",
+      "openapi",
+      "python",
+      "rust",
+      "typescript",
+      "zod",
+    ]) {
+      expectedRoutes.push(planConversion("kotlin", target));
+    }
     expect(listConversionRoutes()).toEqual(expectedRoutes.sort(compareRoutes));
   });
 

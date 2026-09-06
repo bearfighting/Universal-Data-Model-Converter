@@ -1,0 +1,7 @@
+import type { ParserCapabilities } from "@schema-transformation-toolkit/core";
+export const kotlinParserCapabilities: ParserCapabilities = {
+  format: "kotlin",
+  producesIr: ["shape", "constraint"],
+  outputs: [{ ir: "shape" }, { ir: "constraint" }],
+  capabilities: ["shape-ir", "constraint-ir", "collection-constraints"],
+};
