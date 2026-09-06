@@ -71,22 +71,6 @@ try {
     );
   }
 
-  writeFileSync(
-    path.join(tempRoot, "package.json"),
-    `${JSON.stringify(
-      {
-        name: "schema-transformation-toolkit-sdk-package-smoke",
-        private: true,
-        type: "module",
-        dependencies: {
-          "@schema-transformation-toolkit/sdk": `file:${tarballPath}`,
-        },
-      },
-      null,
-      2,
-    )}\n`,
-  );
-
   const workspaceOverrideNames = [
     "@schema-transformation-toolkit/core",
     "@schema-transformation-toolkit/generator-csv",
@@ -116,19 +100,35 @@ try {
     "@schema-transformation-toolkit/parser-zod",
     "@schema-transformation-toolkit/parser-yaml",
   ];
-  const workspaceOverrides = workspaceOverrideNames
-    .map((name) => {
+  const workspaceOverrides = Object.fromEntries(
+    workspaceOverrideNames.map((name) => {
       const localPackage = `file:${path.join(
         repoRoot,
         "packages",
         packageDirectoryFor(name),
       )}`;
-      return `  ${JSON.stringify(name)}: ${JSON.stringify(localPackage)}`;
-    })
-    .join("\n");
+      return [name, localPackage];
+    }),
+  );
+  writeFileSync(
+    path.join(tempRoot, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "schema-transformation-toolkit-sdk-package-smoke",
+        private: true,
+        type: "module",
+        dependencies: {
+          "@schema-transformation-toolkit/sdk": `file:${tarballPath}`,
+        },
+        pnpm: { overrides: workspaceOverrides },
+      },
+      null,
+      2,
+    )}\n`,
+  );
   writeFileSync(
     path.join(tempRoot, "pnpm-workspace.yaml"),
-    `packages:\n  - "."\n\noverrides:\n${workspaceOverrides}\n`,
+    `packages:\n  - "."\n`,
   );
 
   execFileSync("pnpm", ["install", "--ignore-scripts", "--lockfile=false"], {

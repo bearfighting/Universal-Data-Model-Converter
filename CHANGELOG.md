@@ -10,7 +10,7 @@ feature batches, `0.x.y` for smaller features or focused fixes, and
 `-alpha.N`, `-beta.N`, or `-rc.N` for testing stages before the corresponding
 final version.
 
-## Unreleased
+## 0.6.0 - 2026-09-06
 
 ### Kotlin support
 
